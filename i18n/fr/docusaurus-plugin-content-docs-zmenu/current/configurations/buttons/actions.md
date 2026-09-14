@@ -6,7 +6,7 @@ description: Reference complete de tous les types d'actions dans zMenu
 
 # Actions
 
-Les actions sont des commandes executees lorsqu'un joueur interagit avec un bouton. zMenu fournit plus de 28 types d'actions pour divers usages.
+Les actions sont des commandes executees lorsqu'un joueur interagit avec un bouton. zMenu fournit plus de 30 types d'actions pour divers usages.
 
 ## Utilisation de base
 
@@ -131,6 +131,40 @@ Envoyer un message a tous les joueurs en ligne.
 
 ---
 
+### broadcast-message
+
+Envoyer une liste de lignes de chat a tous les joueurs en ligne.
+
+```yaml
+- type: broadcast_message
+  messages:
+    - "&6[Boutique] &f%sender% &7vient d'acheter un grade !"
+  minimessage: true # Optionnel, par defaut : true
+```
+
+**Options :**
+
+| Option | Type | Requis | Description |
+|--------|------|--------|-------------|
+| `messages` | Liste | Oui | Les lignes envoyees a tous les joueurs en ligne. Doit etre ecrit sous forme de liste YAML. |
+| `minimessage` | Booleen | Non | Interpreter chaque ligne en MiniMessage. Par defaut `true`. Mettre `false` pour l'envoyer telle quelle. Alias : `mini-message`. |
+
+**Placeholders :** `%sender%` est remplace par le nom du joueur qui a declenche l'action, `%receiver%` par le nom de chaque joueur qui recoit la ligne.
+
+**Alias :** `broadcast_message` et `broadcast message`.
+
+:::info Difference avec `broadcast`
+`broadcast_message` resout ses placeholders **une seule fois**, pour le joueur qui l'a declenche, puis envoie ce meme resultat a tout le monde : seul `%receiver%` varie. [`broadcast`](#broadcast) les resout **a nouveau pour chaque destinataire** et accepte une liste `requirements` pour filtrer qui recoit le message.
+
+Utilisez `broadcast` quand le texte doit differer selon le destinataire ou etre filtre, et `broadcast_message` pour une simple annonce a propos du joueur qui a clique.
+:::
+
+:::warning
+Contrairement a l'action `message`, la cle au singulier `message` et une chaine unique en ligne ne sont **pas** acceptees : `messages` doit etre une liste YAML. La substitution de `%player%` et le decoupage sur `\n` ne sont pas appliques non plus.
+:::
+
+---
+
 ### action-bar
 
 Afficher un message dans la barre d'action.
@@ -150,10 +184,43 @@ Afficher un titre et sous-titre.
 - type: title
   title: "&6&lBienvenue !"
   subtitle: "&7Profitez de votre sejour"
-  fadeIn: 20      # Ticks
-  stay: 60        # Ticks
-  fadeOut: 20     # Ticks
+  start: 20       # Ticks
+  duration: 60    # Ticks
+  end: 20         # Ticks
 ```
+
+---
+
+### broadcast-title
+
+Afficher un titre et un sous-titre a tous les joueurs en ligne d'un coup. Les options sont les memes que celles de [`title`](#title), qui ne vise que le joueur ayant clique.
+
+```yaml
+- type: broadcast_title
+  title: "&6&lEVENEMENT"
+  subtitle: "&7Lance par &f%player%"
+  start: 20       # Ticks
+  duration: 60    # Ticks
+  end: 20         # Ticks
+```
+
+**Options :**
+
+| Option | Type | Requis | Description |
+|--------|------|--------|-------------|
+| `title` | Texte | Oui | La ligne de titre. Voir l'avertissement ci-dessous. |
+| `subtitle` | Texte | Oui | La ligne de sous-titre. Voir l'avertissement ci-dessous. |
+| `start` | Nombre | Non | Duree d'apparition, en ticks. Par defaut `0`. |
+| `duration` | Nombre | Non | Duree d'affichage a l'ecran, en ticks. Par defaut `0`. |
+| `end` | Nombre | Non | Duree de disparition, en ticks. Par defaut `0`. |
+
+Les placeholders sont resolus **une seule fois, pour le joueur qui a declenche l'action**, donc `%player_name%` designe ce joueur et non chaque destinataire : c'est en general ce que l'on veut pour une annonce.
+
+**Alias :** `broadcast_title` et `broadcast title`.
+
+:::warning Toujours ecrire les deux lignes et les trois durees
+`title` et `subtitle` n'ont pas de valeur par defaut : en omettre un envoie le texte litteral `null` a tous les joueurs. Les trois durees valent `0` par defaut, ce qui fait apparaitre puis disparaitre le titre immediatement sur la plupart des clients. Renseignez-les explicitement, comme dans l'exemple ci-dessus.
+:::
 
 ---
 
@@ -246,6 +313,29 @@ Executer une commande depuis la console.
     - "give %player% diamond 64"
     - "eco give %player% 1000"
 ```
+
+**Options :**
+
+| Option | Type | Requis | Description |
+|--------|------|--------|-------------|
+| `commands` | Liste | Oui | Les commandes a executer en tant que console |
+| `stop-on-failure` | Booleen | Non | Interrompre les commandes suivantes des qu'une commande signale un echec. Par defaut `false`. Alias : `stop_on_failure`. |
+
+**Interrompre une chaine qui a echoue**
+
+Par defaut, toutes les commandes de la liste sont executees, quoi qu'aient fait les precedentes. Avec `stop-on-failure`, la premiere commande qui signale un echec interrompt celles qui la suivent : une chaine du type « retirer l'argent » puis « donner le grade » ne peut donc plus donner le grade si le paiement a echoue.
+
+```yaml
+- type: console-command
+  stop-on-failure: true
+  commands:
+    - "eco take %player% 1000"
+    - "lp user %player% parent add vip"
+```
+
+:::warning Pourquoi c'est desactive par defaut
+Bukkit renvoie un echec aussi bien pour une commande qui n'existe pas **que** pour une commande dont l'executeur a renvoye `false`, ce que beaucoup de plugins font simplement pour afficher leur aide. Activer cette option sans precaution peut donc interrompre une chaine qui fonctionnait. Testez chaque chaine avant de l'activer.
+:::
 
 ---
 
@@ -778,9 +868,11 @@ click-requirement:
 | Action | Description |
 |--------|-------------|
 | `message` | Envoyer un message au joueur |
-| `broadcast` | Envoyer un message a tous |
+| `broadcast` | Envoyer un message a tous, resolu par destinataire et filtrable |
+| `broadcast_message` | Envoyer un message a tous, resolu une fois pour le joueur qui a clique |
 | `action-bar` | Afficher la barre d'action |
 | `title` | Afficher titre/sous-titre |
+| `broadcast_title` | Afficher titre/sous-titre a tous les joueurs |
 | `toast` | Afficher un toast de succes |
 | `sound` | Jouer un son |
 | `player-command` | Executer une commande en tant que joueur |

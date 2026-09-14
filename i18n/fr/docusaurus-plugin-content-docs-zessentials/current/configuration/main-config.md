@@ -558,6 +558,16 @@ default-options:
 | `WORLDEDIT_INVENTORY` | `false` | Indique si le mode inventaire WorldEdit est active par defaut. |
 | `WORLDEDIT_BOSSBAR_DISABLE` | `false` | Indique si la barre de boss de progression WorldEdit est desactivee par defaut. |
 
+### Activer la téléportation à la première connexion
+
+```yaml
+enable-first-join-teleport: false
+```
+
+| Option | Type | Par défaut | Description |
+|--------|------|------------|-------------|
+| `enable-first-join-teleport` | Booléen | `false` | Lorsqu’elle est activée, cette option téléporte les joueurs à leur première connexion vers le premier spawn, le spawn ou la destination de téléportation aléatoire configurée. |
+
 ### Sauvegarde Automatique par Lot
 
 ```yaml
@@ -794,6 +804,9 @@ default-options:
   PHANTOMS_DISABLE: false
   WORLDEDIT_INVENTORY: false
   WORLDEDIT_BOSSBAR_DISABLE: false
+
+# Téléporte les joueurs lors de leur première connexion vers le premier spawn, le spawn ou la destination de téléportation aléatoire configurée
+enable-first-join-teleport: false
 
 # Auto-save interval in seconds (default: 600 = 10 minutes)
 batch-auto-save: 600
