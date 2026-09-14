@@ -558,6 +558,16 @@ default-options:
 | `WORLDEDIT_INVENTORY` | `false` | Whether the WorldEdit inventory mode is enabled by default. |
 | `WORLDEDIT_BOSSBAR_DISABLE` | `false` | Whether the WorldEdit progress boss bar is disabled by default. |
 
+### Enable First-Join Teleportation
+
+```yaml
+enable-first-join-teleport: false
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `enable-first-join-teleport` | Boolean | `false` | When enabled, players are teleported on their first join to the configured first-spawn, spawn, or random teleport location. |
+
 ### Batch Auto Save
 
 ```yaml
@@ -794,6 +804,9 @@ default-options:
   PHANTOMS_DISABLE: false
   WORLDEDIT_INVENTORY: false
   WORLDEDIT_BOSSBAR_DISABLE: false
+
+# Teleports players on their first join to the configured first-spawn, spawn, or random teleport location
+enable-first-join-teleport: false
 
 # Auto-save interval in seconds (default: 600 = 10 minutes)
 batch-auto-save: 600

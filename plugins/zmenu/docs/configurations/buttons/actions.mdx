@@ -9,7 +9,7 @@ import TabItem from '@theme/TabItem';
 
 # Actions
 
-Actions are commands executed when a player interacts with a button. zMenu provides 28+ action types for various purposes.
+Actions are commands executed when a player interacts with a button. zMenu provides 30+ action types for various purposes.
 
 ## Basic Usage
 
@@ -134,6 +134,53 @@ Send a message to all online players.
 
 ---
 
+### broadcast-message
+
+Send a list of chat lines to every online player.
+
+<Tabs>
+    <TabItem value="broadcast_message" label="broadcast_message">
+
+        ```yaml
+        - type: broadcast_message
+          messages:
+            - "&6[Shop] &f%sender% &7just bought a rank!"
+          minimessage: true # Optional, default: true
+        ```
+
+    </TabItem>
+    <TabItem value="broadcast message" label="broadcast message (Alias)">
+
+        ```yaml
+        - type: "broadcast message"
+          messages:
+            - "&6[Shop] &f%sender% &7just bought a rank!"
+        ```
+
+    </TabItem>
+</Tabs>
+
+**Options:**
+
+| Option        | Type    | Required | Description                                                                                       |
+|---------------|---------|----------|---------------------------------------------------------------------------------------------------|
+| `messages`    | List    | Yes      | The lines sent to every online player. Must be written as a YAML list.                              |
+| `minimessage` | Boolean | No       | Parse each line as MiniMessage. Default `true`. Set to `false` to send it as-is. Alias: `mini-message`. |
+
+**Placeholders:** `%sender%` is replaced by the name of the player who triggered the action, `%receiver%` by the name of each player receiving the line.
+
+:::info Difference with `broadcast`
+`broadcast_message` resolves its placeholders **once**, for the player who triggered it, then sends that same result to everyone — only `%receiver%` varies. [`broadcast`](#broadcast) resolves them **again for each recipient** and supports a `requirements` list to filter who receives the message.
+
+Use `broadcast` when the text must differ per recipient or be filtered, `broadcast_message` for a plain announcement about the player who clicked.
+:::
+
+:::warning
+Unlike the `message` action, the singular `message` key and a single inline string are **not** accepted: `messages` must be a YAML list. `%player%` substitution and `\n` line splitting are not applied either.
+:::
+
+---
+
 ### action-bar
 
 Display an action bar message.
@@ -171,6 +218,55 @@ Display a title and subtitle.
   duration: 60   # Ticks
   end: 20        # Ticks
 ```
+
+---
+
+### broadcast-title
+
+Display a title and a subtitle to every online player at once. It takes the same options as [`title`](#title), which only targets the clicking player.
+
+<Tabs>
+    <TabItem value="broadcast_title" label="broadcast_title">
+
+        ```yaml
+        - type: broadcast_title
+          title: "&6&lEVENT"
+          subtitle: "&7Started by &f%player%"
+          start: 20      # Ticks
+          duration: 60   # Ticks
+          end: 20        # Ticks
+        ```
+
+    </TabItem>
+    <TabItem value="broadcast title" label="broadcast title (Alias)">
+
+        ```yaml
+        - type: "broadcast title"
+          title: "&6&lEVENT"
+          subtitle: "&7Started by &f%player%"
+          start: 20
+          duration: 60
+          end: 20
+        ```
+
+    </TabItem>
+</Tabs>
+
+**Options:**
+
+| Option     | Type   | Required | Description                                       |
+|------------|--------|----------|---------------------------------------------------|
+| `title`    | String | Yes      | The title line. See the warning below.            |
+| `subtitle` | String | Yes      | The subtitle line. See the warning below.         |
+| `start`    | Number | No       | Fade-in duration, in ticks. Default `0`.          |
+| `duration` | Number | No       | Time the title stays on screen, in ticks. Default `0`. |
+| `end`      | Number | No       | Fade-out duration, in ticks. Default `0`.         |
+
+Placeholders are resolved **once, for the player who triggered the action**, so `%player_name%` refers to that player and not to each recipient — which is usually what an announcement wants.
+
+:::warning Always write both lines, and all three timings
+`title` and `subtitle` have no default value: omitting one sends the literal text `null` to every player. The three timings default to `0`, which makes the title appear and disappear immediately on most clients. Set them explicitly, as in the examples above.
+:::
 
 ---
 
@@ -426,15 +522,32 @@ Execute a command from the console.
 
         **Options:**
 
-        | Option     | Type  | Required | Description                            |
-        |------------|-------|----------|----------------------------------------|
-        | `commands` | List  | Yes      | Commands to execute as the console user|
+        | Option             | Type    | Required | Description                                                                     |
+        |--------------------|---------|----------|---------------------------------------------------------------------------------|
+        | `commands`         | List    | Yes      | Commands to execute as the console user                                          |
+        | `stop-on-failure`  | Boolean | No       | Stop the remaining commands as soon as one reports a failure. Default `false`. Alias: `stop_on_failure`. |
 
         **Note:** Supports flexible aliasing for varied command syntax.
 
         Available aliases: `console-command`, `console-commands`, `commands`, `command`, `console command`, `console commands`, `console_commands` and `console_command`.
     </TabItem>
 </Tabs>
+
+**Stopping a chain that failed**
+
+By default every command in the list runs, whatever the previous ones did. With `stop-on-failure` enabled, the first command that reports a failure stops the ones after it — so a chain such as "take the money" followed by "grant the rank" can no longer grant the rank when the charge failed.
+
+```yaml
+- type: console-command
+  stop-on-failure: true
+  commands:
+    - "eco take %player% 1000"
+    - "lp user %player% parent add vip"
+```
+
+:::warning Why it is off by default
+Bukkit returns a failure both for a command that does not exist **and** for a command whose executor returned `false` — which many plugins do simply to print their usage. Enabling this option blindly can therefore stop a chain that was working. Test each chain before turning it on.
+:::
 
 ---
 
@@ -1384,9 +1497,11 @@ click-requirement:
 | Action | Description |
 |--------|-------------|
 | `message` | Send message to player |
-| `broadcast` | Send message to all |
+| `broadcast` | Send message to all, resolved per recipient and filterable |
+| `broadcast_message` | Send message to all, resolved once for the clicking player |
 | `action-bar` | Show action bar |
 | `title` | Show title/subtitle |
+| `broadcast_title` | Show title/subtitle to all players |
 | `toast` | Show achievement toast |
 | `sound` | Play sound |
 | `player-command` | Run command as player |
