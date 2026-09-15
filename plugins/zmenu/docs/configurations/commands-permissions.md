@@ -220,6 +220,7 @@ Each player data sub-command has its own permission node (split in 1.1.1.6):
 | `zmenu.dupe`          | Test anti-dupe system      | op      |
 | `zmenu.documentation` | View documentation         | op      |
 | `zmenu.dumplog`       | Export debug logs          | op      |
+| `zmenu.paper.warning` | Receive the "zMenu requires Paper" warning on join, on a server that is not Paper | op      |
 
 ## Custom Command Permissions
 
