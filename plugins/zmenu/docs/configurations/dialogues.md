@@ -44,7 +44,7 @@ type: notice
 
 can-close-with-escape: true
 pause: false
-after_action: CLOSE
+after-action: CLOSE
 
 body:
   # Body content sections...
@@ -95,7 +95,7 @@ Pause the game while the dialog is open (singleplayer-like behavior).
 pause: false
 ```
 
-### after_action
+### after-action
 
 What happens after an action is performed.
 
@@ -106,7 +106,7 @@ What happens after an action is performed.
 | `NONE` | Do nothing |
 
 ```yaml
-after_action: CLOSE
+after-action: CLOSE
 ```
 
 ---
@@ -292,7 +292,7 @@ external_title: "Rules"
 type: notice
 
 can-close-with-escape: true
-after_action: CLOSE
+after-action: CLOSE
 
 body:
   rules:
@@ -326,7 +326,7 @@ external_title: "Confirmation"
 type: confirmation
 
 can-close-with-escape: true
-after_action: CLOSE
+after-action: CLOSE
 
 body:
   message:
@@ -387,7 +387,7 @@ external_title: "Teleport"
 type: multi_action
 
 can-close-with-escape: true
-after_action: CLOSE
+after-action: CLOSE
 number-of-columns: 2
 
 body:
@@ -473,7 +473,7 @@ external_title: "Links"
 type: server_links
 
 can-close-with-escape: true
-after_action: CLOSE
+after-action: CLOSE
 
 server-links:
   text: "&6&lUseful Links"
@@ -610,7 +610,7 @@ external_title: "Share Your Feedback"
 type: notice
 
 can-close-with-escape: true
-after_action: CLOSE
+after-action: CLOSE
 
 body:
   header:
@@ -662,7 +662,7 @@ external_title: "Kit Selection"
 type: multi_action
 
 can-close-with-escape: false
-after_action: CLOSE
+after-action: CLOSE
 number-of-columns: 3
 
 body:
