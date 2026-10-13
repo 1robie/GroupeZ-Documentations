@@ -112,11 +112,18 @@ stackableSpawner:
     # ... continuer pour les niveaux de pile supérieurs
 ```
 
+:::info
+Un niveau s'applique à partir de son `stackAmount` et **jusqu'au suivant**, il n'est donc
+pas nécessaire de déclarer chaque valeur. Avec les niveaux `1`, `5` et `10`, une pile de `3`
+utilise les réglages du niveau `1` et une pile de `7` ceux du niveau `5`. Une pile plus
+grande que le dernier niveau déclaré conserve ce dernier niveau.
+:::
+
 ### Options de Niveau
 
 | Option | Description |
 |--------|-------------|
-| `stackAmount` | Niveau de pile auquel cette configuration s'applique |
+| `stackAmount` | Taille de pile a partir de laquelle ce niveau s'applique |
 | `delay` | Délai de base entre les spawns (ticks) |
 | `minSpawnDelay` | Délai aléatoire minimum (ticks) |
 | `maxSpawnDelay` | Délai aléatoire maximum (ticks) |

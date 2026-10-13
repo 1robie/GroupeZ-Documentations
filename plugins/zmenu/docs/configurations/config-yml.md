@@ -196,6 +196,11 @@ specify-path-menus: []
 # Generate default configuration files if they don't exist
 generate-default-file: true
 
+# Automatically reload an inventory when its file is modified, added or deleted
+hot-reload:
+  enable: false
+  delay-milliseconds: 500
+
 #######################################
 #          Download / API             #
 #######################################
@@ -652,6 +657,53 @@ generate-default-file: true
 
 ---
 
+#### hot-reload
+
+Watches the `inventories/` folder (and all its subfolders) and applies your changes without any command:
+
+- **Modified file**: the inventory is reloaded.
+- **New file**: the inventory is loaded.
+- **Deleted file** (or deleted folder): the inventory is unloaded.
+
+```yaml
+hot-reload:
+  enable: false
+  delay-milliseconds: 500
+```
+
+| Option | Description |
+|--------|-------------|
+| `enable` | Enables the hot reload. Disabled by default. |
+| `delay-milliseconds` | Time to wait after the last change of a file before reloading it. Text editors often save a file in several steps, this avoids reloading it several times. |
+
+**Good to know:**
+- Players viewing an inventory when it is reloaded see the new version open instantly, on the same page and with the same previous inventories (a back button opens the new version too). If the inventory is unloaded (file deleted, `enable: false`), it is closed.
+- A file that cannot be loaded (YAML syntax error, unknown button type, invalid size...) is not applied: the previous version stays loaded and the error is shown in the console until you fix the file.
+- Only the `inventories/` folder is watched. Files listed in `specify-path-menus`, patterns and commands still require `/zm reload`.
+- Enabling or disabling the option takes effect after `/zm reload` or `/zm reload config` (or within two seconds when changed from the in-game configuration dialog).
+- On top of the file system events, the folder is scanned every two seconds. Changes are therefore detected even where the file system sends no event: Docker containers (Pterodactyl, bind mounts), WSL, network shares, files uploaded over SFTP.
+- A file is reloaded when its content or its modification date changes. Saving a file again without any change still reloads it, but the same version is never reloaded twice.
+
+**Console logs:**
+
+Every action is logged in the console with a `[HotReload]` prefix:
+
+```
+[zMenu] [HotReload] Inventory hot reload enabled, watching .../plugins/zMenu/inventories (native recursive watch, 12 file(s), 12 loaded inventory(ies), scan every 2000ms, delay 500ms).
+[zMenu] [HotReload] Change detected on example.yml, reloading the inventory...
+[zMenu] [HotReload] Inventory example.yml reloaded in 14ms, reopened for 1 player(s).
+```
+
+You will also see the YAML errors, the files that could not be loaded, the inventories unloaded after a deletion, and the files that are disabled (`enable: false`) or waiting for a load requirement. With [`enable-debug`](#enable-debug) set to `true`, each file event, each change found by the scan and each ignored (unchanged) file is logged as well.
+
+**Troubleshooting:** if nothing happens when you save a file, first check that the `Inventory hot reload enabled` line appears at startup or after `/zm reload`. Then enable `enable-debug` to see whether the changes are detected.
+
+**When to enable:**
+- While creating or editing menus, to see your changes instantly
+- On a test/development server
+
+---
+
 #### seconds-save-player-data
 
 How often (in seconds) player data is automatically saved.
@@ -754,6 +806,8 @@ performance-debug:
     mode: DISABLED
     operations: []
 skip-update-check: true
+hot-reload:
+  enable: true
 storage-type: SQLITE
 enable-cache-item-stack: false
 enable-cache-placeholder-api: false
