@@ -215,7 +215,7 @@ items:
           - ALL
         requirements:
           - type: placeholder
-            value: "%zmenu_math_%zmenu_time_unix_timestamp%-%zmenu_player_value_last_daily%%"
+            value: "%zmenu_math_{zmenu_time_unix_timestamp}-{zmenu_player_value_last_daily}%"
             action: SUPERIOR_OR_EQUAL
             number: 86400  # 24 heures en secondes
             deny:
@@ -326,7 +326,7 @@ items:
         - ""
         - "&7Kills : &a%zmenu_player_value_kills%"
         - "&7Morts : &c%zmenu_player_value_deaths%"
-        - "&7Ratio K/D : &e%zmenu_math_%zmenu_player_value_kills%/%zmenu_player_value_deaths%%"
+        - "&7Ratio K/D : &e%zmenu_math_{zmenu_player_value_kills}/{zmenu_player_value_deaths}%"
         - ""
         - "&8&m───────────────"
 ```

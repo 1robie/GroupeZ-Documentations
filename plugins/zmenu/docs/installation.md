@@ -18,8 +18,10 @@ Before installing zMenu, make sure your server meets the following requirements:
 | Java | **Java 21** (required) |
 | Server Software | **Paper**, Purpur, Pufferfish, or Folia |
 
-:::warning Paper is now required
-zMenu is a **Paper-only** plugin — it ships a `paper-plugin.yml` and **will not load on Spigot**. Run it on Paper, a Paper fork (Purpur / Pufferfish) or Folia.
+:::warning Paper is required
+zMenu is a **Paper-only** plugin — it ships a `paper-plugin.yml`, which only Paper reads. Run it on Paper, a Paper fork (Purpur / Pufferfish) or Folia.
+
+On Spigot the plugin still loads and enables, but **nothing works**: no menu, no command, no API. It only prints a warning in the console, and sends the same warning on join to players holding `zmenu.paper.warning` (operators by default), telling you to install Paper.
 :::
 
 :::tip Recommended Setup

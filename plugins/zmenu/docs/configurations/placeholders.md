@@ -56,7 +56,7 @@ Perform calculations directly in your configuration:
 ```yaml
 lore:
   - "&7Result: %zmenu_math_10*5%"           # Output: 50
-  - "&7Balance: %zmenu_formatted_math_%vault_eco_balance%*2%"
+  - "&7Balance: %zmenu_formatted_math_{vault_eco_balance}*2%"
 ```
 
 ### Player Data Placeholders
@@ -325,7 +325,7 @@ You can use placeholders inside other placeholders:
 ```yaml
 # Using player data in math
 lore:
-  - "&7Double coins: %zmenu_math_%zmenu_player_value_coins%*2%"
+  - "&7Double coins: %zmenu_math_{zmenu_player_value_coins}*2%"
 ```
 
 ## Requirements with Placeholders

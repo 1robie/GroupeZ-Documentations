@@ -95,6 +95,11 @@ main-menu: "example"
 
 # Utiliser la touche d'echange de main secondaire (F) pour ouvrir le menu principal
 use-swap-item-off-hand-key-to-open-main-menu: false
+
+# Recharger automatiquement un inventaire quand son fichier est modifie, ajoute ou supprime
+hot-reload:
+  enable: false
+  delay-milliseconds: 500
 ```
 
 ## Options de configuration expliquees
@@ -330,6 +335,53 @@ use-swap-item-off-hand-key-to-open-main-menu: false
 
 ---
 
+#### hot-reload
+
+Surveille le dossier `inventories/` (et tous ses sous-dossiers) et applique vos modifications sans aucune commande :
+
+- **Fichier modifie** : l'inventaire est recharge.
+- **Nouveau fichier** : l'inventaire est charge.
+- **Fichier supprime** (ou dossier supprime) : l'inventaire est decharge.
+
+```yaml
+hot-reload:
+  enable: false
+  delay-milliseconds: 500
+```
+
+| Option | Description |
+|--------|-------------|
+| `enable` | Active le rechargement a chaud. Desactive par defaut. |
+| `delay-milliseconds` | Temps d'attente apres la derniere modification d'un fichier avant de le recharger. Les editeurs de texte enregistrent souvent un fichier en plusieurs etapes, cela evite de le recharger plusieurs fois. |
+
+**Bon a savoir :**
+- Les joueurs qui regardent un inventaire au moment ou il est recharge voient la nouvelle version s'ouvrir instantanement, sur la meme page et avec les memes inventaires precedents (un bouton retour ouvre aussi la nouvelle version). Si l'inventaire est decharge (fichier supprime, `enable: false`), il est ferme.
+- Un fichier qui ne peut pas etre charge (erreur de syntaxe YAML, type de bouton inconnu, taille invalide...) n'est pas applique : la version precedente reste chargee et l'erreur est affichee dans la console jusqu'a ce que vous corrigiez le fichier.
+- Seul le dossier `inventories/` est surveille. Les fichiers de `specify-path-menus`, les patterns et les commandes necessitent toujours `/zm reload`.
+- L'activation ou la desactivation de l'option prend effet apres `/zm reload` ou `/zm reload config` (ou en deux secondes depuis le dialogue de configuration en jeu).
+- En plus des evenements du systeme de fichiers, le dossier est scanne toutes les deux secondes. Les modifications sont donc detectees meme la ou le systeme de fichiers n'envoie aucun evenement : conteneurs Docker (Pterodactyl, bind mounts), WSL, partages reseau, fichiers envoyes en SFTP.
+- Un fichier est recharge quand son contenu ou sa date de modification change. Enregistrer a nouveau un fichier sans modification le recharge quand meme, mais une meme version n'est jamais rechargee deux fois.
+
+**Logs console :**
+
+Chaque action est affichee dans la console avec le prefixe `[HotReload]` :
+
+```
+[zMenu] [HotReload] Inventory hot reload enabled, watching .../plugins/zMenu/inventories (native recursive watch, 12 file(s), 12 loaded inventory(ies), scan every 2000ms, delay 500ms).
+[zMenu] [HotReload] Change detected on example.yml, reloading the inventory...
+[zMenu] [HotReload] Inventory example.yml reloaded in 14ms, reopened for 1 player(s).
+```
+
+Vous verrez aussi les erreurs YAML, les fichiers qui n'ont pas pu etre charges, les inventaires decharges apres une suppression, et les fichiers desactives (`enable: false`) ou en attente d'un prerequis de chargement. Avec [`enable-debug`](#enable-debug) a `true`, chaque evenement de fichier, chaque changement trouve par le scan et chaque fichier ignore (inchange) est aussi affiche.
+
+**Depannage :** si rien ne se passe quand vous enregistrez un fichier, verifiez d'abord que la ligne `Inventory hot reload enabled` apparait au demarrage ou apres `/zm reload`. Activez ensuite `enable-debug` pour voir si les modifications sont detectees.
+
+**Quand activer :**
+- Pendant la creation ou la modification de menus, pour voir vos changements instantanement
+- Sur un serveur de test/developpement
+
+---
+
 ## Exemples de configurations
 
 ### Serveur basique (SQLite)
@@ -383,6 +435,8 @@ cooldown-click-milliseconds: 150
 ```yaml
 enable-debug: true
 enable-debug-time: true
+hot-reload:
+  enable: true
 storage-type: SQLITE
 enable-cache-item-stack: false
 enable-cache-placeholder-api: false

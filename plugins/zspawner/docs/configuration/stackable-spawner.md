@@ -112,11 +112,18 @@ stackableSpawner:
     # ... continue for higher stack amounts
 ```
 
+:::info
+A level applies from its `stackAmount` **up to** the next one, so you do not have to
+declare every value. With levels `1`, `5` and `10`, a stack of `3` uses the level `1`
+settings and a stack of `7` uses the level `5` settings. A stack larger than the last
+declared level keeps that last level.
+:::
+
 ### Level Options
 
 | Option | Description |
 |--------|-------------|
-| `stackAmount` | Stack level this configuration applies to |
+| `stackAmount` | Stack amount this level starts applying from |
 | `delay` | Base delay between spawns (ticks) |
 | `minSpawnDelay` | Minimum random delay (ticks) |
 | `maxSpawnDelay` | Maximum random delay (ticks) |

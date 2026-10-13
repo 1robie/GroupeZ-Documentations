@@ -150,6 +150,7 @@ La commande principale est `/zm` (alias : `/zmenu`).
 | `zmenu.open.bedrock` | Ouvrir les formulaires Bedrock | op |
 | `zmenu.reload.bedrock` | Recharger les fichiers de formulaires Bedrock | op |
 | `zmenu.dumplog` | Exporter les logs de debug | op |
+| `zmenu.paper.warning` | Recevoir l'avertissement "zMenu necessite Paper" a la connexion, sur un serveur qui n'est pas Paper | op |
 
 ## Permissions de commandes personnalisees
 
