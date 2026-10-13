@@ -275,6 +275,16 @@ Un curseur numerique.
 
 Dans un formulaire custom, chaque valeur de saisie est disponible comme placeholder en utilisant le nom de cle YAML du bouton. Par exemple, si vous avez un bouton avec la cle `text`, vous pouvez utiliser `%text%` dans la section actions.
 
+Certaines saisies exposent aussi des valeurs supplementaires, avec `%cle.<valeur>%` :
+
+| Saisie | Placeholders supplementaires |
+|--------|------------------------------|
+| `bedrock_slider` | `%cle.min%`, `%cle.max%`, `%cle.percent%` |
+| `bedrock_dropdown` | `%cle.index%`, `%cle.count%`, `%cle.display%` (le texte de l'option choisie) |
+| `bedrock_toggle` | `%cle.bool%`, `%cle.int%` (`1`/`0`), `%cle.yesno%`, `%cle.onoff%`, `%cle.not%` |
+
+Toutes les valeurs acceptent aussi les [modificateurs de placeholders](./placeholders#modificateurs-de-placeholders), par exemple `%text.trim.safe%`.
+
 ### Actions du formulaire custom
 
 Contrairement aux formulaires simple et modal ou chaque bouton a son propre `click-requirement`, les formulaires custom utilisent une section `actions` partagee au niveau racine. Ces actions sont executees quand le joueur soumet le formulaire, avec toutes les valeurs de saisie disponibles comme placeholders.
@@ -457,6 +467,14 @@ Quand un joueur Bedrock ouvre cet inventaire, il sera automatiquement redirige v
 | `name` | String | Oui | Le nom du fichier de formulaire Bedrock (sans `.yml`) |
 | `plugin` | String | Non | Le plugin proprietaire du formulaire (defaut : `zMenu`) |
 | `pages` | Liste d'entiers | Non | Rediriger uniquement sur ces pages (vide = toutes les pages) |
+| `mode` | String | Non | `CUMULUS` (defaut) : ouvrir un formulaire Bedrock. `CHEST` : ouvrir un autre inventaire zMenu a la place, par exemple un menu coffre simplifie concu pour les joueurs Bedrock |
+
+```yaml
+# Rediriger les joueurs Bedrock vers un inventaire coffre plus simple au lieu d'un formulaire
+inventory-replacement:
+  name: "shop-bedrock"    # Un inventaire zMenu classique (inventories/shop-bedrock.yml)
+  mode: CHEST
+```
 
 ---
 

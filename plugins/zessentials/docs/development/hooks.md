@@ -8,6 +8,10 @@ description: Optional plugin integrations and hooks for zEssentials
 
 zEssentials provides optional integrations with third-party plugins to extend its functionality. These hooks are loaded automatically when the corresponding plugin is detected on the server, unless otherwise noted.
 
+:::info Load order
+zEssentials is a Paper plugin. All the integrations below are declared as optional server dependencies in its `paper-plugin.yml` (`load: BEFORE`, `required: false`): Vault, ProtocolLib, SuperiorSkyblock2, BentoBox, BlockTracker, WorldGuard, Votifier, NChat, MythicMobs, AxVaults and PlayerVaults. When present, they are loaded before zEssentials, and all of them except BentoBox use `join-classpath: true` so that zEssentials can access their API. zMenu and PlaceholderAPI are the only **required** dependencies.
+:::
+
 ---
 
 ## Vault
@@ -27,6 +31,10 @@ When Vault is present and the economy module is active, any plugin that depends 
 
 Enables multi-server communication via Redis pub/sub, allowing zEssentials instances across multiple servers to synchronize data and actions in real time.
 
+:::caution In development
+The Redis integration is **currently disabled** in the plugin: the Redis server is not started, even with `server-type: REDIS`. The information below describes the planned behavior.
+:::
+
 ### Configuration
 
 Redis is configured in the main `config.yml`:
@@ -35,9 +43,9 @@ Redis is configured in the main `config.yml`:
 server-type: REDIS
 
 redis-configuration:
-  host: "127.0.0.1"
+  host: "192.168.10.10"
   port: 6379
-  password: ""
+  password: "123456a"
 ```
 
 Set `server-type` to `REDIS` to activate multi-server mode.
@@ -76,7 +84,7 @@ zEssentials uses **7 message types** for inter-server communication:
 
 ## WorldGuard
 
-Integrates with [WorldGuard](https://enginehub.org/worldguard) to block permission checking in protected regions. When a player attempts to perform an action in a WorldGuard-protected region, zEssentials checks the `BLOCK_BREAK` flag to determine whether the action is allowed.
+Integrates with [WorldGuard](https://enginehub.org/worldguard) to check block permissions in protected regions. When the WorldEdit module modifies a block, zEssentials tests the WorldGuard `BLOCK_BREAK` flag for the player at that location; blocks the player is not allowed to break are skipped.
 
 - **Auto-loaded**: Yes, if WorldGuard is present on the server
 - **No additional configuration required**
@@ -85,13 +93,22 @@ Integrates with [WorldGuard](https://enginehub.org/worldguard) to block permissi
 
 ## SuperiorSkyblock2
 
-Integrates with [SuperiorSkyblock2](https://www.spigotmc.org/resources/superiorskyblock2.87411/) to block permission checking on islands. zEssentials verifies island membership and range before allowing certain actions.
+Integrates with [SuperiorSkyblock2](https://www.spigotmc.org/resources/superiorskyblock2.87411/) to check block permissions on islands. Before the WorldEdit module modifies a block, zEssentials verifies island membership and range.
 
 - **Auto-loaded**: Yes, if SuperiorSkyblock2 is present on the server
 - **Checks performed**:
   - `isMember()` -- verifies the player is a member of the island
   - `isInsideRange()` -- verifies the action occurs within the island boundaries
 - **No additional configuration required**
+
+---
+
+## Generic Protection Plugins
+
+In addition to the dedicated hooks above, zEssentials always registers a **Bukkit event-based permission checker** (since 1.0.3.6). Before the WorldEdit module modifies a block, it fires a simulated `BlockBreakEvent` for the player: if a protection plugin cancels the event, the block is skipped.
+
+- **Always active**, no configuration required
+- Works with any protection plugin that cancels `BlockBreakEvent` (HuskClaims, GriefPrevention, Lands, Towny, etc.)
 
 ---
 
@@ -131,20 +148,22 @@ Integrates with [BlockTracker](https://github.com/Krakenied/BlockTracker) to tra
 
 ## ProtocolLib
 
-Integrates with [ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/) to intercept `SYSTEM_CHAT` packets and add clickable command suggestions to chat messages.
+Integration with [ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/) designed to intercept `SYSTEM_CHAT` packets and make the `./command` pattern clickable in **every** message sent to players (not only in player chat).
 
-- **Auto-loaded**: Yes, if ProtocolLib is present on the server
+:::caution
+The ProtocolLib packet listener is **currently disabled** in the plugin. ProtocolLib is only declared as an optional dependency and is not required by any module.
+:::
+
+- **Auto-loaded**: No (disabled)
 - **Packet intercepted**: `SYSTEM_CHAT`
-- **Pattern**: `./command` -- text matching this pattern in chat messages becomes clickable, suggesting the command when clicked
 
-### Configuration
-
-Configured in `modules/chat/config.yml` under the `command-placeholder` section:
+The `./command` placeholder in **player chat** does not need ProtocolLib: it is handled by the Chat module, in the `command-placeholder` section of `modules/chat/config.yml`:
 
 ```yaml
-command-placeholder:
-  enabled: true
-  # Additional settings for command suggestion behavior
+command-placeholder: # ./<command>. placeholder
+  enable: true
+  result: "<hover:show_text:'<yellow>Try this command'><click:suggest_command:'/%fixed_command%'><yellow>/%command%</yellow></click></hover>"
+  permission: "zessentials.chat.placeholder.command"
 ```
 
 ---
@@ -164,9 +183,9 @@ Integrates with [MythicMobs](https://www.spigotmc.org/resources/mythicmobs.5702/
 
 ## AxVaults
 
-Provides data migration from [AxVaults](https://www.spigotmc.org/resources/axvaults.103560/) to the zEssentials vault system. This is not a runtime integration but a one-time migration tool.
+Provides data migration from [AxVaults](https://www.spigotmc.org/resources/axvaults.103862/) to the zEssentials vault system. This is not a runtime integration but a one-time migration tool.
 
 - **Usage**: Accessed via the built-in converter command
 - **Purpose**: Migrates existing AxVaults player vault data into zEssentials vaults
 
-To migrate data from AxVaults, use the zEssentials converter command and select AxVaults as the source.
+To migrate data from AxVaults, run `/zessentials convert axvaults` (see [Data Migration](../converters#axvaults)). The same applies to PlayerVaults with `/zessentials convert playervaultx`.

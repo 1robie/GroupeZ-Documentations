@@ -1,69 +1,78 @@
 ---
 sidebar_position: 1
 title: Introduction
-description: Introduction à zEssentials - Un plugin essentials complet pour les serveurs Minecraft
+description: Introduction à zEssentials - Un plugin essentials complet pour serveurs Minecraft
 ---
 
 # zEssentials
 
 Bienvenue dans la documentation officielle de zEssentials !
 
-zEssentials est un plugin essentials complet et modulaire pour les serveurs Minecraft (Paper/Spigot), construit avec une architecture moderne, un support API étendu et des capacités multi-serveurs via Redis. Il fournit toutes les commandes et systèmes essentiels nécessaires pour gérer un serveur Minecraft.
+zEssentials est un plugin essentials complet et modulaire pour les serveurs Minecraft **Paper**, conçu avec une architecture moderne et une API étendue. Il fournit toutes les commandes et tous les systèmes de base nécessaires pour faire tourner un serveur Minecraft.
 
-## Fonctionnalités Principales
+:::info Paper uniquement
+Depuis la version **1.0.4.0**, zEssentials est un plugin Paper et nécessite **Paper (ou un fork comme Purpur, Pufferfish ou Folia) 1.20.6+**. Spigot n'est plus supporté : sur Spigot, le plugin reste inactif et affiche seulement un avertissement. Consultez [Installation](./installation) pour plus de détails.
+:::
 
-### Architecture Modulaire
+## Fonctionnalités principales
+
+### Architecture modulaire
 Chaque fonctionnalité est un module indépendant qui peut être activé ou désactivé individuellement :
-- **Economy** - Système multi-devises avec intégration Vault
-- **Homes** - Résidences des joueurs avec limites basées sur les permissions
-- **Kits** - Système de kits configurable avec temps de recharge
-- **Teleportation** - TPA, warps, spawn, téléportation aléatoire
-- **Sanctions** - Ban, mute, kick, freeze avec historique
-- **Chat** - Formatage du chat, chat interactif, diffusion
+- **Économie** - Système multi-devises avec intégration Vault, paiements et baltop
+- **Homes** - Homes des joueurs avec limites par permission, ainsi que **homes publics**, **homes partagés**, catégories, favoris et import depuis EssentialsX
+- **Kits** - Système de kits configurable avec cooldowns et catégories
+- **Téléportation** - TPA (avec file d'attente et activation/désactivation), back, top, bottom, téléportation aléatoire
+- **Spawn & Warps** - Gestion du spawn, du premier spawn et des warps
+- **Sanctions** - Ban, mute, kick, freeze avec historique et `/seen` configurable
+- **Chat** - Format du chat, chat interactif, affichage d'items, son de ping, annonces
+- **Messages privés** - `/msg`, `/reply`, social spy et un **système d'ignore** (`/ignore`, `/unignore`, `/ignorelist`)
+- **Boîte aux lettres** - Livraison d'items hors ligne et **mails texte** (`/mail send`, `/mail read`...) pour les joueurs déconnectés
+- **Commandes personnalisées** - Créez vos propres commandes (`/discord`, `/map`, `/store`...) directement depuis la configuration
 - **Scoreboard** - Scoreboards dynamiques par joueur avec animations
-- **Holograms** - Hologrammes de texte, d'objets et de blocs
-- **Vaults** - Coffres de stockage personnels des joueurs
-- **Mailbox** - Système de livraison d'objets hors ligne
-- **Voting** - Suivi des votes et système de vote party
+- **Hologrammes** - Hologrammes de texte, d'items et de blocs
+- **Coffres** - Coffres de stockage personnels
+- **Votes** - Suivi des votes et système de vote party
 - **WorldEdit** - Outils de construction intégrés
-- **Death Message** - Messages de mort personnalisables par cause
-- **Discord** - Notifications webhook et liaison de comptes
-- **AFK** - Détection d'absence
+- **Messages de mort** - Messages de mort personnalisables par cause
+- **Messages automatiques** - Annonces diffusées à intervalle régulier
+- **Discord** - Notifications par webhook et liaison de comptes
+- **AFK** - Détection d'inactivité (Away From Keyboard)
+- **Règles, Étapes, Connexion/Déconnexion, Items** - Et bien d'autres utilitaires
 
-### Support Multi-Serveurs
-- Intégration Redis pour la messagerie inter-serveurs
-- Synchronisation des données joueurs, temps de recharge et sanctions
-- Messages privés et diffusions inter-serveurs
+### Paramètres joueurs persistants
+- Le temps et la météo personnels (`/ptime`, `/pweather`) sont sauvegardés et réappliqués à la reconnexion
+- Les options des joueurs (vanish, god, social spy, réception des demandes de téléportation, son de ping...) sont stockées en base de données
 
-### Multiples Backends de Stockage
+### Plusieurs moteurs de stockage
 - **SQLite** - Installation rapide pour les tests
 - **MySQL / MariaDB** - Recommandé pour la production
-- **HikariCP** - Pool de connexions pour haute performance
+- **HikariCP** - Pool de connexions pour de hautes performances
+- **JSON** - Stockage en fichiers (fonctionnalités limitées)
 
-### Compatibilité Étendue
-- **Minecraft 1.20.4 - 1.21.11** supporté
-- **Paper** (recommandé), Spigot, Purpur, Pufferfish
-- **Folia** compatible (threading asynchrone)
-- **Java 21+** requis
+### Large compatibilité
+- **Minecraft 1.20.6, 1.21 - 1.21.11 et 26.2** supportés
+- **Paper** (recommandé), Purpur, Pufferfish et autres forks de Paper
+- Compatible **Folia** (threading par régions)
+- **Java 21+** requis (**Java 25** pour Minecraft 26.x)
 
-### Intégrations Riches
-- [zMenu](https://modrinth.com/plugin/zmenu) - Interfaces GUI entièrement personnalisables
-- [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) - 150+ placeholders personnalisés
-- [Vault](https://www.spigotmc.org/resources/vault.34315/) - Backend économique
-- [WorldGuard](https://enginehub.org/worldguard) - Protection de régions
-- [SuperiorSkyblock2](https://www.spigotmc.org/resources/superiorskyblock2.87411/) - Permissions d'îles
-- [ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/) - Manipulation de paquets
-- [NuVotifier](https://www.spigotmc.org/resources/nuvotifier.13449/) - Réception de votes
+### Nombreuses intégrations
+- [zMenu](https://modrinth.com/plugin/zmenu) - Interfaces entièrement personnalisables
+- [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) - Des centaines de placeholders personnalisés
+- [Vault](https://www.spigotmc.org/resources/vault.34315/) - Backend d'économie
+- [WorldGuard](https://enginehub.org/worldguard) - Protection des régions
+- [SuperiorSkyblock2](https://www.spigotmc.org/resources/superiorskyblock2.87411/) - Permissions des îles
+- [NuVotifier](https://www.spigotmc.org/resources/nuvotifier.13449/) - Réception des votes
 - [BlockTracker](https://github.com/Krakenied/BlockTracker) - Suivi des modifications de blocs
-- [MythicMobs](https://www.spigotmc.org/resources/mythicmobs.5702/) - Messages de mort des mobs personnalises
+- [MythicMobs](https://www.spigotmc.org/resources/mythicmobs.5702/) - Mobs personnalisés dans les messages de mort
+- NChat - Application des mutes aux messages NChat
 
-### API Développeur
-- API propre et modulaire avec 242 fichiers d'interface
-- Événements personnalisés pour toutes les actions majeures
+### API développeur
+- API propre et modulaire avec 250 fichiers d'interfaces et de classes
+- Événements personnalisés pour toutes les actions importantes
 - Architecture basée sur les services
 - Expansion PlaceholderAPI complète
 
-### Migration de Données
+### Migration de données
 Convertisseurs intégrés depuis :
 - EssentialsX
 - CMI
@@ -77,18 +86,19 @@ Convertisseurs intégrés depuis :
 
 | Prérequis | Version |
 |-----------|---------|
-| Java | 21 ou supérieur |
-| Minecraft | 1.20.4 ou supérieur |
+| Serveur | Paper (ou fork) 1.20.6 ou supérieur |
+| Java | 21 ou supérieur (25 pour Minecraft 26.x) |
 | zMenu | Dernière version |
 | PlaceholderAPI | Dernière version |
 
-## Liens Rapides
+## Liens rapides
 
-- [Guide d'Installation](./installation)
+- [Guide d'installation](./installation)
 - [Commandes & Permissions](./commands-permissions)
 - [Placeholders](./placeholders)
 - [Configuration](./configuration/main-config)
-- [Base de Données](./database)
+- [Base de données](./database)
+- [Migration de données](./converters)
 - [API & Événements](./development/events)
 
 ## Support
@@ -100,4 +110,4 @@ Convertisseurs intégrés depuis :
 ## Téléchargement
 
 - **Modrinth** : [modrinth.com/plugin/zessentials](https://modrinth.com/plugin/zessentials)
-- **groupez.dev** : [groupez.dev](https://groupez.dev/)
+- **groupez.dev** : [groupez.dev](https://groupez.dev/resources/zessentials.325/)

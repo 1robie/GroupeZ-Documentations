@@ -572,7 +572,7 @@ Requirements that must be met to open this inventory. Similar to `view-requireme
 
 ### inventory-replacement
 
-Automatically redirect Bedrock players to a native Bedrock form when they try to open this inventory. Java players will see the regular inventory as usual.
+Automatically redirect Bedrock players to a native Bedrock form (or to another inventory) when they try to open this inventory. Java players will see the regular inventory as usual.
 
 :::warning Requirements
 This feature requires **Geyser** or **Floodgate** installed on your server.
@@ -591,6 +591,7 @@ inventory-replacement:
 | `name` | String | - | The Bedrock form file name (without `.yml`) |
 | `plugin` | String | `zMenu` | The plugin owning the Bedrock form |
 | `pages` | List | empty | Only redirect on these pages (empty = all pages) |
+| `mode` | String | `CUMULUS` | `CUMULUS`: open a Bedrock form. `CHEST`: open another zMenu inventory named `name` instead |
 
 See [Bedrock Forms](../bedrock) for complete documentation on creating Bedrock forms.
 

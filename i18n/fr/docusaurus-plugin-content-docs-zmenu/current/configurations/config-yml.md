@@ -100,6 +100,9 @@ use-swap-item-off-hand-key-to-open-main-menu: false
 hot-reload:
   enable: false
   delay-milliseconds: 500
+
+# Nombre de dialogues dialog_list pouvant etre imbriques les uns dans les autres
+dialog-list-max-depth: 4
 ```
 
 ## Options de configuration expliquees
@@ -337,6 +340,10 @@ use-swap-item-off-hand-key-to-open-main-menu: false
 
 #### hot-reload
 
+:::tip
+Le hot reload a sa propre page avec tous les details : [Hot Reload](../hot-reload).
+:::
+
 Surveille le dossier `inventories/` (et tous ses sous-dossiers) et applique vos modifications sans aucune commande :
 
 - **Fichier modifie** : l'inventaire est recharge.
@@ -379,6 +386,18 @@ Vous verrez aussi les erreurs YAML, les fichiers qui n'ont pas pu etre charges, 
 **Quand activer :**
 - Pendant la creation ou la modification de menus, pour voir vos changements instantanement
 - Sur un serveur de test/developpement
+
+---
+
+#### dialog-list-max-depth
+
+Nombre de dialogues [`dialog_list`](./dialogues#liste-de-dialogues) pouvant etre imbriques les uns dans les autres (une liste dans une liste dans une liste...). Par defaut : `4`.
+
+```yaml
+dialog-list-max-depth: 4
+```
+
+Cela ne limite pas le nombre de dialogues qu'une liste contient. Une liste envoie tous les dialogues qu'elle contient, y compris le contenu des listes imbriquees, dans le paquet qui l'ouvre : une imbrication profonde rend ce paquet plus gros et peut deconnecter le joueur. Les listes imbriquees au-dela de cette valeur sont ignorees.
 
 ---
 

@@ -26,7 +26,7 @@ plugins/zMenu/dialogs/
 
 ## Dialog Types
 
-zMenu supports four dialog types:
+zMenu supports every vanilla dialog type:
 
 | Type | Description |
 |------|-------------|
@@ -34,6 +34,7 @@ zMenu supports four dialog types:
 | `confirmation` | Yes/No confirmation dialog |
 | `multi_action` | Multiple action buttons in a grid layout |
 | `server_links` | Display server links as clickable buttons |
+| `dialog_list` | A hub listing other dialogs, one button per dialog |
 
 ## Basic Structure
 
@@ -65,7 +66,7 @@ name: "&6&lWelcome Dialog"
 
 ### external_title
 
-The window title shown in the dialog header.
+The window title shown in the dialog header. `external-title` is accepted too. It is also the label of the button that opens this dialog from a [dialog list](#dialog-list). When it is empty, nothing is sent and the client uses the dialog name.
 
 ```yaml
 external_title: "Server Information"
@@ -487,6 +488,73 @@ server-links:
           messages:
             - "&aLink opened!"
 ```
+
+---
+
+## Dialog List
+
+A `dialog_list` dialog is a hub: it shows one button per dialog listed under `dialogs:`, each labelled with the `external-title` of its dialog (or its name when it has none). Clicking a button opens that dialog. An example is generated in `dialogs/dialog_list-dialog.yml`.
+
+```yaml
+name: "&6&lServer Hub"
+external-title: "&6Server hub"
+type: dialog_list
+
+can-close-with-escape: true
+pause: false
+after-action: CLOSE
+
+number-of-columns: 2
+button-width: 150
+
+dialogs:
+  - "default-dialog"                     # zMenu dialog, by file name or name
+  - "multi_action-dialog"
+  - dialog: "confirmation-dialog"        # same, written as a map
+  - registry-key: "minecraft:server_links" # vanilla or datapack dialog
+
+back-button:
+  enabled: true
+  label: "&7« Back"
+  tooltip: "&7Return to the server hub"
+  width: 150
+
+exit-button:
+  label: "&cClose"
+  tooltip: "&7Close the server hub"
+  width: 150
+  actions:
+    1:
+      success:
+        - type: message
+          messages:
+            - "&7See you soon!"
+
+body:
+  welcome:
+    type: dialog_plain_message
+    messages:
+      - "&7Welcome &f%player_name%&7, pick a section below."
+    width: 300
+```
+
+### Dialog List Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `dialogs` | List | - | The dialogs to list. Each entry is a zMenu dialog name (`name` or `plugin:name`, also written `dialog: <name>`), or a vanilla/datapack dialog written `registry-key: <namespace:key>` |
+| `number-of-columns` | Integer | `2` | Number of buttons in a row |
+| `button-width` | Integer | `150` | Width of each button (1-1024) |
+| `back-button.enabled` | Boolean | `true` | Adds a back button to the listed dialogs |
+| `back-button.label` | String | `Back` | Label of the back button |
+| `back-button.tooltip` | String | empty | Tooltip of the back button |
+| `back-button.width` | Integer | `150` | Width of the back button (1-1024) |
+| `exit-button` | Section | none | Optional button at the bottom of the list, also triggered by the Escape key. Supports `label`, `tooltip`, `width` and `actions` |
+
+**Good to know:**
+- **Back button**: the client does not return to the list when a listed dialog is closed. The back button is added to the listed dialogs that have no exit button of their own (`multi_action`, `server_links` and `dialog_list`) so players can come back. `notice` and `confirmation` dialogs have no exit slot and are left unchanged. To write your own back button instead, give the dialog an `exit-button` with the [`dialog`](./buttons/actions#dialog) action.
+- **Requirements**: listed dialogs whose `open-requirement` the player does not meet are hidden. The requirement is checked when the list is opened, because the client opens the listed dialogs on its own, without asking the server.
+- **Nesting**: a list can contain other lists. How deep they can be nested is set by [`dialog-list-max-depth`](./config-yml#dialog-list-max-depth) in `config.yml` (default `4`).
 
 ---
 

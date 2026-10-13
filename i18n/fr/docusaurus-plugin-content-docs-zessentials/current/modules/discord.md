@@ -155,8 +155,13 @@ Les sections de webhook qui utilisent `embeds` prennent en charge les propriét�
 | `color` | String | Code couleur hexadécimal pour la barre latérale de l'embed (par exemple, `"#00ff00"` pour le vert) |
 | `title` | String | Titre optionnel de l'embed |
 | `description` | String | Description/texte principal optionnel de l'embed |
-| `thumbnail` | String | URL optionnelle de l'image miniature |
-| `footer` | String | Texte de pied de page optionnel |
+| `url` | String | URL optionnelle ouverte en cliquant sur le titre |
+| `author.url` | String | URL optionnelle ouverte en cliquant sur le nom de l'auteur |
+| `thumbnail.url` | String | URL optionnelle de l'image miniature |
+| `image.url` | String | URL optionnelle d'une grande image |
+| `footer.text` | String | Texte de pied de page optionnel |
+| `footer.icon-url` | String | URL optionnelle de l'icône du pied de page |
+| `fields` | List | Liste optionnelle de champs, chacun avec `name`, `value` et `inline` (Boolean) |
 
 ---
 

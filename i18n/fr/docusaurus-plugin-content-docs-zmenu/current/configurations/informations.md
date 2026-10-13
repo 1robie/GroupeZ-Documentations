@@ -67,7 +67,7 @@ plugins/zMenu/
 1. **Un inventaire par fichier** - Chaque fichier YAML dans `inventories/` definit un inventaire
 2. **Sous-dossiers supportes** - Organisez les inventaires dans des sous-dossiers
 3. **Reutilisabilite** - Utilisez les patterns et items pour eviter les repetitions
-4. **Rechargement a chaud** - Utilisez `/zm reload` pour appliquer les changements sans redemarrage
+4. **Rechargement a chaud** - Activez le [hot reload](../hot-reload) et vos modifications d'inventaire sont appliquees des que vous enregistrez le fichier, ou utilisez `/zm reload` pour appliquer les changements sans redemarrage
 
 ## Codes couleur
 

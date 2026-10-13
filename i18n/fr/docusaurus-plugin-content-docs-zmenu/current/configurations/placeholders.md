@@ -229,6 +229,45 @@ items:
         - "&7Prix : &a$%prix%"
 ```
 
+## Modificateurs de placeholders
+
+Les placeholders propres a zMenu (arguments de commande, `%page%`, `%player%`, saisies des formulaires Bedrock, saisies des dialogues...) peuvent etre transformes directement dans le placeholder, en ajoutant un ou plusieurs modificateurs apres un point :
+
+```yaml
+# /shop <category>
+- "&7Categorie : &f%category.capitalize%"   # weapons -> Weapons
+- "&7Page &f%page.pad:2%"                   # 3 -> 03
+- "&7Nom : &f%name.trim.max:16%"            # les modificateurs peuvent etre enchaines
+- "&7Quantite : &f%amount.default:1%"       # 1 quand l'argument est vide
+- "console-command: give %player% diamond %amount.int.safe%"
+```
+
+| Modificateur | Exemple | Resultat |
+|--------------|---------|----------|
+| `upper` / `lower` | `%name.upper%` | Majuscules / minuscules |
+| `capitalize` | `%name.capitalize%` | Premiere lettre en majuscule, le reste en minuscules |
+| `trim` | `%name.trim%` | Retire les espaces autour |
+| `length` | `%name.length%` | Nombre de caracteres |
+| `empty` | `%name.empty%` | `true` si vide |
+| `isnumber` | `%amount.isnumber%` | `true` si la valeur est un nombre |
+| `safe` | `%name.safe%` | Retire `;`, `&`, `§` et les retours a la ligne (sur dans une commande) |
+| `default:<valeur>` | `%amount.default:1%` | `<valeur>` si vide |
+| `max:<n>` | `%name.max:16%` | Coupe a `<n>` caracteres |
+| `pad:<n>` | `%page.pad:3%` | Complete avec des zeros a gauche jusqu'a `<n>` caracteres |
+| `int`, `round`, `floor`, `ceil` | `%price.round%` | Nombre entier |
+| `abs` | `%value.abs%` | Valeur absolue |
+| `negative`, `even` | `%value.even%` | `true` / `false` |
+| `0f`, `1f`, `2f`, `3f` | `%price.2f%` | Nombre avec 0 a 3 decimales |
+| `comma` | `%price.comma%` | Separateur de milliers (`1,234,567`) |
+| `add_one`, `remove_one` | `%page.add_one%` | Valeur + 1 / - 1 |
+| `add:<n>`, `sub:<n>` | `%page.add:10%` | Valeur + n / - n |
+
+Un modificateur inconnu, un argument manquant ou un modificateur numerique applique a une valeur non numerique donne un resultat vide. Les anciens prefixes (`%upper_cle%`, `%lower_cle%`, `%capitalize_cle%`, `%add_one_cle%`, `%remove_one_cle%`) fonctionnent toujours.
+
+:::info
+Les modificateurs s'appliquent aux placeholders propres a zMenu, pas aux placeholders PlaceholderAPI. Pour PlaceholderAPI, utilisez les options de formatage de l'expansion.
+:::
+
 ## Cache des placeholders
 
 Pour de meilleures performances, vous pouvez activer le cache des placeholders dans `config.yml` :

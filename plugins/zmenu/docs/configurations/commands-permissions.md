@@ -141,9 +141,18 @@ These commands connect your server to the [Minecraft Inventory Builder](https://
 
 | Command        | Permission      | Description                               |
 |----------------|-----------------|-------------------------------------------|
-| `/zm convert`  | `zmenu.convert` | Convert configurations from other plugins |
 | `/zm testdupe` | `zmenu.dupe`    | Test the anti-dupe system                 |
 | `/zm dumplog`  | `zmenu.dumplog` | Export debug logs                         |
+
+### Conversion Commands
+
+Migrating from DeluxeMenus? Convert all your menus into zMenu inventories in one command. See [Migrate from DeluxeMenus](../convert-deluxemenus) for everything that is converted.
+
+| Command                          | Permission      | Description                                                                     |
+|----------------------------------|-----------------|---------------------------------------------------------------------------------|
+| `/zm convert deluxemenus`        | `zmenu.convert` | Convert every menu of `plugins/DeluxeMenus/gui_menus/` into a zMenu inventory   |
+| `/zm convert deluxemenus <menu>` | `zmenu.convert` | Convert a single DeluxeMenus menu (file name, with or without `.yml`)           |
+| `/zm convert dm [menu]`          | `zmenu.convert` | Alias of `/zm convert deluxemenus`                                              |
 
 ## Permission List
 
@@ -216,7 +225,7 @@ Each player data sub-command has its own permission node (split in 1.1.1.6):
 
 | Permission            | Description                | Default |
 |-----------------------|----------------------------|---------|
-| `zmenu.convert`       | Convert from other plugins | op      |
+| `zmenu.convert`       | Convert DeluxeMenus menus  | op      |
 | `zmenu.dupe`          | Test anti-dupe system      | op      |
 | `zmenu.documentation` | View documentation         | op      |
 | `zmenu.dumplog`       | Export debug logs          | op      |

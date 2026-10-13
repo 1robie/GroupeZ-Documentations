@@ -103,6 +103,8 @@ baltop-message-amount: 10
 
 # Whether to store economy data for offline players (increases storage usage)
 store-offline-player-money: false
+paytoggle-placeholder-enabled: "&aEnabled"
+paytoggle-placeholder-disabled: "&cDisabled"
 
 # Default balances granted to new players
 default-economies:
@@ -139,6 +141,8 @@ command-set-reason: "Admin set"
 | `baltop-message-economy` | String | `money` | The economy used when displaying the baltop via the `/baltop` command |
 | `baltop-message-amount` | Integer | `10` | Number of entries shown per page in the baltop leaderboard |
 | `store-offline-player-money` | Boolean | `false` | If `true`, economy data for offline players is stored and accessible via placeholders. Increases storage usage |
+| `paytoggle-placeholder-enabled` | String | `&aEnabled` | Text returned by `%zessentials_user_pay_status%` when the player accepts payments |
+| `paytoggle-placeholder-disabled` | String | `&cDisabled` | Text returned by `%zessentials_user_pay_status%` when the player has disabled payments with `/paytoggle` |
 
 ### Economy Entry Properties
 

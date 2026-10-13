@@ -275,6 +275,16 @@ A numeric slider.
 
 In a custom form, each input value is available as a placeholder using the button's YAML key name. For example, if you have a button with key `text`, you can use `%text%` in the actions section.
 
+Some inputs also expose extra values, using `%key.<value>%`:
+
+| Input | Extra placeholders |
+|-------|--------------------|
+| `bedrock_slider` | `%key.min%`, `%key.max%`, `%key.percent%` |
+| `bedrock_dropdown` | `%key.index%`, `%key.count%`, `%key.display%` (the selected option text) |
+| `bedrock_toggle` | `%key.bool%`, `%key.int%` (`1`/`0`), `%key.yesno%`, `%key.onoff%`, `%key.not%` |
+
+All values also accept the [placeholder modifiers](./placeholders#placeholder-modifiers), for example `%text.trim.safe%`.
+
 ### Custom Form Actions
 
 Unlike simple and modal forms where each button has its own `click-requirement`, custom forms use a shared `actions` section at the root level. These actions are executed when the player submits the form, with all input values available as placeholders.
@@ -457,6 +467,14 @@ When a Bedrock player opens this inventory, they will automatically be redirecte
 | `name` | String | Yes | The Bedrock form file name (without `.yml`) |
 | `plugin` | String | No | The plugin owning the form (default: `zMenu`) |
 | `pages` | List of integers | No | Only redirect on these pages (empty = all pages) |
+| `mode` | String | No | `CUMULUS` (default): open a Bedrock form. `CHEST`: open another zMenu inventory instead, for example a simplified chest menu designed for Bedrock players |
+
+```yaml
+# Redirect Bedrock players to a simpler chest inventory instead of a form
+inventory-replacement:
+  name: "shop-bedrock"    # A regular zMenu inventory (inventories/shop-bedrock.yml)
+  mode: CHEST
+```
 
 ---
 

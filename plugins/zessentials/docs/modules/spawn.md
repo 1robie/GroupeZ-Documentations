@@ -8,7 +8,7 @@ description: Server spawn management with configurable respawn behavior
 
 **File:** `modules/spawn/config.yml`
 
-The Spawn module manages the server's spawn point and controls how players are handled on **respawn** and **join**. It provides fine-grained control over respawn priorities (bed, home, respawn anchor) and allows you to configure whether players are teleported to spawn when they first join or on every login.
+The Spawn module manages the server's spawn point and first spawn point, and controls where players appear on **respawn** and on **join**. It lets you decide whether beds and respawn anchors are respected, and at which event priority zEssentials handles respawns and first joins, so it can cooperate with other plugins such as Multiverse.
 
 ---
 
@@ -16,11 +16,31 @@ The Spawn module manages the server's spawn point and controls how players are h
 
 ```yaml
 enable: true
-respawn-listener-priority: highest  # none, lowest, low, normal, high, highest
+
+# What priority should we use for handling respawns?
+# Set this to none, if you want vanilla respawning behaviour.
+# Set this to lowest, if you want Multiverse to handle the respawning.
+# Set this to high, if you want zEssentials to handle the respawning.
+# Set this to highest, if you want to force zEssentials to handle the respawning.
+# Note: Changes will not apply until after the server is restarted.
+respawn-listener-priority: highest
+
+# What priority should we use for handling spawning on joining the server?
+# See respawn-listener-priority for possible values.
+# Note: Changing this may impact or break spawn-on-join functionality.
+# Note: Changes will not apply until after the server is restarted.
 spawn-join-listener-priority: highest
+
+# When the player dies, does he have to respawn to the respawn anchor
 respawn-at-anchor: false
+
+# When users die, should they respawn at their first home, instead of the spawnpoint?
 respawn-at-home: false
+
+# When users die, should they respawn at their bed instead of the spawnpoint?
 respawn-at-bed: true
+
+# Allows teleporting the player to spawn when logged in
 teleport-at-spawn-on-join: false
 ```
 
@@ -31,45 +51,65 @@ teleport-at-spawn-on-join: false
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `enable` | Boolean | `true` | Enable or disable the Spawn module |
-| `respawn-listener-priority` | String | `highest` | The Bukkit event priority for the respawn listener. Accepts: `none`, `lowest`, `low`, `normal`, `high`, `highest`. Use `none` to disable the respawn listener entirely |
-| `spawn-join-listener-priority` | String | `highest` | The Bukkit event priority for the join listener that handles spawn teleportation. Accepts: `none`, `lowest`, `low`, `normal`, `high`, `highest`. Use `none` to disable the join listener entirely |
-| `respawn-at-anchor` | Boolean | `false` | If `true`, players will respawn at their respawn anchor (Nether) when available |
-| `respawn-at-home` | Boolean | `false` | If `true`, players will respawn at their home location (set via `/sethome`) when available |
-| `respawn-at-bed` | Boolean | `true` | If `true`, players will respawn at their bed location when available |
-| `teleport-at-spawn-on-join` | Boolean | `false` | If `true`, players are teleported to the server spawn point every time they join the server |
+| `respawn-listener-priority` | String | `highest` | Event priority of the respawn listener. Accepts `none`, `lowest`, `low`, `normal`, `high`, `highest`. `none` disables the listener (vanilla respawn behavior) |
+| `spawn-join-listener-priority` | String | `highest` | Event priority of the listener that sets the spawn location of a player joining for the first time. Accepts `lowest`, `low`, `normal`, `high`, `highest` |
+| `respawn-at-anchor` | Boolean | `false` | If `true`, a player whose respawn is at a respawn anchor keeps that location. If `false`, they are sent to the server spawn |
+| `respawn-at-home` | Boolean | `false` | Reserved for a future version: respawning at a home is **not implemented yet** and this option currently has no effect |
+| `respawn-at-bed` | Boolean | `true` | If `true`, a player whose respawn is at a bed keeps that location. If `false`, they are sent to the server spawn |
+| `teleport-at-spawn-on-join` | Boolean | `false` | If `true`, players are teleported to the server spawn every time they join |
 
-:::info Listener Priority
-The `respawn-listener-priority` and `spawn-join-listener-priority` options control the order in which zEssentials processes the respawn and join events relative to other plugins. Setting these to `highest` ensures zEssentials has the final say. Set to `none` to completely disable that listener, letting other plugins handle it instead.
+:::info Listener priorities are now honored
+Before version 1.0.3.8, `respawn-listener-priority` and `spawn-join-listener-priority` were ignored and both listeners were always registered with the `NORMAL` priority. They now use the configured value, `HIGHEST` by default, which lets zEssentials have the final say over other plugins. Use `lowest` if another plugin (e.g. Multiverse) should decide instead.
 :::
+
+:::warning
+`none` is only supported for `respawn-listener-priority`. Do not use it for `spawn-join-listener-priority`.
+:::
+
+Changes to the listener priorities require a **server restart**.
 
 ---
 
 ## Respawn Behavior
 
-When a player dies and respawns, the plugin checks the following locations in order of priority:
+When a player respawns and a server spawn has been set with `/setspawn`:
 
-1. **Respawn Anchor** -- If `respawn-at-anchor` is `true` and the player has a valid respawn anchor set.
-2. **Home** -- If `respawn-at-home` is `true` and the player has a home location set.
-3. **Bed** -- If `respawn-at-bed` is `true` and the player has a valid bed spawn.
-4. **Server Spawn** -- If none of the above conditions are met, the player respawns at the server spawn point.
+1. **Respawn Anchor** -- If the respawn happens at a respawn anchor and `respawn-at-anchor` is `true`, the anchor is kept.
+2. **Bed** -- If the respawn happens at a bed and `respawn-at-bed` is `true`, the bed is kept.
+3. **Server Spawn** -- Otherwise, the player respawns at the server spawn.
+
+If no server spawn is set, zEssentials does not change the respawn location.
 
 :::tip
-Only one respawn location is used per death. The first valid option in the priority chain above is selected. If you want players to always respawn at spawn, set all three options (`respawn-at-anchor`, `respawn-at-home`, `respawn-at-bed`) to `false`.
+To always respawn players at spawn, set `respawn-at-anchor` and `respawn-at-bed` to `false`.
 :::
 
-:::warning
-If `respawn-at-bed` is `true` (the default), players with a valid bed will respawn there instead of at the server spawn. This is standard vanilla behavior. Set it to `false` if you want to override this for your server.
+:::note Folia
+On Folia, the server spawn is set as the player's respawn location when they die.
 :::
+
+---
+
+## First Join
+
+The first spawn is defined with `/setfirstspawn`. New players are sent there only when **first join teleport** is enabled in the main `config.yml`:
+
+```yaml
+# config.yml
+enable-first-join-teleport: false
+```
+
+This option is **disabled by default** since 1.0.3.9. When it is enabled, a player joining for the first time spawns at the first spawn location, or at the server spawn if no first spawn is set. The spawn location is set during the join (with `spawn-join-listener-priority`), so new players directly appear at the right place.
 
 ---
 
 ## How It Works
 
 1. An administrator sets the spawn point using `/setspawn` at the desired location.
-2. Optionally, a first-join spawn is set using `/setfirstspawn` for new players.
-3. When a player dies, the respawn listener evaluates the configured respawn options and teleports the player accordingly.
+2. Optionally, a first-join spawn is set using `/setfirstspawn`, and `enable-first-join-teleport` is enabled in `config.yml`.
+3. When a player dies, the respawn listener applies the rules above.
 4. When a player joins, if `teleport-at-spawn-on-join` is `true`, they are teleported to the server spawn.
-5. First-time players are teleported to the first spawn location (if configured), regardless of the `teleport-at-spawn-on-join` setting.
+5. Players can return to spawn at any time with `/spawn`.
 
 ---
 
@@ -77,10 +117,10 @@ If `respawn-at-bed` is `true` (the default), players with a valid bed will respa
 
 | Command | Permission | Description |
 |---------|------------|-------------|
-| `/spawn` | `essentials.spawn` | Teleport to the server spawn point |
-| `/setspawn` | `essentials.setspawn` | Set the server spawn point at your current location |
-| `/firstspawn` | `essentials.firstspawn` | Teleport to the first-join spawn point |
-| `/setfirstspawn` | `essentials.setfirstspawn` | Set the first-join spawn point at your current location |
+| `/spawn [player]` | `essentials.spawn` | Teleport to the server spawn point. Teleporting another player requires `essentials.spawn.other` |
+| `/setspawn` | `essentials.set.spawn` | Set the server spawn point at your current location |
+| `/firstspawn [player]` | `essentials.spawn.first` | Teleport to the first-join spawn point. Teleporting another player requires `essentials.spawn.other` |
+| `/setfirstspawn` | `essentials.set.first.spawn` | Set the first-join spawn point at your current location |
 
 For the full command list, see [Commands & Permissions](../commands-permissions).
 
@@ -90,11 +130,8 @@ For the full command list, see [Commands & Permissions](../commands-permissions)
 
 ### Always Respawn at Spawn
 
-To force all players to respawn at the server spawn regardless of beds, anchors, or homes:
-
 ```yaml
 respawn-at-anchor: false
-respawn-at-home: false
 respawn-at-bed: false
 ```
 
@@ -115,5 +152,5 @@ respawn-listener-priority: none
 ```
 
 :::note
-Setting the listener priority to `none` completely disables that listener. This is different from setting it to `lowest`, which still processes the event but allows other plugins to override it.
+Setting the respawn listener priority to `none` completely disables it. This is different from `lowest`, which still processes the event but lets plugins listening at a higher priority override the location.
 :::

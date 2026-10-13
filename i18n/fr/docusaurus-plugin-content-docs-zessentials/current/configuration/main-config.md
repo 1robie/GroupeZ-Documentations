@@ -6,33 +6,33 @@ description: Fichier de configuration principal (config.yml) pour zEssentials
 
 # Configuration Principale
 
-Cette page documente chaque section du fichier principal `config.yml` situe dans `plugins/zEssentials/config.yml`. Ce fichier controle le comportement global du plugin, incluant le stockage, les cooldowns, les restrictions, les couleurs de messages, les parametres de vol, et plus encore.
+Cette page documente chaque option du fichier principal `config.yml` situé dans `plugins/zEssentials/config.yml`. Ce fichier contrôle le comportement global du plugin : stockage, cooldowns, restrictions, couleurs des messages, paramètres de vol, etc. Les paramètres propres à chaque module se trouvent dans `plugins/zEssentials/modules/<module>/config.yml`.
 
 ---
 
 ## Debug
 
-Active ou desactive le mode debug. Lorsqu'il est active, le plugin affiche des logs supplementaires dans la console, ce qui est utile pour le depannage de problemes.
+Active ou désactive le mode debug. Lorsqu'il est activé, le plugin affiche des logs supplémentaires dans la console, ce qui est utile pour diagnostiquer un problème.
 
 ```yaml
 enable-debug: false
 ```
 
-| Option | Type | Par Defaut | Description |
-|--------|------|------------|-------------|
-| `enable-debug` | Boolean | `false` | Active les logs de debug detailles dans la console du serveur |
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `enable-debug` | Boolean | `false` | Active les logs de debug détaillés dans la console du serveur |
 
 :::tip
-N'activez le mode debug que lorsque vous depannez activement un probleme. La sortie de debug peut etre tres verbeuse et peut impacter les performances du serveur sur les serveurs a fort trafic.
+Si vous demandez de l'aide, activez le mode debug et envoyez les logs. Ne le laissez activé que pendant le diagnostic : la sortie de debug peut être très verbeuse.
 :::
 
 ---
 
 ## Stockage
 
-Configurez la maniere dont zEssentials stocke les donnees, le type de communication serveur et les details de connexion a la base de donnees/Redis.
+Configure la façon dont zEssentials stocke les données, le type de serveur et les informations de connexion à la base de données et à Redis. Consultez la page [Base de données](../database) pour le schéma complet.
 
-### Type de Stockage
+### Type de stockage
 
 ```yaml
 storage-type: SQLITE
@@ -40,11 +40,17 @@ storage-type: SQLITE
 
 | Valeur | Description |
 |--------|-------------|
-| `SQLITE` | Stockage local base sur des fichiers. Ideal pour les configurations a serveur unique et les tests. Aucune configuration supplementaire requise. |
-| `MYSQL` | Base de donnees MySQL ou MariaDB. Recommande pour les environnements de production. |
-| `HIKARICP` | MySQL/MariaDB avec pool de connexions HikariCP. Ideal pour les serveurs haute performance et a fort trafic. |
+| `SQLITE` | Stockage local dans un fichier (`plugins/zEssentials/database.db`). Uniquement prévu pour installer et tester le plugin, certaines fonctionnalités sont limitées. |
+| `MYSQL` | Base MySQL via un pool de connexions HikariCP. |
+| `MARIADB` | Base MariaDB via un pool de connexions HikariCP, avec le driver MariaDB. |
+| `HIKARICP` | Base MySQL/MariaDB via un pool de connexions HikariCP. Recommandé en production. |
+| `JSON` | Un fichier JSON par joueur dans `plugins/zEssentials/users/`. Toutes les fonctionnalités ne sont pas supportées. |
 
-### Type de Serveur
+:::warning
+Utilisez `MYSQL`, `MARIADB` ou `HIKARICP` en production. SQLite sert uniquement à installer le plugin et à faire des tests, et le stockage JSON ne supporte pas toutes les fonctionnalités (coffres, boîte aux lettres d'items, historique du chat, baltop...).
+:::
+
+### Type de serveur
 
 ```yaml
 server-type: PAPER
@@ -52,397 +58,426 @@ server-type: PAPER
 
 | Valeur | Description |
 |--------|-------------|
-| `PAPER` | Mode serveur autonome. Toutes les donnees sont stockees et lues localement. |
-| `REDIS` | Mode multi-serveur avec synchronisation en temps reel via Redis pub/sub. Necessite un stockage MySQL ou HikariCP. |
+| `PAPER` | Mode par défaut. Toutes les données sont gérées localement. |
+| `REDIS` | Mode multi-serveurs avec synchronisation via le pub/sub Redis. **Actuellement en développement** : dans la version actuelle, le serveur Redis n'est pas démarré et cette valeur se comporte comme `PAPER`. |
 
-### Configuration de la Base de Donnees
+### Configuration de la base de données
 
-Utilise lorsque `storage-type` est defini sur `MYSQL` ou `HIKARICP`.
+Utilisée lorsque `storage-type` vaut `MYSQL`, `MARIADB` ou `HIKARICP`.
 
 ```yaml
 database-configuration:
   table-prefix: "zessentials_"
-  host: "192.168.10.10"
+  host: 192.168.10.10
   port: 3306
-  user: "homestead"
-  password: "secret"
-  database: "zessentials"
+  user: homestead
+  password: 'secret'
+  database: zessentials
   debug: false
 ```
 
-| Option | Type | Par Defaut | Description |
-|--------|------|------------|-------------|
-| `table-prefix` | String | `zessentials_` | Prefixe applique a tous les noms de tables de la base de donnees. Utile lors du partage d'une base de donnees avec d'autres plugins. |
-| `host` | String | `192.168.10.10` | Nom d'hote ou adresse IP du serveur de base de donnees. |
-| `port` | Integer | `3306` | Port sur lequel le serveur de base de donnees ecoute. |
-| `user` | String | `homestead` | Nom d'utilisateur de la base de donnees pour l'authentification. |
-| `password` | String | `secret` | Mot de passe de la base de donnees pour l'authentification. |
-| `database` | String | `zessentials` | Nom de la base de donnees a utiliser. La base de donnees doit deja exister. |
-| `debug` | Boolean | `false` | Active les logs de debug des requetes SQL. Affiche toutes les requetes executees dans la console. |
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `table-prefix` | String | `zessentials_` | Préfixe appliqué à toutes les tables. Utile si la base est partagée avec d'autres plugins. Il est conseillé de ne pas le modifier. |
+| `host` | String | `192.168.10.10` | Nom d'hôte ou adresse IP du serveur de base de données. |
+| `port` | Integer | `3306` | Port d'écoute du serveur de base de données. |
+| `user` | String | `homestead` | Nom d'utilisateur de la base de données. |
+| `password` | String | `secret` | Mot de passe de la base de données. |
+| `database` | String | `zessentials` | Nom de la base de données à utiliser. Elle doit déjà exister. |
+| `debug` | Boolean | `false` | Affiche les requêtes SQL exécutées dans la console. |
 
 :::warning
-Modifiez les identifiants de base de donnees par defaut avant de deployer en production. Les valeurs par defaut (`homestead` / `secret`) sont des espaces reserves et ne doivent pas etre utilisees dans un environnement en production.
+Changez les identifiants par défaut avant de passer en production. Les valeurs par défaut (`homestead` / `secret`) sont des exemples et ne doivent pas être utilisées sur un serveur en ligne.
 :::
+
+### Sauvegarde par lots
+
+```yaml
+batch-auto-save: 10000
+```
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `batch-auto-save` | Long | `10000` | Intervalle en **millisecondes** entre deux écritures groupées en base. Les logs (commandes, messages du chat, messages privés, transactions économiques) et les mises à jour du temps de vol sont mis en file d'attente puis envoyés en un seul lot à cet intervalle. |
 
 ### Configuration Redis
 
-Utilise lorsque `server-type` est defini sur `REDIS`. Permet la synchronisation inter-serveurs des donnees joueurs, sanctions, economie, messages, et plus encore.
+Utilisée par le type de serveur `REDIS`.
 
 ```yaml
 redis-configuration:
-  host: "127.0.0.1"
+  host: "192.168.10.10"
   port: 6379
-  password: ""
+  password: "123456a"
 ```
 
-| Option | Type | Par Defaut | Description |
-|--------|------|------------|-------------|
-| `host` | String | `127.0.0.1` | Nom d'hote ou adresse IP du serveur Redis. |
-| `port` | Integer | `6379` | Port sur lequel le serveur Redis ecoute. |
-| `password` | String | `""` | Mot de passe Redis. Laissez vide si l'authentification n'est pas configuree. |
-
-:::tip
-Lors de l'utilisation du type de serveur `REDIS`, assurez-vous que tous les serveurs du reseau partagent la meme base de donnees MySQL **et** la meme instance Redis pour une synchronisation complete des donnees.
-:::
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `host` | String | `192.168.10.10` | Nom d'hôte ou adresse IP du serveur Redis. |
+| `port` | Integer | `6379` | Port d'écoute du serveur Redis. |
+| `password` | String | `123456a` | Mot de passe Redis. |
 
 ---
 
-## Cooldowns de Commandes
+## Commandes
 
-Configurez les cooldowns pour les commandes afin de prevenir le spam et les abus. Les cooldowns sont appliques par joueur et par commande. Vous pouvez definir un cooldown de base et des surcharges basees sur les permissions afin que differents rangs aient des temps d'attente differents.
+### Commandes forcées
 
-### Commandes Forcees
-
-Une liste de chaines de commandes exactes qui auront toujours des cooldowns appliques, meme si le joueur possede la permission de contournement. Ceci est utile pour les commandes que vous ne voulez jamais voir spammees, quel que soit le rang.
+Les commandes listées ici restent utilisables même si leur module est désactivé. Indiquez le nom principal de la commande, sans le `/`.
 
 ```yaml
 force-commands:
-  - "/essversion"
+  # - rtp
+  # - home
 ```
 
-### Contournement des Cooldowns
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `force-commands` | Liste de String | *(vide)* | Noms principaux des commandes qui restent disponibles quand leur module est désactivé. |
+
+### Contournement des cooldowns
 
 ```yaml
 enable-cooldown-bypass: true
 ```
 
-Lorsque `enable-cooldown-bypass` est defini sur `true`, les joueurs possedant la permission `essentials.bypass.cooldown` ignoreront tous les cooldowns de commandes (sauf ceux listes dans `force-commands`).
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `enable-cooldown-bypass` | Boolean | `true` | Si activé, les joueurs ayant la permission `essentials.bypass.cooldown` ignorent les cooldowns définis dans `command-cooldowns`. |
 
-### Definition des Cooldowns de Commandes
+### Cooldowns des commandes
 
-Definissez les cooldowns par commande avec des surcharges optionnelles basees sur les permissions. Chaque entree se compose de :
-- **command** : Le nom de la commande (sans le `/` initial).
-- **cooldown** : Le cooldown de base en secondes qui s'applique a tous les joueurs.
-- **permissions** : Une liste de surcharges basees sur les permissions. Les joueurs possedant la permission correspondante utilisent le cooldown de surcharge au lieu de la valeur de base. Un cooldown de `0` signifie aucun cooldown.
+Définit un cooldown (en secondes) par commande, avec des valeurs différentes selon les permissions. Le cooldown est appliqué après l'exécution réussie de la commande.
+
+- **command** : le nom principal de la commande (sans le `/`).
+- **cooldown** : le cooldown de base en secondes.
+- **permissions** : une liste de cooldowns par permission. Si le joueur possède plusieurs permissions correspondantes, le cooldown **le plus bas** est utilisé. Un cooldown de `0` signifie aucun cooldown.
 
 ```yaml
 command-cooldowns:
-  - command: "heal"
+  - command: heal
     cooldown: 60
     permissions:
-      - permission: "essentials.cooldowns.vip"
+      - permission: "essentials.cooldown.heal.vip"
         cooldown: 40
-      - permission: "essentials.cooldowns.staff"
+      - permission: "essentials.cooldown.heal.staff"
         cooldown: 20
-  - command: "tpr"
+  - command: tpr
     cooldown: 300
     permissions:
-      - permission: "essentials.cooldowns.vip"
+      - permission: "essentials.cooldown.rtp.vip"
         cooldown: 120
-      - permission: "essentials.cooldowns.staff"
+      - permission: "essentials.cooldown.rtp.staff"
         cooldown: 0
 ```
 
-**Exemple detaille pour `heal` :**
+**Exemple détaillé pour `heal` :**
 
-| Type de Joueur | Permission | Cooldown |
-|----------------|-----------|----------|
-| Par Defaut | *(aucune)* | 60 secondes |
-| VIP | `essentials.cooldowns.vip` | 40 secondes |
-| Staff | `essentials.cooldowns.staff` | 20 secondes |
+| Type de joueur | Permission | Cooldown |
+|----------------|------------|----------|
+| Par défaut | *(aucune)* | 60 secondes |
+| VIP | `essentials.cooldown.heal.vip` | 40 secondes |
+| Staff | `essentials.cooldown.heal.staff` | 20 secondes |
 
-**Exemple detaille pour `tpr` :**
+**Exemple détaillé pour `tpr` :**
 
-| Type de Joueur | Permission | Cooldown |
-|----------------|-----------|----------|
-| Par Defaut | *(aucune)* | 300 secondes (5 minutes) |
-| VIP | `essentials.cooldowns.vip` | 120 secondes (2 minutes) |
-| Staff | `essentials.cooldowns.staff` | 0 secondes (aucun cooldown) |
+| Type de joueur | Permission | Cooldown |
+|----------------|------------|----------|
+| Par défaut | *(aucune)* | 300 secondes (5 minutes) |
+| VIP | `essentials.cooldown.rtp.vip` | 120 secondes (2 minutes) |
+| Staff | `essentials.cooldown.rtp.staff` | 0 seconde (aucun cooldown) |
 
-:::info
-Les surcharges basees sur les permissions sont verifiees dans l'ordre. La premiere permission correspondante est utilisee. Si aucune permission ne correspond, la valeur de base `cooldown` est appliquee.
-:::
+### Restrictions de commandes
 
----
-
-## Restrictions de Commandes
-
-Restreignez des commandes specifiques d'etre utilisees dans certains mondes ou au sein de regions cuboides definies. Les joueurs possedant la permission de contournement peuvent ignorer ces restrictions.
+Désactive des commandes dans certains mondes ou à l'intérieur de zones cuboïdes. Les joueurs ayant la permission de contournement ignorent la restriction.
 
 ```yaml
 command-restrictions:
   - commands:
-      - "heal"
-      - "feed"
-    bypass-permission: "essentials.bypass.restriction"
+      - "spawn"
+    bypass-permission: "essentials.bypass.commandrestriction.spawn"
     worlds:
-      - "world_pvp"
+      - "world_nether"
     cuboids:
-      - "world,100,0,100,200,256,200"
+      - "world,0,0,0,100,255,100"
 ```
 
 | Option | Type | Description |
 |--------|------|-------------|
-| `commands` | List of Strings | Les commandes a restreindre (sans le `/` initial). |
-| `bypass-permission` | String | Permission qui permet a un joueur de contourner cette restriction. |
-| `worlds` | List of Strings | Noms des mondes ou les commandes listees sont bloquees. |
-| `cuboids` | List of Strings | Regions cuboides ou les commandes listees sont bloquees. Format : `world,x1,y1,z1,x2,y2,z2` |
+| `commands` | Liste de String | Les commandes à restreindre (sans le `/`). Le label tapé par le joueur est comparé, ajoutez donc aussi les alias si nécessaire. |
+| `bypass-permission` | String | Permission permettant d'ignorer cette restriction. |
+| `worlds` | Liste de String | Mondes dans lesquels les commandes sont bloquées. |
+| `cuboids` | Liste de String | Zones cuboïdes dans lesquelles les commandes sont bloquées. Format : `world,x1,y1,z1,x2,y2,z2` |
 
-**Format cuboide :** `world,x1,y1,z1,x2,y2,z2`
-- `world` -- Le nom du monde.
-- `x1,y1,z1` -- Coordonnees du premier coin.
-- `x2,y2,z2` -- Coordonnees du second coin.
+Le cuboïde est défini par deux coins opposés ; tout joueur se trouvant à l'intérieur ne peut pas utiliser les commandes listées. Vous pouvez définir plusieurs restrictions.
 
-Le cuboide est defini par deux coins opposes, et tout joueur se trouvant a l'interieur de la zone englobante sera empeche d'utiliser les commandes listees.
+### Anti-spam des commandes
 
-:::info
-Vous pouvez definir plusieurs entrees de restriction, chacune avec son propre ensemble de commandes, mondes, cuboides et permissions de contournement.
-:::
-
----
-
-## Poubelle
-
-Configurez l'inventaire poubelle (elimination) que les joueurs peuvent ouvrir avec `/trash`. Les objets places dans cet inventaire sont definitivement supprimes lorsque l'inventaire est ferme.
+Cooldown progressif empêchant les joueurs de spammer des commandes. Chaque entrée signifie : « si le joueur a exécuté `messages` commandes durant les `cooldown` dernières millisecondes, la commande suivante est bloquée ».
 
 ```yaml
-trash-size: 54
+cooldowns:
+  - messages: 2
+    cooldown: 1500 # max 1.5s
+  - messages: 4
+    cooldown: 5000 # max 5s
+  - messages: 8
+    cooldown: 10000 # max 10s
 ```
 
-| Option | Type | Par Defaut | Description |
-|--------|------|------------|-------------|
-| `trash-size` | Integer | `54` | Nombre d'emplacements dans l'inventaire poubelle. Doit etre un multiple de 9. |
+| Option | Type | Description |
+|--------|------|-------------|
+| `messages` | Integer | Nombre de commandes exécutées. |
+| `cooldown` | Long | Fenêtre de temps en millisecondes. |
 
-**Valeurs valides :** `9`, `18`, `27`, `36`, `45`, `54`
+Pour désactiver ce système, utilisez `cooldowns: []`. Les joueurs ayant la permission `essentials.cooldown.command.bypass` ne sont pas concernés.
 
-Celles-ci correspondent a 1 a 6 rangees d'un inventaire de type coffre.
+### Log des commandes
+
+```yaml
+enable-command-log: true
+```
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `enable-command-log` | Boolean | `true` | Enregistre chaque commande exécutée par les joueurs dans la table `commands`. Fonctionne uniquement avec un stockage SQL. |
 
 ---
 
-## Materiaux Compactables
+## Items
 
-Definissez quels objets peuvent etre compactes en leur forme de bloc en utilisant les commandes `/compact` et `/compactall`. Chaque entree associe un materiau de base a sa forme compactee (bloc). Neuf materiaux de base sont consommes pour produire un bloc.
+### Poubelle
+
+```yaml
+trash-size: 27
+```
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `trash-size` | Integer | `27` | Taille de l'inventaire `/trash`. Doit valoir `9`, `18`, `27`, `36`, `45` ou `54`. |
+
+### Matériaux compactables
+
+Matériaux pouvant être compactés avec les commandes `/compact` (`/condense`) et `/compactall` (`/condenseall`). Chaque entrée associe un matériau (`from`) à sa forme compactée (`to`).
 
 ```yaml
 compact-materials:
-  - COAL:COAL_BLOCK
-  - REDSTONE:REDSTONE_BLOCK
-  - LAPIS_LAZULI:LAPIS_BLOCK
-  - DIAMOND:DIAMOND_BLOCK
-  - EMERALD:EMERALD_BLOCK
-  - IRON_INGOT:IRON_BLOCK
-  - GOLD_INGOT:GOLD_BLOCK
-  - RAW_IRON:RAW_IRON_BLOCK
-  - RAW_GOLD:RAW_GOLD_BLOCK
-  - RAW_COPPER:RAW_COPPER_BLOCK
-  - COPPER_INGOT:COPPER_BLOCK
+  - from: COAL
+    to: COAL_BLOCK
+  - from: REDSTONE
+    to: REDSTONE_BLOCK
+  - from: LAPIS_LAZULI
+    to: LAPIS_BLOCK
+  - from: IRON_INGOT
+    to: IRON_BLOCK
+  - from: GOLD_INGOT
+    to: GOLD_BLOCK
+  - from: IRON_NUGGET
+    to: IRON_INGOT
+  - from: GOLD_NUGGET
+    to: GOLD_INGOT
+  - from: DIAMOND
+    to: DIAMOND_BLOCK
+  - from: EMERALD
+    to: EMERALD_BLOCK
+  - from: COPPER_INGOT
+    to: COPPER_BLOCK
+  - from: NETHERITE_INGOT
+    to: NETHERITE_BLOCK
 ```
 
-**Conversions de compactage par defaut :**
+Les noms doivent correspondre à des [Material Bukkit](https://jd.papermc.io/paper/org/bukkit/Material.html) valides.
 
-| Materiau | Compacte En |
-|----------|-------------|
-| `COAL` | `COAL_BLOCK` |
-| `REDSTONE` | `REDSTONE_BLOCK` |
-| `LAPIS_LAZULI` | `LAPIS_BLOCK` |
-| `DIAMOND` | `DIAMOND_BLOCK` |
-| `EMERALD` | `EMERALD_BLOCK` |
-| `IRON_INGOT` | `IRON_BLOCK` |
-| `GOLD_INGOT` | `GOLD_BLOCK` |
-| `RAW_IRON` | `RAW_IRON_BLOCK` |
-| `RAW_GOLD` | `RAW_GOLD_BLOCK` |
-| `RAW_COPPER` | `RAW_COPPER_BLOCK` |
-| `COPPER_INGOT` | `COPPER_BLOCK` |
+### Matériaux cuisables
 
-Vous pouvez ajouter des entrees personnalisees en utilisant le meme format : `SOURCE_MATERIAL:RESULT_MATERIAL`. Les noms de materiaux doivent correspondre a des noms valides de [Bukkit Material](https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html).
-
----
-
-## Materiaux Fondables
-
-Definissez quels objets peuvent etre instantanement fondus en utilisant la commande `/furnace`. Chaque entree associe un materiau brut a sa sortie fondue.
+Matériaux pouvant être cuits instantanément avec la commande `/furnace`.
 
 ```yaml
 smeltable-materials:
-  - RAW_IRON:IRON_INGOT
-  - RAW_GOLD:GOLD_INGOT
-  - RAW_COPPER:COPPER_INGOT
-  - IRON_ORE:IRON_INGOT
-  - GOLD_ORE:GOLD_INGOT
-  - COPPER_ORE:COPPER_INGOT
-  - COBBLESTONE:STONE
-  - SAND:GLASS
-  - WET_SPONGE:SPONGE
+  - from: RAW_IRON
+    to: IRON_INGOT
+  - from: RAW_COPPER
+    to: COPPER_INGOT
+  - from: RAW_GOLD
+    to: GOLD_INGOT
+  - from: SAND
+    to: GLASS
+  - from: CLAY_BALL
+    to: BRICK
+  - from: ANCIENT_DEBRIS
+    to: NETHERITE_SCRAP
+  - from: WET_SPONGE
+    to: SPONGE
+  - from: CACTUS
+    to: GREEN_DYE
+  - from: KELP
+    to: DRIED_KELP
 ```
-
-**Conversions de fonte par defaut :**
-
-| Materiau | Fond En |
-|----------|---------|
-| `RAW_IRON` | `IRON_INGOT` |
-| `RAW_GOLD` | `GOLD_INGOT` |
-| `RAW_COPPER` | `COPPER_INGOT` |
-| `IRON_ORE` | `IRON_INGOT` |
-| `GOLD_ORE` | `GOLD_INGOT` |
-| `COPPER_ORE` | `COPPER_INGOT` |
-| `COBBLESTONE` | `STONE` |
-| `SAND` | `GLASS` |
-| `WET_SPONGE` | `SPONGE` |
-
-Vous pouvez ajouter des entrees personnalisees en utilisant le meme format : `SOURCE_MATERIAL:RESULT_MATERIAL`. Les noms de materiaux doivent correspondre a des noms valides de [Bukkit Material](https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html).
 
 ---
 
-## Couleurs des Messages
+## Couleurs des messages
 
-Configurez le schema de couleurs global utilise pour les messages du plugin. Les couleurs sont specifiees sous forme de codes couleur hexadecimaux.
+Clés de couleur remplacées dans tous les messages du plugin. Vous pouvez ajouter vos propres clés.
 
 ```yaml
 message-colors:
-  primary: "#24d65d"
-  secondary: "#656665"
-  error: "#ff0000"
-  success: "#00ff00"
+  - key: "<primary>"
+    color: "#24d65d"
+  - key: "<secondary>"
+    color: "#656665"
+  - key: "<error>"
+    color: "#ff0000"
+  - key: "<success>"
+    color: "#00ff00"
 ```
 
-| Couleur | Code Hex | Description |
-|---------|----------|-------------|
-| `primary` | `#24d65d` | Couleur d'accentuation principale utilisee pour les mises en valeur, les valeurs importantes et l'emphase dans les messages. |
-| `secondary` | `#656665` | Couleur secondaire utilisee pour le texte moins important comme les libelles et les descriptions. |
-| `error` | `#ff0000` | Couleur utilisee pour les messages d'erreur et les avertissements. |
-| `success` | `#00ff00` | Couleur utilisee pour les confirmations de succes et les retours positifs. |
-
-Ces couleurs sont appliquees a travers tous les messages du plugin et peuvent etre referencees dans les modeles de messages.
+| Clé | Défaut | Description |
+|-----|--------|-------------|
+| `<primary>` | `#24d65d` | Couleur principale pour les éléments mis en avant et les valeurs importantes. |
+| `<secondary>` | `#656665` | Couleur secondaire pour le texte moins important. |
+| `<error>` | `#ff0000` | Couleur des messages d'erreur. |
+| `<success>` | `#00ff00` | Couleur des confirmations de succès. |
 
 ---
 
-## Cooldowns de Chat
+## Placeholders
 
-Un systeme anti-spam qui applique des cooldowns progressivement croissants aux joueurs qui envoient des messages rapidement. Le cooldown augmente en fonction du nombre de messages envoyes dans une courte fenetre de temps.
+### Valeur vide
 
 ```yaml
-chat-cooldowns:
-  2: 1.5
-  4: 5.0
-  8: 10.0
+placeholder-empty: "Empty"
 ```
 
-| Messages Envoyes | Cooldown Applique |
-|------------------|-------------------|
-| 2 | 1.5 secondes |
-| 4 | 5.0 secondes |
-| 8 | 10.0 secondes |
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `placeholder-empty` | String | `Empty` | Valeur renvoyée par les placeholders lorsqu'aucune donnée n'est disponible. |
 
-**Comment ca fonctionne :**
-- Lorsqu'un joueur envoie **2 messages** en succession rapide, un cooldown de **1,5 seconde** est applique avant qu'il puisse envoyer un autre message.
-- A **4 messages**, le cooldown augmente a **5 secondes**.
-- A **8 messages**, le cooldown augmente a **10 secondes**.
+### Remplacement de placeholders
 
-Le compteur de cooldown se reinitialise apres que le joueur cesse d'envoyer des messages pendant un certain temps. Ce systeme est concu pour prevenir le spam dans le chat tout en permettant un flux de conversation normal.
-
-:::info
-Les cles representent le seuil de nombre de messages et les valeurs representent la duree du cooldown en secondes. Vous pouvez personnaliser ces seuils et durees pour correspondre aux besoins de votre serveur.
-:::
-
----
-
-## Remplacement de Placeholders
-
-Un systeme puissant pour remplacer dynamiquement les placeholders PlaceholderAPI par du texte formate base sur des conditions configurables. Cela vous permet de transformer les valeurs brutes des placeholders en affichages conviviaux et colores.
-
-Chaque entree de remplacement se compose de :
-- **placeholder** : Le placeholder PlaceholderAPI a intercepter et remplacer.
-- **conditions** : Une liste de conditions a evaluer par rapport a la valeur resolue du placeholder. Les conditions sont verifiees dans l'ordre ; la premiere condition correspondante determine la sortie.
-
-### Types de Conditions
-
-| Type | Description |
-|------|-------------|
-| `STRING` | Correspond lorsque la valeur resolue du placeholder est exactement egale a la chaine `value` specifiee. |
-| `NUMBER` | Correspond lorsque la valeur resolue du placeholder (analysee comme un nombre) satisfait la plage `min` et/ou `max`. |
-
-### Exemple : Affichage du Ping
-
-Cet exemple remplace le placeholder `%player_ping%` par du texte colore en fonction de la latence du joueur :
+Remplace le résultat d'un placeholder PlaceholderAPI par une autre valeur, par exemple pour ajouter des couleurs. Utilisez le placeholder `%zessentials_replace_<placeholder>%` pour appliquer la configuration (par exemple `%zessentials_replace_player_ping%`).
 
 ```yaml
 replace-placeholders:
-  - placeholder: "%player_ping%"
-    conditions:
+  - placeholder: 'player_ping' # Placeholder à remplacer, sans %
+    default: '&c%result%' # Utilisé si aucune condition ne correspond
+    replaces:
+      - type: STRING
+        equalsTo: 0
+        value: '&aWHOA YOU DONT HAVE PING WTF YOU ARE IN A DATACENTER ?'
       - type: NUMBER
-        min: 0
         max: 50
-        result: "<#00ff00>%player_ping%ms"
+        value: '&a%result%'
       - type: NUMBER
-        min: 51
-        max: 100
-        result: "<#ffff00>%player_ping%ms"
+        max: 99
+        value: '&2%result%'
       - type: NUMBER
-        min: 101
-        max: 200
-        result: "<#ff8800>%player_ping%ms"
+        max: 199
+        value: '&e%result%'
       - type: NUMBER
-        min: 201
-        result: "<#ff0000>%player_ping%ms"
+        max: 299
+        value: '&c%result%'
 ```
 
-**Comportement resultant :**
+| Option | Description |
+|--------|-------------|
+| `placeholder` | Le placeholder PlaceholderAPI à remplacer, sans les `%`. |
+| `default` | Valeur utilisée lorsqu'aucune condition ne correspond. |
+| `replaces` | Liste de conditions, vérifiées dans l'ordre. La première condition qui correspond est utilisée. |
 
-| Plage de Ping | Couleur d'Affichage | Exemple de Sortie |
-|---------------|---------------------|-------------------|
-| 0 -- 50 ms | Vert (`#00ff00`) | `50ms` |
-| 51 -- 100 ms | Jaune (`#ffff00`) | `75ms` |
-| 101 -- 200 ms | Orange (`#ff8800`) | `150ms` |
-| 201+ ms | Rouge (`#ff0000`) | `300ms` |
+**Types de conditions :**
 
-### Proprietes des Conditions
+| Type | Propriétés | Correspond lorsque |
+|------|------------|--------------------|
+| `STRING` | `equalsTo`, `value` | Le résultat du placeholder est égal (sans tenir compte de la casse) à `equalsTo`. |
+| `NUMBER` | `max`, `value` | Le résultat du placeholder est un nombre inférieur ou égal à `max`. |
 
-**Pour les conditions `NUMBER` :**
+Dans `value` et `default`, `%result%` est remplacé par la valeur d'origine du placeholder.
 
-| Propriete | Type | Requis | Description |
-|-----------|------|--------|-------------|
-| `type` | String | Oui | Doit etre `NUMBER`. |
-| `min` | Number | Non | Valeur minimale (inclusive). Omettez pour aucune borne inferieure. |
-| `max` | Number | Non | Valeur maximale (inclusive). Omettez pour aucune borne superieure. |
-| `result` | String | Oui | Le texte de remplacement. Peut inclure le placeholder original et le formatage MiniMessage. |
+### Mots aléatoires
 
-**Pour les conditions `STRING` :**
+Mots renvoyés par le placeholder `%zessentials_random_word%` (un mot n'est jamais donné deux fois tant que la liste n'a pas été réinitialisée avec `/zessentials clear-random-word`).
 
-| Propriete | Type | Requis | Description |
-|-----------|------|--------|-------------|
-| `type` | String | Oui | Doit etre `STRING`. |
-| `value` | String | Oui | La chaine exacte a comparer avec la valeur resolue du placeholder. |
-| `result` | String | Oui | Le texte de remplacement. Peut inclure le placeholder original et le formatage MiniMessage. |
-
-:::tip
-Vous pouvez utiliser ce systeme pour creer des soldes d'economie colores, des affichages de sante, des prefixes de rang, et tout autre texte dynamique base sur les placeholders.
-:::
+```yaml
+random-words:
+  - "enderdragon"
+  - "netherite"
+  - "crafting"
+  - "survival"
+  - "adventure"
+  - "exploration"
+  - "obsidian"
+  - "diamond"
+  - "goldmine"
+  - "enderchest"
+```
 
 ---
 
-## Parametres de Vol
-
-Configurez le comportement lie au vol, y compris la gestion du vol temporaire, les restrictions de monde et les minuteries de notification.
+## Near
 
 ```yaml
-temp-fly-task: 1
+near-distance: 50.0
+
+near-direction-replacements:
+  forward: "↑"
+  forward-right: "↗"
+  right: "→"
+  back-right: "↘"
+  back: "↓"
+  back-left: "↙"
+  left: "←"
+  forward-left: "↖"
+
+near-permissions:
+  - permission: "essentials.near.vip"
+    distance: 100.0
+  - permission: "essentials.near.staff"
+    distance: 200.0
+```
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `near-distance` | Double | `50.0` | Rayon par défaut (en blocs) de la commande `/near`. |
+| `near-direction-replacements` | Section | *(flèches)* | Flèches utilisées pour afficher la direction de chaque joueur dans `/near`. |
+| `near-permissions` | Liste | *(voir ci-dessus)* | Rayon selon la permission. La première permission que possède le joueur est utilisée. |
+
+---
+
+## Temps
+
+```yaml
+day-time: 1000
+night-time: 13000
+time-smooth-change: false
+```
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `day-time` | Long | `1000` | Heure du monde définie par la commande `/day`. |
+| `night-time` | Long | `13000` | Heure du monde définie par la commande `/night`. |
+| `time-smooth-change` | Boolean | `false` | Anime le changement d'heure de `/day` et `/night` au lieu d'un changement instantané. |
+
+---
+
+## Paramètres de vol
+
+```yaml
+temp-fly-task: false
+
 disable-fly-world:
-  - "world_pvp"
-enable-fly-return: true
+  - world_the_end
+
+enable-fly-return: false
+
 fly-task-announce:
-  - 300
-  - 120
-  - 60
+  - 7200 # 2 heures
+  - 3600 # 1 heure
+  - 1800 # 30 minutes
+  - 900 # 15 minutes
+  - 300 # 5 minutes
+  - 120 # 2 minutes
+  - 60 # 1 minute
   - 30
   - 10
   - 5
@@ -452,307 +487,314 @@ fly-task-announce:
   - 1
 ```
 
-| Option | Type | Par Defaut | Description |
-|--------|------|------------|-------------|
-| `temp-fly-task` | Integer | `1` | Intervalle en secondes auquel le minuteur de vol temporaire est verifie et mis a jour. |
-| `disable-fly-world` | List of Strings | `[]` | Liste des noms de mondes ou le vol est automatiquement desactive a l'entree. |
-| `enable-fly-return` | Boolean | `true` | Lorsque defini sur `true`, restaure l'etat de vol du joueur lorsqu'il retourne dans un monde autorisant le vol apres avoir quitte un monde restreint. |
-| `fly-task-announce` | List of Integers | *(voir ci-dessus)* | Seuils de temps restant (en secondes) auxquels le joueur est notifie que son vol temporaire est sur le point d'expirer. |
-
-**Comment fonctionnent les annonces de vol temporaire :**
-
-La liste `fly-task-announce` definit les valeurs exactes de temps restant auxquelles une notification est envoyee. Dans la configuration par defaut, un joueur avec le vol temporaire recevra un avertissement a 5 minutes, 2 minutes, 1 minute, 30 secondes, 10 secondes, puis un decompte de 5 a 1 seconde.
-
-:::info
-La valeur `temp-fly-task` controle la frequence a laquelle le plugin verifie le temps de vol restant. Une valeur de `1` signifie qu'il verifie chaque seconde, ce qui est recommande pour des notifications de decompte precises.
-:::
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `temp-fly-task` | Boolean | `false` | Active la tâche (exécutée chaque seconde) qui décrémente le temps de vol temporaire des joueurs (`/fly add`, `/fly set`...). |
+| `disable-fly-world` | Liste de String | `[world_the_end]` | Mondes dans lesquels le vol est désactivé. Contournement : `essentials.fly.bypass.world`. |
+| `enable-fly-return` | Boolean | `false` | Réactive le vol lorsque le joueur revient dans un monde où il est autorisé. |
+| `fly-task-announce` | Liste d'Integer | *(voir ci-dessus)* | Temps de vol restants (en secondes) auxquels le joueur est prévenu. |
 
 ---
 
-## Divers
-
-Cette section couvre divers parametres independants qui controlent le comportement global du plugin.
-
-### Desactivation du Back par Monde
-
-Une liste de mondes ou la commande `/back` est desactivee. Les joueurs qui meurent ou se teleportent dans ces mondes n'auront pas leur position precedente sauvegardee.
+## Back
 
 ```yaml
 disable-back-world:
-  - "world_pvp"
+  - world_the_end
 ```
 
-### Mots Aleatoires
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `disable-back-world` | Liste de String | `[world_the_end]` | Mondes dans lesquels `/back` est désactivé : la dernière position n'y est pas enregistrée. |
 
-Une liste de mots utilises pour la generation de mots aleatoires au sein du plugin (par exemple, pour la generation de noms aleatoires ou les invites de confirmation).
+---
 
-```yaml
-random-words:
-  - "apple"
-  - "banana"
-  - "cherry"
-  - "diamond"
-  - "emerald"
-  - "fire"
-  - "gold"
-  - "honey"
-  - "iron"
-  - "jungle"
-```
+## Joueurs
 
-### Activer les Noms de Joueurs Hors Ligne
+### Noms des joueurs hors ligne
 
 ```yaml
 enable-offline-player-names: true
 ```
 
-| Option | Type | Par Defaut | Description |
-|--------|------|------------|-------------|
-| `enable-offline-player-names` | Boolean | `true` | Lorsqu'active, le plugin resout et met en cache les noms des joueurs hors ligne pour une utilisation dans l'auto-completion par tabulation et les commandes acceptant des noms de joueurs en argument. |
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `enable-offline-player-names` | Boolean | `true` | Affiche les noms des joueurs en ligne **et** hors ligne dans l'autocomplétion des commandes. |
 
-### UUIDs en Liste Noire
+### UUID blacklistés
 
-Une liste d'UUIDs de joueurs mis en liste noire pour certaines fonctionnalites du plugin. Les joueurs avec des UUIDs en liste noire peuvent etre exclus des classements, des actions economiques ou d'autres systemes.
+Les joueurs dont l'UUID est listé ici ne peuvent pas se connecter au serveur (ils sont expulsés à la connexion avec le message « Unable to verify your connection, please try again. »).
 
 ```yaml
 blacklist-uuids:
   - "00000000-0000-0000-0000-000000000000"
 ```
 
-### Options Par Defaut
+### Options par défaut
 
-Configurez l'etat par defaut des options joueur activables/desactivables. Chaque option est definie sur `true` (activee) ou `false` (desactivee) par defaut pour tous les joueurs. Les joueurs peuvent les modifier individuellement via les commandes en jeu.
+Valeurs des options appliquées aux **nouveaux joueurs** lors de leur première connexion.
 
 ```yaml
 default-options:
-  SOCIAL_SPY: false
-  GOD: false
-  BAN: false
-  MUTE: false
-  INVSEE: false
-  VANISH: false
-  PRIVATE_MESSAGE_DISABLE: false
-  PAY_DISABLE: false
-  POWER_TOOLS_DISABLE: false
-  DISABLE_SCOREBOARD: false
-  NIGHT_VISION: false
-  PHANTOMS_DISABLE: false
-  WORLDEDIT_INVENTORY: false
-  WORLDEDIT_BOSSBAR_DISABLE: false
+  - option: WORLDEDIT_INVENTORY
+    value: true
 ```
 
-| Option | Par Defaut | Description |
-|--------|------------|-------------|
-| `SOCIAL_SPY` | `false` | Indique si l'espionnage social (visualisation des messages prives entre autres joueurs) est active par defaut. |
-| `GOD` | `false` | Indique si le mode dieu (invincibilite) est active par defaut. |
-| `BAN` | `false` | Indique si le joueur est banni par defaut. |
-| `MUTE` | `false` | Indique si le joueur est mute par defaut. |
-| `INVSEE` | `false` | Indique si la visualisation d'inventaire est activee par defaut. |
-| `VANISH` | `false` | Indique si le mode vanish (invisibilite) est active par defaut. |
-| `PRIVATE_MESSAGE_DISABLE` | `false` | Indique si la reception de messages prives est desactivee par defaut. |
-| `PAY_DISABLE` | `false` | Indique si la reception de paiements est desactivee par defaut. |
-| `POWER_TOOLS_DISABLE` | `false` | Indique si les power tools (objets lies a des commandes) sont desactives par defaut. |
-| `DISABLE_SCOREBOARD` | `false` | Indique si l'affichage du scoreboard est desactive par defaut. |
-| `NIGHT_VISION` | `false` | Indique si la vision nocturne permanente est activee par defaut. |
-| `PHANTOMS_DISABLE` | `false` | Indique si l'apparition des phantoms est desactivee par defaut pour le joueur. |
-| `WORLDEDIT_INVENTORY` | `false` | Indique si le mode inventaire WorldEdit est active par defaut. |
-| `WORLDEDIT_BOSSBAR_DISABLE` | `false` | Indique si la barre de boss de progression WorldEdit est desactivee par defaut. |
+| Option | Description |
+|--------|-------------|
+| `SOCIAL_SPY` | Espionner les messages privés entre joueurs. |
+| `GOD` | Rend le joueur invincible. |
+| `BAN` | Le joueur est banni. |
+| `MUTE` | Le joueur est muet. |
+| `INVSEE` | Permet de consulter l'inventaire des autres joueurs. |
+| `VANISH` | Rend le joueur invisible. |
+| `PRIVATE_MESSAGE_DISABLE` | Désactive les messages privés. |
+| `PAY_DISABLE` | Désactive la réception de paiements. |
+| `POWER_TOOLS_DISABLE` | Désactive les power tools. |
+| `DISABLE_SCOREBOARD` | Désactive le scoreboard. |
+| `NIGHT_VISION` | Vision nocturne permanente. |
+| `PHANTOMS_DISABLE` | Désactive l'apparition des phantoms. |
+| `WORLDEDIT_INVENTORY` | Utilise l'inventaire du joueur pour WorldEdit. |
+| `WORLDEDIT_BOSSBAR_DISABLE` | Désactive la boss bar de WorldEdit. |
+| `TELEPORT_REQUEST_DISABLE` | Désactive la réception des demandes de téléportation (`/tpa`). |
+| `TELEPORT_HERE_REQUEST_DISABLE` | Désactive la réception des demandes `/tpahere`. |
+| `DEATH_MESSAGE_DISABLE` | Masque les messages de mort. |
+| `PAY_NOTIFICATION_DISABLE` | Désactive les notifications de paiement. |
+| `PLAYER_PING_SOUND_DISABLE` | Désactive le son de ping du chat. |
 
-### Activer la téléportation à la première connexion
+### Téléportation à la première connexion
 
 ```yaml
 enable-first-join-teleport: false
 ```
 
-| Option | Type | Par défaut | Description |
-|--------|------|------------|-------------|
-| `enable-first-join-teleport` | Booléen | `false` | Lorsqu’elle est activée, cette option téléporte les joueurs à leur première connexion vers le premier spawn, le spawn ou la destination de téléportation aléatoire configurée. |
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `enable-first-join-teleport` | Boolean | `false` | Téléporte les joueurs lors de leur première connexion au premier spawn configuré, ou au spawn si aucun premier spawn n'est défini, ou à une position aléatoire si `enable-first-join-rtp` est activé dans `modules/teleportation/config.yml`. **Désactivé par défaut depuis la 1.0.3.9.** |
 
-### Sauvegarde Automatique par Lot
-
-```yaml
-batch-auto-save: 600
-```
-
-| Option | Type | Par Defaut | Description |
-|--------|------|------------|-------------|
-| `batch-auto-save` | Integer | `600` | Intervalle en secondes entre les sauvegardes automatiques par lot des donnees joueurs dans la base de donnees. La valeur par defaut est de 600 secondes (10 minutes). |
-
-### Activer le Journal des Commandes
-
-```yaml
-enable-command-log: false
-```
-
-| Option | Type | Par Defaut | Description |
-|--------|------|------------|-------------|
-| `enable-command-log` | Boolean | `false` | Lorsqu'active, enregistre toutes les commandes executees par les joueurs dans la base de donnees a des fins d'audit. |
-
-### Distance de Proximite
-
-```yaml
-near-distance: 200
-```
-
-| Option | Type | Par Defaut | Description |
-|--------|------|------------|-------------|
-| `near-distance` | Integer | `200` | Le rayon (en blocs) utilise par la commande `/near` pour trouver les joueurs a proximite. |
-
-### Format de Date Global
-
-```yaml
-global-date-format: "dd/MM/yyyy HH:mm:ss"
-```
-
-| Option | Type | Par Defaut | Description |
-|--------|------|------------|-------------|
-| `global-date-format` | String | `dd/MM/yyyy HH:mm:ss` | Le modele de format de date utilise dans tout le plugin pour l'affichage des dates et heures. Suit les modeles [Java SimpleDateFormat](https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html). |
-
-**Modeles de format courants :**
-
-| Modele | Description | Exemple |
-|--------|-------------|---------|
-| `dd/MM/yyyy HH:mm:ss` | Jour/Mois/Annee heure 24h | `04/02/2026 14:30:00` |
-| `MM/dd/yyyy hh:mm a` | Style americain avec AM/PM | `02/04/2026 02:30 PM` |
-| `yyyy-MM-dd HH:mm:ss` | Style ISO 8601 | `2026-02-04 14:30:00` |
+:::info
+Si vous utilisiez le premier spawn avant la 1.0.3.9, passez cette option à `true` pour conserver l'ancien comportement.
+:::
 
 ---
 
-## Configuration Par Defaut Complete
-
-Ci-dessous se trouve le fichier `config.yml` complet par defaut avec toutes les sections et leurs valeurs par defaut pour reference :
+## Format de date
 
 ```yaml
-#
-# zEssentials - Main Configuration
-#
+global-date-format: "yyyy-MM-dd HH:mm:ss"
+```
 
-# Debug mode - Enable verbose logging for troubleshooting
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `global-date-format` | String | `yyyy-MM-dd HH:mm:ss` | Format de date utilisé lorsqu'aucun autre format n'est disponible. Suit les motifs de [Java SimpleDateFormat](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/text/SimpleDateFormat.html). |
+
+**Formats courants :**
+
+| Motif | Description | Exemple |
+|-------|-------------|---------|
+| `yyyy-MM-dd HH:mm:ss` | Style ISO 8601 | `2026-02-04 14:30:00` |
+| `dd/MM/yyyy HH:mm:ss` | Jour/Mois/Année, format 24 h | `04/02/2026 14:30:00` |
+| `MM/dd/yyyy hh:mm a` | Format américain avec AM/PM | `02/04/2026 02:30 PM` |
+
+---
+
+## Statistiques
+
+Depuis la 1.0.3.9, zEssentials envoie des statistiques d'utilisation et des erreurs anonymes à [FastStats](https://faststats.dev/project/zessentials/). Ce n'est pas configuré dans `config.yml` : FastStats crée son propre fichier de configuration dans le dossier `faststats` de votre répertoire `plugins/`, dans lequel vous pouvez le désactiver.
+
+---
+
+## Configuration par défaut complète
+
+Voici le `config.yml` complet par défaut :
+
+```yaml
+# Displays debug items in the console, if you request support, please enable debug and send logs with debugs
 enable-debug: false
 
-# Storage configuration
+# Storage:
+# SQLITE - For the launch of the plugin only.
+# MYSQL - Allows creating a simple connection to the database, only for small servers.
+# HIKARICP - HikariCP is a fast and lightweight JDBC connection pool.
 storage-type: SQLITE
+
+# PAPER - Default type
+# REDIS - Allows connecting several servers (currently in development)
 server-type: PAPER
 
-# Database configuration (for MYSQL and HIKARICP storage types)
 database-configuration:
   table-prefix: "zessentials_"
-  host: "192.168.10.10"
+  host: 192.168.10.10
   port: 3306
-  user: "homestead"
-  password: "secret"
-  database: "zessentials"
+  user: homestead
+  password: 'secret'
+  database: zessentials
   debug: false
 
-# Redis configuration (for REDIS server type)
+# Sends requests available in batch to the database (history of messages, commands, etc.)
+batch-auto-save: 10000
+
 redis-configuration:
-  host: "127.0.0.1"
+  host: "192.168.10.10"
   port: 6379
-  password: ""
+  password: "123456a"
 
-# Commands that always have cooldowns (even with bypass permission)
+# Commands that will work even if their module is disabled
 force-commands:
-  - "/essversion"
+  # - rtp
+  # - home
 
-# Allow players with essentials.bypass.cooldown to skip cooldowns
 enable-cooldown-bypass: true
 
-# Command cooldowns with permission-based overrides
 command-cooldowns:
-  - command: "heal"
+  - command: heal
     cooldown: 60
     permissions:
-      - permission: "essentials.cooldowns.vip"
+      - permission: "essentials.cooldown.heal.vip"
         cooldown: 40
-      - permission: "essentials.cooldowns.staff"
+      - permission: "essentials.cooldown.heal.staff"
         cooldown: 20
-  - command: "tpr"
+  - command: tpr
     cooldown: 300
     permissions:
-      - permission: "essentials.cooldowns.vip"
+      - permission: "essentials.cooldown.rtp.vip"
         cooldown: 120
-      - permission: "essentials.cooldowns.staff"
+      - permission: "essentials.cooldown.rtp.staff"
         cooldown: 0
 
-# Command restrictions by world and cuboid region
 command-restrictions:
   - commands:
-      - "heal"
-      - "feed"
-    bypass-permission: "essentials.bypass.restriction"
+      - "spawn"
+    bypass-permission: "essentials.bypass.commandrestriction.spawn"
     worlds:
-      - "world_pvp"
+      - "world_nether"
     cuboids:
-      - "world,100,0,100,200,256,200"
+      - "world,0,0,0,100,255,100"
 
-# Trash inventory size (must be a multiple of 9: 9, 18, 27, 36, 45, 54)
-trash-size: 54
+trash-size: 27
 
-# Compact material conversions (9 items -> 1 block)
 compact-materials:
-  - COAL:COAL_BLOCK
-  - REDSTONE:REDSTONE_BLOCK
-  - LAPIS_LAZULI:LAPIS_BLOCK
-  - DIAMOND:DIAMOND_BLOCK
-  - EMERALD:EMERALD_BLOCK
-  - IRON_INGOT:IRON_BLOCK
-  - GOLD_INGOT:GOLD_BLOCK
-  - RAW_IRON:RAW_IRON_BLOCK
-  - RAW_GOLD:RAW_GOLD_BLOCK
-  - RAW_COPPER:RAW_COPPER_BLOCK
-  - COPPER_INGOT:COPPER_BLOCK
+  - from: COAL
+    to: COAL_BLOCK
+  - from: REDSTONE
+    to: REDSTONE_BLOCK
+  - from: LAPIS_LAZULI
+    to: LAPIS_BLOCK
+  - from: IRON_INGOT
+    to: IRON_BLOCK
+  - from: GOLD_INGOT
+    to: GOLD_BLOCK
+  - from: IRON_NUGGET
+    to: IRON_INGOT
+  - from: GOLD_NUGGET
+    to: GOLD_INGOT
+  - from: DIAMOND
+    to: DIAMOND_BLOCK
+  - from: EMERALD
+    to: EMERALD_BLOCK
+  - from: COPPER_INGOT
+    to: COPPER_BLOCK
+  - from: NETHERITE_INGOT
+    to: NETHERITE_BLOCK
 
-# Smeltable material conversions (instant furnace)
-smeltable-materials:
-  - RAW_IRON:IRON_INGOT
-  - RAW_GOLD:GOLD_INGOT
-  - RAW_COPPER:COPPER_INGOT
-  - IRON_ORE:IRON_INGOT
-  - GOLD_ORE:GOLD_INGOT
-  - COPPER_ORE:COPPER_INGOT
-  - COBBLESTONE:STONE
-  - SAND:GLASS
-  - WET_SPONGE:SPONGE
-
-# Global message color scheme
 message-colors:
-  primary: "#24d65d"
-  secondary: "#656665"
-  error: "#ff0000"
-  success: "#00ff00"
+  - key: "<primary>"
+    color: "#24d65d"
+  - key: "<secondary>"
+    color: "#656665"
+  - key: "<error>"
+    color: "#ff0000"
+  - key: "<success>"
+    color: "#00ff00"
 
-# Chat anti-spam cooldowns (message count threshold: cooldown in seconds)
-chat-cooldowns:
-  2: 1.5
-  4: 5.0
-  8: 10.0
+cooldowns:
+  - messages: 2
+    cooldown: 1500 # max 1.5s
+  - messages: 4
+    cooldown: 5000 # max 5s
+  - messages: 8
+    cooldown: 10000 # max 10s
 
-# Placeholder replacement system
+enable-command-log: true
+
+smeltable-materials:
+  - from: RAW_IRON
+    to: IRON_INGOT
+  - from: RAW_COPPER
+    to: COPPER_INGOT
+  - from: RAW_GOLD
+    to: GOLD_INGOT
+  - from: SAND
+    to: GLASS
+  - from: CLAY_BALL
+    to: BRICK
+  - from: ANCIENT_DEBRIS
+    to: NETHERITE_SCRAP
+  - from: WET_SPONGE
+    to: SPONGE
+  - from: CACTUS
+    to: GREEN_DYE
+  - from: KELP
+    to: DRIED_KELP
+
+placeholder-empty: "Empty"
+
+near-distance: 50.0
+
+near-direction-replacements:
+  forward: "↑"
+  forward-right: "↗"
+  right: "→"
+  back-right: "↘"
+  back: "↓"
+  back-left: "↙"
+  left: "←"
+  forward-left: "↖"
+
+day-time: 1000
+night-time: 13000
+time-smooth-change: false
+
+near-permissions:
+  - permission: "essentials.near.vip"
+    distance: 100.0
+  - permission: "essentials.near.staff"
+    distance: 200.0
+
+global-date-format: "yyyy-MM-dd HH:mm:ss"
+
 replace-placeholders:
-  - placeholder: "%player_ping%"
-    conditions:
+  - placeholder: 'player_ping'
+    default: '&c%result%'
+    replaces:
+      - type: STRING
+        equalsTo: 0
+        value: '&aWHOA YOU DONT HAVE PING WTF YOU ARE IN A DATACENTER ?'
       - type: NUMBER
-        min: 0
         max: 50
-        result: "<#00ff00>%player_ping%ms"
+        value: '&a%result%'
       - type: NUMBER
-        min: 51
-        max: 100
-        result: "<#ffff00>%player_ping%ms"
+        max: 99
+        value: '&2%result%'
       - type: NUMBER
-        min: 101
-        max: 200
-        result: "<#ff8800>%player_ping%ms"
+        max: 199
+        value: '&e%result%'
       - type: NUMBER
-        min: 201
-        result: "<#ff0000>%player_ping%ms"
+        max: 299
+        value: '&c%result%'
 
-# Fly settings
-temp-fly-task: 1
+temp-fly-task: false
+
 disable-fly-world:
-  - "world_pvp"
-enable-fly-return: true
+  - world_the_end
+
+enable-fly-return: false
+
 fly-task-announce:
+  - 7200
+  - 3600
+  - 1800
+  - 900
   - 300
   - 120
   - 60
@@ -764,59 +806,30 @@ fly-task-announce:
   - 2
   - 1
 
-# Worlds where /back is disabled
 disable-back-world:
-  - "world_pvp"
+  - world_the_end
 
-# Random words for generation features
 random-words:
-  - "apple"
-  - "banana"
-  - "cherry"
+  - "enderdragon"
+  - "netherite"
+  - "crafting"
+  - "survival"
+  - "adventure"
+  - "exploration"
+  - "obsidian"
   - "diamond"
-  - "emerald"
-  - "fire"
-  - "gold"
-  - "honey"
-  - "iron"
-  - "jungle"
+  - "goldmine"
+  - "enderchest"
 
-# Resolve and cache offline player names for tab-completion
 enable-offline-player-names: true
 
-# Blacklisted UUIDs excluded from certain features
 blacklist-uuids:
   - "00000000-0000-0000-0000-000000000000"
 
-# Default player option states
 default-options:
-  SOCIAL_SPY: false
-  GOD: false
-  BAN: false
-  MUTE: false
-  INVSEE: false
-  VANISH: false
-  PRIVATE_MESSAGE_DISABLE: false
-  PAY_DISABLE: false
-  POWER_TOOLS_DISABLE: false
-  DISABLE_SCOREBOARD: false
-  NIGHT_VISION: false
-  PHANTOMS_DISABLE: false
-  WORLDEDIT_INVENTORY: false
-  WORLDEDIT_BOSSBAR_DISABLE: false
+  - option: WORLDEDIT_INVENTORY
+    value: true
 
-# Téléporte les joueurs lors de leur première connexion vers le premier spawn, le spawn ou la destination de téléportation aléatoire configurée
+# Teleports players on their first join to the configured first-spawn, spawn, or random teleport location
 enable-first-join-teleport: false
-
-# Auto-save interval in seconds (default: 600 = 10 minutes)
-batch-auto-save: 600
-
-# Log all player commands to the database
-enable-command-log: false
-
-# Radius in blocks for the /near command
-near-distance: 200
-
-# Global date format (Java SimpleDateFormat pattern)
-global-date-format: "dd/MM/yyyy HH:mm:ss"
 ```

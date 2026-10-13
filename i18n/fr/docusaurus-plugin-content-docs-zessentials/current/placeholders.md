@@ -58,12 +58,14 @@ Placeholders supplémentaires de statut et d'informations pour les utilisateurs 
 | `%zessentials_user_afk_duration_formatted%` | Retourne la durée AFK formatée | String |
 | `%zessentials_user_home_list%` | Retourne une liste séparée par des virgules des noms de résidences | String |
 | `%zessentials_user_home_{index}%` | Retourne le nom de la résidence par index (commençant à 1) | String |
-| `%zessentials_user_home_{index}_{w/x/y/z}%` | Retourne les informations de localisation de la résidence par index | String |
+| `%zessentials_user_home_{index}_{w/world/x/y/z}%` | Retourne le monde (`w` ou `world`) ou une coordonnée de bloc (`x`, `y`, `z`) de la résidence par index | String |
 | `%zessentials_user_vote_offline%` | Retourne le nombre de votes hors ligne | Integer |
 | `%zessentials_user_pm_recipient%` | Retourne le nom du dernier destinataire de message privé | String |
 | `%zessentials_user_is_pay_disabled%` | Retourne true si le joueur a désactivé les paiements (paytoggle) | Boolean |
 | `%zessentials_user_pay_status%` | Retourne le texte de placeholder configuré pour le statut de paiement | String |
-| `%zessentials_user_is_tptoggle_disabled%` | Retourne true si le joueur a désactivé les demandes de téléportation | Boolean |
+| `%zessentials_user_is_pay_notification_disabled%` | Retourne true si le joueur a désactivé les notifications de paiement (paynotificationtoggle) | Boolean |
+| `%zessentials_user_is_tptoggle_disabled%` | Retourne true si le joueur a désactivé les demandes de téléportation (tptoggle) | Boolean |
+| `%zessentials_user_is_tpahere_disabled%` | Retourne true si le joueur a désactivé les demandes tpahere (tpaheretoggle) | Boolean |
 
 ---
 
@@ -113,13 +115,13 @@ Récupérez les informations du classement économique. Remplacez `{economy}` pa
 
 ## Options Utilisateur
 
-Récupérez la valeur d'une option utilisateur. Remplacez `{option_name}` par la clé de l'option telle que `BAN`, `MUTE`, `GOD`, `VANISH`, ou toute autre option enregistrée.
+Récupérez la valeur d'une option utilisateur. Remplacez `{option_name}` par l'une des clés d'option suivantes (insensible à la casse) : `SOCIAL_SPY`, `GOD`, `BAN`, `MUTE`, `INVSEE`, `VANISH`, `PRIVATE_MESSAGE_DISABLE`, `PAY_DISABLE`, `PAY_NOTIFICATION_DISABLE`, `POWER_TOOLS_DISABLE`, `DISABLE_SCOREBOARD`, `NIGHT_VISION`, `PHANTOMS_DISABLE`, `WORLDEDIT_INVENTORY`, `WORLDEDIT_BOSSBAR_DISABLE`, `TELEPORT_REQUEST_DISABLE`, `TELEPORT_HERE_REQUEST_DISABLE`, `DEATH_MESSAGE_DISABLE`, `PLAYER_PING_SOUND_DISABLE`.
 
 | Placeholder | Description | Type de Retour |
 |-------------|-------------|----------------|
 | `%zessentials_user_option_{option_name}%` | Retourne la valeur de l'option utilisateur spécifiée | String |
 
-**Exemple :** `%zessentials_user_option_VANISH%` retourne si le joueur est en mode vanish.
+**Exemple :** `%zessentials_user_option_VANISH%` retourne si le joueur est en mode vanish, et `%zessentials_user_option_PLAYER_PING_SOUND_DISABLE%` retourne `true` si le joueur a désactivé le son de mention du chat avec `/pingsound`.
 
 ---
 
@@ -543,7 +545,7 @@ lines:
 
 - Assurez-vous que le **module** correspondant est activé (par ex., module Economy pour les placeholders de solde, module Vote pour les placeholders de vote).
 - Vérifiez la syntaxe du placeholder, en particulier les paramètres dynamiques comme les noms d'économie, noms de kits et noms d'emplacements.
-- Pour les placeholders d'économie, confirmez que le nom de l'économie correspond à ce qui est configuré dans `modules/economy.yml`.
+- Pour les placeholders d'économie, confirmez que le nom de l'économie correspond à ce qui est configuré dans `modules/economy/config.yml`.
 
 ### Les placeholders ne se mettent pas à jour
 

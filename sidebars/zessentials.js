@@ -24,6 +24,7 @@ const sidebars = {
         'modules/afk',
         'modules/automessage',
         'modules/chat',
+        'modules/custom-commands',
         'modules/discord',
         'modules/economy',
         'modules/hologram',

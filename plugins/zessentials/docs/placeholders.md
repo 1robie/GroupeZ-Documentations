@@ -58,12 +58,14 @@ Additional status and detail placeholders for zEssentials users. Replace `{index
 | `%zessentials_user_afk_duration_formatted%` | Returns the AFK duration formatted | String |
 | `%zessentials_user_home_list%` | Returns a comma-separated list of home names | String |
 | `%zessentials_user_home_{index}%` | Returns the home name by index (1-based) | String |
-| `%zessentials_user_home_{index}_{w/x/y/z}%` | Returns the home location info by index | String |
+| `%zessentials_user_home_{index}_{w/world/x/y/z}%` | Returns the home world (`w` or `world`) or block coordinate (`x`, `y`, `z`) by index | String |
 | `%zessentials_user_vote_offline%` | Returns the number of offline votes | Integer |
 | `%zessentials_user_pm_recipient%` | Returns the name of the last private message recipient | String |
 | `%zessentials_user_is_pay_disabled%` | Returns true if the player has disabled payments (paytoggle) | Boolean |
 | `%zessentials_user_pay_status%` | Returns the configured placeholder text for pay status | String |
-| `%zessentials_user_is_tptoggle_disabled%` | Returns true if the player has disabled teleport requests | Boolean |
+| `%zessentials_user_is_pay_notification_disabled%` | Returns true if the player has disabled pay notifications (paynotificationtoggle) | Boolean |
+| `%zessentials_user_is_tptoggle_disabled%` | Returns true if the player has disabled teleport requests (tptoggle) | Boolean |
+| `%zessentials_user_is_tpahere_disabled%` | Returns true if the player has disabled tpahere requests (tpaheretoggle) | Boolean |
 
 ---
 
@@ -113,13 +115,13 @@ Retrieve information about the economy leaderboard. Replace `{economy}` with you
 
 ## User Options
 
-Retrieve the value of a user option. Replace `{option_name}` with the option key such as `BAN`, `MUTE`, `GOD`, `VANISH`, or any other registered option.
+Retrieve the value of a user option. Replace `{option_name}` with one of the following option keys (case-insensitive): `SOCIAL_SPY`, `GOD`, `BAN`, `MUTE`, `INVSEE`, `VANISH`, `PRIVATE_MESSAGE_DISABLE`, `PAY_DISABLE`, `PAY_NOTIFICATION_DISABLE`, `POWER_TOOLS_DISABLE`, `DISABLE_SCOREBOARD`, `NIGHT_VISION`, `PHANTOMS_DISABLE`, `WORLDEDIT_INVENTORY`, `WORLDEDIT_BOSSBAR_DISABLE`, `TELEPORT_REQUEST_DISABLE`, `TELEPORT_HERE_REQUEST_DISABLE`, `DEATH_MESSAGE_DISABLE`, `PLAYER_PING_SOUND_DISABLE`.
 
 | Placeholder | Description | Return Type |
 |-------------|-------------|-------------|
 | `%zessentials_user_option_{option_name}%` | Returns the value of the specified user option | String |
 
-**Example:** `%zessentials_user_option_VANISH%` returns whether the player is vanished.
+**Example:** `%zessentials_user_option_VANISH%` returns whether the player is vanished, and `%zessentials_user_option_PLAYER_PING_SOUND_DISABLE%` returns `true` if the player has disabled the chat ping sound with `/pingsound`.
 
 ---
 
@@ -543,7 +545,7 @@ lines:
 
 - Ensure the corresponding **module** is enabled (e.g., Economy module for balance placeholders, Vote module for vote placeholders).
 - Double-check the placeholder syntax, especially dynamic parameters like economy names, kit names, and slot names.
-- For economy placeholders, confirm the economy name matches what is configured in `modules/economy.yml`.
+- For economy placeholders, confirm the economy name matches what is configured in `modules/economy/config.yml`.
 
 ### Placeholders not updating
 

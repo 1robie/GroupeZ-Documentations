@@ -26,7 +26,7 @@ plugins/zMenu/dialogs/
 
 ## Types de dialogues
 
-zMenu supporte quatre types de dialogues :
+zMenu supporte tous les types de dialogues vanilla :
 
 | Type | Description |
 |------|-------------|
@@ -34,6 +34,7 @@ zMenu supporte quatre types de dialogues :
 | `confirmation` | Dialogue de confirmation Oui/Non |
 | `multi_action` | Plusieurs boutons d'action disposes en grille |
 | `server_links` | Affiche les liens du serveur sous forme de boutons cliquables |
+| `dialog_list` | Un hub qui liste d'autres dialogues, un bouton par dialogue |
 
 ## Structure de base
 
@@ -65,7 +66,7 @@ name: "&6&lWelcome Dialog"
 
 ### external_title
 
-Le titre de la fenetre affiche dans l'en-tete du dialogue.
+Le titre de la fenetre affiche dans l'en-tete du dialogue. `external-title` est aussi accepte. C'est egalement le libelle du bouton qui ouvre ce dialogue depuis une [liste de dialogues](#liste-de-dialogues). S'il est vide, rien n'est envoye et le client utilise le nom du dialogue.
 
 ```yaml
 external_title: "Server Information"
@@ -487,6 +488,73 @@ server-links:
           messages:
             - "&aLink opened!"
 ```
+
+---
+
+## Liste de dialogues
+
+Un dialogue `dialog_list` est un hub : il affiche un bouton par dialogue liste sous `dialogs:`, chacun avec comme libelle le `external-title` de son dialogue (ou son nom s'il n'en a pas). Cliquer sur un bouton ouvre ce dialogue. Un exemple est genere dans `dialogs/dialog_list-dialog.yml`.
+
+```yaml
+name: "&6&lServer Hub"
+external-title: "&6Server hub"
+type: dialog_list
+
+can-close-with-escape: true
+pause: false
+after-action: CLOSE
+
+number-of-columns: 2
+button-width: 150
+
+dialogs:
+  - "default-dialog"                     # dialogue zMenu, par nom de fichier ou nom
+  - "multi_action-dialog"
+  - dialog: "confirmation-dialog"        # idem, ecrit sous forme de map
+  - registry-key: "minecraft:server_links" # dialogue vanilla ou de datapack
+
+back-button:
+  enabled: true
+  label: "&7« Back"
+  tooltip: "&7Return to the server hub"
+  width: 150
+
+exit-button:
+  label: "&cClose"
+  tooltip: "&7Close the server hub"
+  width: 150
+  actions:
+    1:
+      success:
+        - type: message
+          messages:
+            - "&7See you soon!"
+
+body:
+  welcome:
+    type: dialog_plain_message
+    messages:
+      - "&7Welcome &f%player_name%&7, pick a section below."
+    width: 300
+```
+
+### Options de la liste de dialogues
+
+| Option | Type | Defaut | Description |
+|--------|------|--------|-------------|
+| `dialogs` | Liste | - | Les dialogues a lister. Chaque entree est un nom de dialogue zMenu (`nom` ou `plugin:nom`, aussi ecrit `dialog: <nom>`), ou un dialogue vanilla/datapack ecrit `registry-key: <namespace:cle>` |
+| `number-of-columns` | Entier | `2` | Nombre de boutons par ligne |
+| `button-width` | Entier | `150` | Largeur de chaque bouton (1-1024) |
+| `back-button.enabled` | Booleen | `true` | Ajoute un bouton retour aux dialogues listes |
+| `back-button.label` | Texte | `Back` | Libelle du bouton retour |
+| `back-button.tooltip` | Texte | vide | Infobulle du bouton retour |
+| `back-button.width` | Entier | `150` | Largeur du bouton retour (1-1024) |
+| `exit-button` | Section | aucun | Bouton optionnel en bas de la liste, aussi declenche par la touche Echap. Supporte `label`, `tooltip`, `width` et `actions` |
+
+**Bon a savoir :**
+- **Bouton retour** : le client ne revient pas a la liste quand un dialogue liste est ferme. Le bouton retour est ajoute aux dialogues listes qui n'ont pas leur propre bouton de sortie (`multi_action`, `server_links` et `dialog_list`) pour que les joueurs puissent revenir. Les dialogues `notice` et `confirmation` n'ont pas d'emplacement de sortie et restent inchanges. Pour ecrire votre propre bouton retour, donnez au dialogue un `exit-button` avec l'action [`dialog`](./buttons/actions#dialog).
+- **Prerequis** : les dialogues listes dont le joueur ne remplit pas l'`open-requirement` sont masques. Le prerequis est verifie a l'ouverture de la liste, car le client ouvre les dialogues listes lui-meme, sans demander au serveur.
+- **Imbrication** : une liste peut contenir d'autres listes. La profondeur maximale est definie par [`dialog-list-max-depth`](./config-yml#dialog-list-max-depth) dans `config.yml` (`4` par defaut).
 
 ---
 

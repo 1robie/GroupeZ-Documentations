@@ -1,18 +1,18 @@
 ---
 sidebar_position: 2
-title: "Evenements"
-description: "Evenements personnalises declenches par zEssentials pour les developpeurs"
+title: "Événements"
+description: "Événements personnalisés déclenchés par zEssentials pour les développeurs"
 ---
 
-# Evenements
+# Événements
 
-zEssentials declenche des evenements personnalises qui permettent aux developpeurs de se connecter a diverses actions effectuees par le plugin. Ces evenements suivent le systeme d'evenements standard de Bukkit et peuvent etre ecoutes en utilisant `@EventHandler` dans tout listener enregistre.
+zEssentials déclenche des événements personnalisés qui permettent aux développeurs de réagir aux différentes actions effectuées par le plugin. Ces événements suivent le système d'événements standard de Bukkit et peuvent être écoutés avec `@EventHandler` dans n'importe quel listener enregistré.
 
 ---
 
-## Hierarchie des Evenements
+## Hiérarchie des événements
 
-Tous les evenements de zEssentials etendent une hierarchie de base :
+Tous les événements de zEssentials héritent d'une hiérarchie de base :
 
 ```
 Event
@@ -22,16 +22,16 @@ Event
         └── CancellableEssentialsEvent (implements Cancellable)
 ```
 
-- **EssentialsEvent** -- Evenement de base pour tous les evenements de zEssentials.
-- **UserEvent** -- Etend `EssentialsEvent` et contient une reference a l'utilisateur affecte.
-- **CancellableUserEvent** -- Etend `UserEvent` et implemente `Cancellable`, permettant l'annulation de l'evenement.
-- **CancellableEssentialsEvent** -- Etend `EssentialsEvent` et implemente `Cancellable`, pour les evenements annulables non specifiques a un utilisateur.
+- **EssentialsEvent** -- Événement de base de tous les événements de zEssentials.
+- **UserEvent** -- Hérite d'`EssentialsEvent` et contient une référence vers l'utilisateur concerné.
+- **CancellableUserEvent** -- Hérite d'`UserEvent` et implémente `Cancellable`, ce qui permet d'annuler l'événement.
+- **CancellableEssentialsEvent** -- Hérite d'`EssentialsEvent` et implémente `Cancellable`, pour les événements annulables qui ne concernent pas un utilisateur précis.
 
 ---
 
-## Ecouter les Evenements
+## Écouter les événements
 
-Pour ecouter les evenements de zEssentials, enregistrez un listener Bukkit comme vous le feriez normalement :
+Pour écouter les événements de zEssentials, enregistrez un listener Bukkit comme d'habitude :
 
 ```java
 import org.bukkit.event.EventHandler;
@@ -57,13 +57,52 @@ public void onEnable() {
 
 ---
 
-## Reference des Evenements
+## Dépendre de zEssentials
+
+Depuis la 1.0.4.0, zEssentials est chargé en tant que **plugin Paper** (`paper-plugin.yml`). Déclarez-le comme dépendance de votre plugin pour qu'il soit chargé en premier et que ses classes soient visibles par votre plugin :
+
+**Plugin Bukkit (`plugin.yml`)**
+
+```yaml
+softdepend: [ zEssentials ] # ou depend: [ zEssentials ]
+```
+
+**Plugin Paper (`paper-plugin.yml`)**
+
+Les plugins Paper sont isolés les uns des autres : ajoutez `join-classpath: true` pour accéder à l'API de zEssentials.
+
+```yaml
+dependencies:
+  server:
+    zEssentials:
+      load: BEFORE
+      required: false
+      join-classpath: true
+```
+
+L'instance principale de zEssentials est enregistrée dans le `ServicesManager` de Bukkit sous `EssentialsPlugin` :
+
+```java
+RegisteredServiceProvider<EssentialsPlugin> provider = Bukkit.getServicesManager().getRegistration(EssentialsPlugin.class);
+if (provider != null) {
+    EssentialsPlugin essentials = provider.getProvider();
+    // Use the API
+}
+```
+
+:::info
+zEssentials nécessite Paper 1.20.6+ (mappings Mojang). Sur Spigot, le plugin reste inactif et l'API n'est **pas** disponible.
+:::
+
+---
+
+## Référence des événements
 
 ### UserFirstJoinEvent
 
-Declenche lorsqu'un joueur rejoint le serveur pour la toute premiere fois.
+Déclenché lorsqu'un joueur rejoint le serveur pour la toute première fois.
 
-| Propriete | Valeur |
+| Propriété | Valeur |
 |-----------|--------|
 | Classe parente | `UserEvent` |
 | Annulable | Non |
@@ -80,9 +119,9 @@ public void onFirstJoin(UserFirstJoinEvent event) {
 
 ### UserJoinEvent
 
-Declenche a chaque fois qu'un joueur rejoint le serveur.
+Déclenché à chaque fois qu'un joueur rejoint le serveur.
 
-| Propriete | Valeur |
+| Propriété | Valeur |
 |-----------|--------|
 | Classe parente | `UserEvent` |
 | Annulable | Non |
@@ -99,9 +138,9 @@ public void onJoin(UserJoinEvent event) {
 
 ### UserQuitEvent
 
-Declenche lorsqu'un joueur quitte le serveur.
+Déclenché lorsqu'un joueur quitte le serveur.
 
-| Propriete | Valeur |
+| Propriété | Valeur |
 |-----------|--------|
 | Classe parente | `UserEvent` |
 | Annulable | Non |
@@ -118,17 +157,17 @@ public void onQuit(UserQuitEvent event) {
 
 ### UserEconomyUpdateEvent
 
-Declenche **avant** la mise a jour du solde d'un joueur. Il s'agit d'un evenement pre-transaction qui vous permet d'inspecter, modifier ou annuler l'operation economique avant qu'elle ne prenne effet.
+Déclenché **avant** la mise à jour du solde d'un joueur. C'est un événement pré-transaction qui permet d'inspecter, de modifier ou d'annuler l'opération avant qu'elle ne soit appliquée.
 
-| Propriete | Valeur |
+| Propriété | Valeur |
 |-----------|--------|
 | Classe parente | `CancellableUserEvent` |
 | Annulable | **Oui** |
 
-**Methodes disponibles :**
-- `getEconomy()` / `setEconomy()` -- obtenir ou changer l'economie cible
+**Méthodes disponibles :**
+- `getEconomy()` / `setEconomy()` -- obtenir ou changer l'économie ciblée
 - `getAmount()` / `setAmount()` -- obtenir ou modifier le montant de la transaction
-- `setCancelled(true)` -- annuler entierement la transaction
+- `setCancelled(true)` -- annuler complètement la transaction
 
 ```java
 @EventHandler
@@ -151,9 +190,9 @@ public void onEconomyUpdate(UserEconomyUpdateEvent event) {
 
 ### UserEconomyPostUpdateEvent
 
-Declenche **apres** la mise a jour du solde d'un joueur. Il s'agit d'un evenement post-transaction destine uniquement a des fins informatives. La transaction a deja ete validee et ne peut pas etre modifiee ou annulee.
+Déclenché **après** la mise à jour du solde d'un joueur. C'est un événement post-transaction purement informatif : la transaction a déjà été validée et ne peut plus être modifiée ni annulée.
 
-| Propriete | Valeur |
+| Propriété | Valeur |
 |-----------|--------|
 | Classe parente | `UserEvent` |
 | Annulable | Non |
@@ -170,15 +209,15 @@ public void onPostEconomyUpdate(UserEconomyPostUpdateEvent event) {
 
 ### EconomyBaltopUpdateEvent
 
-Declenche lorsque les classements du solde top (baltop) sont recalcules et mis a jour.
+Déclenché lorsque le classement des soldes (baltop) est recalculé et mis à jour.
 
-| Propriete | Valeur |
+| Propriété | Valeur |
 |-----------|--------|
 | Classe parente | `EssentialsEvent` |
 | Annulable | Non |
 
-**Methodes disponibles :**
-- `getBaltop()` -- retourne l'objet `Baltop` contenant les classements mis a jour
+**Méthodes disponibles :**
+- `getBaltop()` -- renvoie l'objet `Baltop` contenant le classement mis à jour
 
 ```java
 @EventHandler
@@ -192,15 +231,15 @@ public void onBaltopUpdate(EconomyBaltopUpdateEvent event) {
 
 ### DiscordLinkEvent
 
-Declenche lorsqu'un joueur lie son compte Discord a son compte Minecraft.
+Déclenché lorsqu'un joueur lie son compte Discord à son compte Minecraft.
 
-| Propriete | Valeur |
+| Propriété | Valeur |
 |-----------|--------|
 | Classe parente | `CancellableUserEvent` |
 | Annulable | **Oui** |
 
-**Methodes disponibles :**
-- `getDiscordAccount()` -- retourne le `DiscordAccount` en cours de liaison
+**Méthodes disponibles :**
+- `getDiscordAccount()` -- renvoie le `DiscordAccount` en cours de liaison
 
 ```java
 @EventHandler
@@ -219,15 +258,15 @@ public void onDiscordLink(DiscordLinkEvent event) {
 
 ### DiscordUnlinkEvent
 
-Declenche lorsqu'un joueur delie son compte Discord de son compte Minecraft.
+Déclenché lorsqu'un joueur supprime la liaison entre son compte Discord et son compte Minecraft.
 
-| Propriete | Valeur |
+| Propriété | Valeur |
 |-----------|--------|
 | Classe parente | `CancellableUserEvent` |
 | Annulable | **Oui** |
 
-**Methodes disponibles :**
-- `getDiscordAccount()` -- retourne le `DiscordAccount` en cours de deliaison
+**Méthodes disponibles :**
+- `getDiscordAccount()` -- renvoie le `DiscordAccount` dont la liaison est supprimée
 
 ```java
 @EventHandler
@@ -246,15 +285,15 @@ public void onDiscordUnlink(DiscordUnlinkEvent event) {
 
 ### StepCreateEvent
 
-Declenche lorsqu'une etape est creee pour un joueur. Les etapes sont des jalons de progression dans le systeme d'etapes de zEssentials.
+Déclenché lorsqu'une étape est créée pour un joueur. Les étapes sont des jalons de progression du système d'étapes de zEssentials.
 
-| Propriete | Valeur |
+| Propriété | Valeur |
 |-----------|--------|
 | Classe parente | `CancellableUserEvent` |
 | Annulable | **Oui** |
 
-**Methodes disponibles :**
-- `getStep()` -- retourne le `Step` en cours de creation
+**Méthodes disponibles :**
+- `getStep()` -- renvoie le `Step` en cours de création
 
 ```java
 @EventHandler
@@ -270,15 +309,15 @@ public void onStepCreate(StepCreateEvent event) {
 
 ### StepFinishEvent
 
-Declenche lorsqu'un joueur termine une etape.
+Déclenché lorsqu'un joueur termine une étape.
 
-| Propriete | Valeur |
+| Propriété | Valeur |
 |-----------|--------|
 | Classe parente | `CancellableUserEvent` |
 | Annulable | **Oui** |
 
-**Methodes disponibles :**
-- `getPlayerStep()` -- retourne le `PlayerStep` qui a ete complete
+**Méthodes disponibles :**
+- `getPlayerStep()` -- renvoie le `PlayerStep` qui vient d'être terminé
 
 ```java
 @EventHandler
@@ -297,16 +336,16 @@ public void onStepFinish(StepFinishEvent event) {
 
 ### UserVoteEvent
 
-Declenche lorsqu'un joueur vote pour le serveur.
+Déclenché lorsqu'un joueur vote pour le serveur.
 
-| Propriete | Valeur |
+| Propriété | Valeur |
 |-----------|--------|
 | Classe parente | `CancellableEssentialsEvent` |
 | Annulable | **Oui** |
 
-**Methodes disponibles :**
-- `getUniqueId()` -- retourne l'`UUID` du joueur qui a vote
-- `getSiteName()` -- retourne le nom du site de vote
+**Méthodes disponibles :**
+- `getUniqueId()` -- renvoie l'`UUID` du joueur qui a voté
+- `getSiteName()` -- renvoie le nom du site de vote
 
 ```java
 @EventHandler
@@ -325,15 +364,15 @@ public void onVote(UserVoteEvent event) {
 
 ### VotePartyEvent
 
-Declenche au fur et a mesure que la vote party progresse. Cet evenement est declenche a chaque vote qui contribue au seuil de la vote party, vous permettant de suivre ou modifier la progression.
+Déclenché au fil de la progression de la vote party. Cet événement est déclenché à chaque vote qui compte pour le seuil de la vote party, ce qui permet de suivre ou de modifier la progression.
 
-| Propriete | Valeur |
+| Propriété | Valeur |
 |-----------|--------|
 | Classe parente | `CancellableEssentialsEvent` |
 | Annulable | **Oui** |
 
-**Methodes disponibles :**
-- `getVotePartyAmount()` / `setVotePartyAmount()` -- obtenir ou modifier le montant de progression actuel de la vote party
+**Méthodes disponibles :**
+- `getVotePartyAmount()` / `setVotePartyAmount()` -- obtenir ou modifier la progression actuelle de la vote party
 
 ```java
 @EventHandler
@@ -351,9 +390,9 @@ public void onVotePartyProgress(VotePartyEvent event) {
 
 ### VotePartyStartEvent
 
-Declenche lorsque le seuil de la vote party est atteint et que la vote party est sur le point de commencer.
+Déclenché lorsque le seuil de la vote party est atteint et que la vote party est sur le point de commencer.
 
-| Propriete | Valeur |
+| Propriété | Valeur |
 |-----------|--------|
 | Classe parente | `CancellableEssentialsEvent` |
 | Annulable | **Oui** |
@@ -370,20 +409,20 @@ public void onVotePartyStart(VotePartyStartEvent event) {
 
 ---
 
-## Tableau Recapitulatif
+## Tableau récapitulatif
 
-| Evenement | Parent | Annulable | Description |
+| Événement | Parent | Annulable | Description |
 |-----------|--------|-----------|-------------|
-| `UserFirstJoinEvent` | `UserEvent` | Non | Premiere connexion d'un joueur |
+| `UserFirstJoinEvent` | `UserEvent` | Non | Première connexion d'un joueur |
 | `UserJoinEvent` | `UserEvent` | Non | Toute connexion d'un joueur |
-| `UserQuitEvent` | `UserEvent` | Non | Deconnexion d'un joueur |
-| `UserEconomyUpdateEvent` | `CancellableUserEvent` | **Oui** | Avant la mise a jour du solde |
-| `UserEconomyPostUpdateEvent` | `UserEvent` | Non | Apres la mise a jour du solde |
-| `EconomyBaltopUpdateEvent` | `EssentialsEvent` | Non | Classements baltop recalcules |
-| `DiscordLinkEvent` | `CancellableUserEvent` | **Oui** | Compte Discord lie |
-| `DiscordUnlinkEvent` | `CancellableUserEvent` | **Oui** | Compte Discord delie |
-| `StepCreateEvent` | `CancellableUserEvent` | **Oui** | Etape creee pour un joueur |
-| `StepFinishEvent` | `CancellableUserEvent` | **Oui** | Etape completee par un joueur |
+| `UserQuitEvent` | `UserEvent` | Non | Déconnexion d'un joueur |
+| `UserEconomyUpdateEvent` | `CancellableUserEvent` | **Oui** | Avant la mise à jour du solde |
+| `UserEconomyPostUpdateEvent` | `UserEvent` | Non | Après la mise à jour du solde |
+| `EconomyBaltopUpdateEvent` | `EssentialsEvent` | Non | Classement baltop recalculé |
+| `DiscordLinkEvent` | `CancellableUserEvent` | **Oui** | Compte Discord lié |
+| `DiscordUnlinkEvent` | `CancellableUserEvent` | **Oui** | Liaison du compte Discord supprimée |
+| `StepCreateEvent` | `CancellableUserEvent` | **Oui** | Étape créée pour un joueur |
+| `StepFinishEvent` | `CancellableUserEvent` | **Oui** | Étape terminée par un joueur |
 | `UserVoteEvent` | `CancellableEssentialsEvent` | **Oui** | Un joueur vote |
 | `VotePartyEvent` | `CancellableEssentialsEvent` | **Oui** | Progression de la vote party |
 | `VotePartyStartEvent` | `CancellableEssentialsEvent` | **Oui** | Seuil de la vote party atteint |

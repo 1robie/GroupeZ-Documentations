@@ -201,6 +201,9 @@ hot-reload:
   enable: false
   delay-milliseconds: 500
 
+# How many dialog_list dialogs can be nested inside each other
+dialog-list-max-depth: 4
+
 #######################################
 #          Download / API             #
 #######################################
@@ -659,6 +662,10 @@ generate-default-file: true
 
 #### hot-reload
 
+:::tip
+The hot reload has its own page with every detail: [Hot Reload](../hot-reload).
+:::
+
 Watches the `inventories/` folder (and all its subfolders) and applies your changes without any command:
 
 - **Modified file**: the inventory is reloaded.
@@ -701,6 +708,18 @@ You will also see the YAML errors, the files that could not be loaded, the inven
 **When to enable:**
 - While creating or editing menus, to see your changes instantly
 - On a test/development server
+
+---
+
+#### dialog-list-max-depth
+
+How many [`dialog_list`](./dialogues#dialog-list) dialogs can be nested inside each other (a list inside a list inside a list...). Default: `4`.
+
+```yaml
+dialog-list-max-depth: 4
+```
+
+This does not limit how many dialogs a list contains. A list sends every dialog it contains, including the content of nested lists, in the packet that opens it, so deep nesting makes that packet bigger and can disconnect the player. Lists nested deeper than this value are left out.
 
 ---
 
