@@ -954,7 +954,7 @@ items:
           - ALL
         requirements:
           - type: placeholder
-            placeholder: "%zmenu_math_%zmenu_time_unix_timestamp%-%zmenu_player_value_last_daily%%"
+            placeholder: "%zmenu_math_{zmenu_time_unix_timestamp}-{zmenu_player_value_last_daily}%"
             action: SUPERIOR_OR_EQUAL
             value: 86400
             deny:
