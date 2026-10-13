@@ -9,14 +9,35 @@ description: Migrate data from other plugins to zEssentials
 zEssentials includes built-in data converters that allow you to migrate player data from other popular plugins. Each converter reads data from the source plugin's storage format and imports it into the zEssentials database.
 
 :::warning Prerequisites
-All converters require zEssentials to be configured with **SQL storage** (MySQL, MariaDB, or HikariCP). SQLite is not supported as a target for data migration. Ensure your database is configured and working before running any converter.
+All converters require zEssentials to be configured with **SQL storage** (`SQLITE`, `MYSQL`, `MARIADB` or `HIKARICP`). The `JSON` storage is not supported as a target for data migration. Ensure your database is configured and working before running any converter. For production, use MySQL/MariaDB rather than SQLite.
 :::
 
 :::tip Before You Start
 1. **Back up your database** before running any converter.
-2. **Stop the server** or ensure no players are online during migration to prevent data conflicts.
+2. **Close the server to players** (e.g. with the whitelist) or ensure no players are online during migration to prevent data conflicts.
 3. Verify that the source plugin's data files are accessible from the server.
 4. Run the converter from the server console for best results.
+:::
+
+## Command
+
+All converters are started with the same command:
+
+```
+/zessentials convert <plugin>
+```
+
+| Argument | Values |
+|----------|--------|
+| `<plugin>` | `essentialsx`, `cmi`, `sunlight`, `playervaultx`, `coinsengine`, `huskhomes`, `axvaults` |
+
+- **Aliases**: `/ess convert`, `/zessentials conv`, `/zessentials c`
+- **Permission**: `essentials.convert`
+
+The conversion runs asynchronously. Progress and the final result (`You have just converted your ... data to zEssentials !`) are sent to the command sender.
+
+:::tip Homes only from EssentialsX
+If you only want to import the **homes** of EssentialsX (without balances), you can also use `/homeimport essentialsx` (permission `essentials.home.import`). It reads the same `plugins/Essentials/userdata/` files, skips homes whose world does not exist, and works with every storage type. See the [Home module](./modules/home).
 :::
 
 ---
@@ -54,7 +75,7 @@ From each player file, the converter extracts:
 ### Usage
 
 1. Ensure the `plugins/Essentials/userdata/` directory contains the player `.yml` files
-2. Run the converter command from the console
+2. Run `/zessentials convert essentialsx` from the console
 3. The converter will iterate through all `.yml` files and import each player's data
 
 ---
@@ -85,7 +106,7 @@ Home locations in CMI are stored as serialized strings. The converter parses the
 ### Usage
 
 1. Copy the `cmi.sqlite.db` file to `plugins/zEssentials/`
-2. Run the converter command from the console
+2. Run `/zessentials convert cmi` from the console
 3. The converter will read the CMI database and import users, balances, and homes
 
 ---
@@ -120,7 +141,7 @@ Each currency defined in CoinsEngine maps to a column in the database. The conve
 
 1. Ensure `plugins/CoinsEngine/data.db` and `plugins/CoinsEngine/currencies/` are accessible
 2. Create all matching currencies in the zEssentials economy module configuration
-3. Run the converter command from the console
+3. Run `/zessentials convert coinsengine` from the console
 4. The converter will map each CoinsEngine currency to its zEssentials equivalent and import all balances
 
 ---
@@ -138,13 +159,14 @@ Migrates player data from [HuskHomes](https://william278.net/project/huskhomes/)
 
 ### How It Works
 
-The converter reads from HuskHomes' SQLite database (`HuskHomesData.db`) or from existing database tables if using a shared MySQL database. The converter performs a join across three tables:
+The converter reads from HuskHomes' SQLite database (`HuskHomesData.db`) if the file is present in `plugins/zEssentials/`, otherwise it reads the HuskHomes tables from the zEssentials database (useful when both plugins share the same MySQL database). The converter reads four tables:
 
-1. **Users table** -- Contains player UUIDs and usernames
-2. **Homes table** -- Contains home names and owner references
-3. **Positions table** -- Contains the actual coordinates (world, x, y, z, yaw, pitch)
+1. **`huskhomes_users`** -- Contains player UUIDs and usernames
+2. **`huskhomes_homes`** -- Contains home names and owner references
+3. **`huskhomes_saved_positions`** -- Links each home to a position
+4. **`huskhomes_position_data`** -- Contains the actual coordinates (world, x, y, z, yaw, pitch)
 
-The three tables are joined together to reconstruct each player's complete home data.
+These tables are combined to reconstruct each player's complete home data.
 
 ### Prerequisites
 
@@ -154,8 +176,8 @@ The three tables are joined together to reconstruct each player's complete home 
 ### Usage
 
 1. Copy the `HuskHomesData.db` file to `plugins/zEssentials/` (or configure access to the shared database)
-2. Run the converter command from the console
-3. The converter will join the users, homes, and positions tables and import all player home data
+2. Run `/zessentials convert huskhomes` from the console
+3. The converter will combine the users, homes, and positions tables and import all player home data
 
 ---
 
@@ -185,7 +207,7 @@ The converter decodes each Base64 string back into Minecraft `ItemStack` objects
 
 1. Ensure the PlayerVaults plugin is installed and enabled on the server
 2. Verify that `plugins/PlayerVaults/newvaults/` contains the player vault `.yml` files
-3. Run the converter command from the console
+3. Run `/zessentials convert playervaultx` from the console
 4. The converter will decode and import all vault items for each player
 
 ---
@@ -212,7 +234,7 @@ The converter reads vault data directly from the AxVaults database. It uses Java
 ### Usage
 
 1. Ensure the AxVaults plugin is installed and enabled on the server
-2. Run the converter command from the console
+2. Run `/zessentials convert axvaults` from the console
 3. The converter will access the AxVaults database connection and import all vault items
 
 ---
@@ -248,7 +270,7 @@ The converter remaps the fields to match the zEssentials location structure duri
 ### Usage
 
 1. Copy the `data.db` file to `plugins/zEssentials/`
-2. Run the converter command from the console
+2. Run `/zessentials convert sunlight` from the console
 3. The converter will read the Sunlight database, translate the location format, and import users and homes
 
 ---
@@ -260,11 +282,11 @@ The converter remaps the fields to match the zEssentials location structure duri
 | **EssentialsX** | Yes | Yes | Yes | -- | Flat-file YAML | `plugins/Essentials/userdata/` (in-place) |
 | **CMI** | Yes | Yes | Yes | -- | SQLite | Copy `cmi.sqlite.db` to `plugins/zEssentials/` |
 | **CoinsEngine** | -- | Yes | -- | -- | SQLite + YAML | `plugins/CoinsEngine/` (in-place) |
-| **HuskHomes** | Yes | -- | Yes | -- | SQLite / MySQL | Copy `HuskHomesData.db` to `plugins/zEssentials/` or use shared DB |
+| **HuskHomes** | Yes | -- | Yes | -- | SQLite / MySQL | Copy `HuskHomesData.db` to `plugins/zEssentials/` or use a shared database |
 | **PlayerVaultX** | -- | -- | -- | Yes | Flat-file YAML (Base64) | `plugins/PlayerVaults/newvaults/` (in-place) |
 | **AxVaults** | -- | -- | -- | Yes | Database (via reflection) | Plugin must be enabled |
 | **Sunlight** | Yes | -- | Yes | -- | SQLite | Copy `data.db` to `plugins/zEssentials/` |
 
 :::info
-All converters require SQL storage (MySQL, MariaDB, or HikariCP) to be configured in zEssentials. SQLite cannot be used as the target storage for migrations.
+All converters require an SQL storage (`SQLITE`, `MYSQL`, `MARIADB` or `HIKARICP`) to be configured in zEssentials. The `JSON` storage cannot be used as the target storage for migrations.
 :::

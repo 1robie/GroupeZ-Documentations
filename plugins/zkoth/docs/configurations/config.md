@@ -106,6 +106,25 @@ capturePermission: "zkoth.capture"
 Spectators are always blocked from capturing, regardless of this setting.
 :::
 
+## Team Capture Transfer
+
+```yaml
+teamCaptureTransfer:
+  # A teammate already inside the zone takes over the capture
+  # when the capturer leaves, dies or disconnects
+  enable: true
+  # Team IDs that never count as a real team
+  # (Wilderness, SafeZone and WarZone for Factions plugins)
+  ignoredTeamIds:
+    - "0"
+    - "-1"
+    - "-2"
+```
+
+:::info
+The timer is not reset during a transfer: the teammate continues the capture where it stopped. Without a team plugin, every player is their own team, so no transfer happens.
+:::
+
 ## Chest Settings
 
 ```yaml

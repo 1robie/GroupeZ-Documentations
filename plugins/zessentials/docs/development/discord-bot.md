@@ -299,7 +299,7 @@ Stores an audit trail of all linking and unlinking actions.
 ### Bot does not start
 
 - Verify the `bot-token` in `config.yml` is correct and has not been regenerated in the Developer Portal
-- Ensure Java 17 or higher is installed
+- Ensure Java 21 or higher is installed
 - Check that the `config.yml` file is in the same directory as the bot JAR
 
 ### Bot is online but commands do not appear

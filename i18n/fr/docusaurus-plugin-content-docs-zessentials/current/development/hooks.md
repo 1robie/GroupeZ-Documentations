@@ -1,172 +1,191 @@
 ---
 sidebar_position: 1
-title: Hooks & Integrations
-description: Integrations et hooks optionnels de plugins pour zEssentials
+title: Hooks & Intégrations
+description: Intégrations et hooks optionnels avec d'autres plugins pour zEssentials
 ---
 
-# Hooks & Integrations
+# Hooks & Intégrations
 
-zEssentials fournit des integrations optionnelles avec des plugins tiers pour etendre ses fonctionnalites. Ces hooks sont charges automatiquement lorsque le plugin correspondant est detecte sur le serveur, sauf indication contraire.
+zEssentials propose des intégrations optionnelles avec des plugins tiers pour étendre ses fonctionnalités. Ces hooks sont chargés automatiquement lorsque le plugin correspondant est détecté sur le serveur, sauf indication contraire.
+
+:::info Ordre de chargement
+zEssentials est un plugin Paper. Toutes les intégrations ci-dessous sont déclarées comme dépendances serveur optionnelles dans son `paper-plugin.yml` (`load: BEFORE`, `required: false`) : Vault, ProtocolLib, SuperiorSkyblock2, BentoBox, BlockTracker, WorldGuard, Votifier, NChat, MythicMobs, AxVaults et PlayerVaults. Lorsqu'elles sont présentes, elles sont chargées avant zEssentials, et toutes sauf BentoBox utilisent `join-classpath: true` pour que zEssentials puisse accéder à leur API. zMenu et PlaceholderAPI sont les seules dépendances **obligatoires**.
+:::
 
 ---
 
 ## Vault
 
-Expose le systeme d'economie de zEssentials via l'API [Vault](https://www.spigotmc.org/resources/vault.34315/), permettant a d'autres plugins d'interagir avec les soldes des joueurs en utilisant l'interface standard Vault Economy.
+Expose le système d'économie de zEssentials via l'API [Vault](https://www.spigotmc.org/resources/vault.34315/), ce qui permet aux autres plugins d'interagir avec les soldes des joueurs grâce à l'interface standard Vault Economy.
 
-- **Charge dans** : `onLoad()` (avant l'initialisation des autres plugins)
-- **Methodes supportees** : `getBalance`, `deposit`, `withdraw`, `has`, `format`, et toutes les autres methodes standard de Vault Economy
-- **Support bancaire** : Non supporte
-- **Prerequis** : Le module d'economie doit etre active dans la configuration de zEssentials
+- **Chargé dans** : `onLoad()` (avant l'initialisation des autres plugins)
+- **Méthodes supportées** : `getBalance`, `deposit`, `withdraw`, `has`, `format` et toutes les autres méthodes standard de Vault Economy
+- **Support des banques** : Non supporté
+- **Prérequis** : Le module Économie doit être activé dans la configuration de zEssentials
 
-Lorsque Vault est present et que le module d'economie est actif, tout plugin dependant de Vault pour les operations economiques utilisera automatiquement zEssentials comme fournisseur d'economie.
+Lorsque Vault est présent et que le module Économie est actif, tout plugin utilisant Vault pour l'économie utilise automatiquement zEssentials comme fournisseur.
 
 ---
 
 ## Redis
 
-Permet la communication multi-serveur via Redis pub/sub, permettant aux instances de zEssentials sur plusieurs serveurs de synchroniser les donnees et les actions en temps reel.
+Permet la communication entre plusieurs serveurs via le pub/sub Redis, afin que les instances de zEssentials synchronisent leurs données et leurs actions en temps réel.
+
+:::caution En développement
+L'intégration Redis est **actuellement désactivée** dans le plugin : le serveur Redis n'est pas démarré, même avec `server-type: REDIS`. Les informations ci-dessous décrivent le fonctionnement prévu.
+:::
 
 ### Configuration
 
-Redis est configure dans le fichier principal `config.yml` :
+Redis se configure dans le fichier principal `config.yml` :
 
 ```yaml
 server-type: REDIS
 
 redis-configuration:
-  host: "127.0.0.1"
+  host: "192.168.10.10"
   port: 6379
-  password: ""
+  password: "123456a"
 ```
 
-Definissez `server-type` sur `REDIS` pour activer le mode multi-serveur.
+Passez `server-type` à `REDIS` pour activer le mode multi-serveurs.
 
-### Fonctionnalites
+### Fonctionnalités
 
-- Messages prives inter-serveurs
-- Diffusions inter-serveurs
-- Expulsions inter-serveurs
+- Messages privés entre serveurs
+- Annonces entre serveurs
+- Expulsions entre serveurs
 - Synchronisation des cooldowns entre serveurs
-- Synchronisation de l'effacement et du basculement du chat
-- Synchronisation de la liste des joueurs via Redis `SET`
+- Synchronisation de l'effacement et de l'activation/désactivation du chat
+- Synchronisation de la liste des joueurs via un `SET` Redis
 
-### Details Techniques
+### Détails techniques
 
-| Propriete | Valeur |
+| Propriété | Valeur |
 |-----------|--------|
-| Canal Pub/Sub | `essentials:messages` |
-| Cle de suivi des joueurs | `essentials:playerlist` |
+| Canal pub/sub | `essentials:messages` |
+| Clé de suivi des joueurs | `essentials:playerlist` |
 
-### Types de Messages
+### Types de messages
 
-zEssentials utilise **7 types de messages** pour la communication inter-serveurs :
+zEssentials utilise **7 types de messages** pour la communication entre serveurs :
 
-| Type de Message | Description |
+| Type de message | Description |
 |-----------------|-------------|
-| `KickMessage` | Expulse un joueur a travers les serveurs |
-| `ServerMessage` | Envoie une diffusion a tous les serveurs |
+| `KickMessage` | Expulse un joueur sur l'ensemble des serveurs |
+| `ServerMessage` | Envoie une annonce à tous les serveurs |
 | `ChatClear` | Efface le chat sur tous les serveurs |
-| `ChatToggle` | Bascule l'etat du chat sur tous les serveurs |
-| `ServerPrivateMessage` | Delivre un message prive inter-serveur |
-| `ClearCooldown` | Efface un cooldown specifique a travers les serveurs |
-| `UpdateCooldown` | Synchronise les minuteurs de cooldown a travers les serveurs |
+| `ChatToggle` | Active/désactive le chat sur tous les serveurs |
+| `ServerPrivateMessage` | Transmet un message privé à un autre serveur |
+| `ClearCooldown` | Supprime un cooldown sur l'ensemble des serveurs |
+| `UpdateCooldown` | Synchronise les cooldowns entre serveurs |
 
 ---
 
 ## WorldGuard
 
-S'integre avec [WorldGuard](https://enginehub.org/worldguard) pour bloquer la verification des permissions dans les regions protegees. Lorsqu'un joueur tente d'effectuer une action dans une region protegee par WorldGuard, zEssentials verifie le flag `BLOCK_BREAK` pour determiner si l'action est autorisee.
+S'intègre avec [WorldGuard](https://enginehub.org/worldguard) pour vérifier les permissions sur les blocs dans les régions protégées. Lorsque le module WorldEdit modifie un bloc, zEssentials teste le flag WorldGuard `BLOCK_BREAK` du joueur à cet emplacement ; les blocs que le joueur n'a pas le droit de casser sont ignorés.
 
-- **Chargement automatique** : Oui, si WorldGuard est present sur le serveur
-- **Aucune configuration supplementaire requise**
+- **Chargé automatiquement** : Oui, si WorldGuard est présent sur le serveur
+- **Aucune configuration supplémentaire requise**
 
 ---
 
 ## SuperiorSkyblock2
 
-S'integre avec [SuperiorSkyblock2](https://www.spigotmc.org/resources/superiorskyblock2.87411/) pour bloquer la verification des permissions sur les iles. zEssentials verifie l'appartenance a l'ile et sa portee avant d'autoriser certaines actions.
+S'intègre avec [SuperiorSkyblock2](https://www.spigotmc.org/resources/superiorskyblock2.87411/) pour vérifier les permissions sur les blocs des îles. Avant que le module WorldEdit ne modifie un bloc, zEssentials vérifie l'appartenance du joueur à l'île et les limites de celle-ci.
 
-- **Chargement automatique** : Oui, si SuperiorSkyblock2 est present sur le serveur
-- **Verifications effectuees** :
-  - `isMember()` -- verifie que le joueur est membre de l'ile
-  - `isInsideRange()` -- verifie que l'action se produit dans les limites de l'ile
-- **Aucune configuration supplementaire requise**
+- **Chargé automatiquement** : Oui, si SuperiorSkyblock2 est présent sur le serveur
+- **Vérifications effectuées** :
+  - `isMember()` -- vérifie que le joueur est membre de l'île
+  - `isInsideRange()` -- vérifie que l'action a lieu dans les limites de l'île
+- **Aucune configuration supplémentaire requise**
+
+---
+
+## Plugins de protection génériques
+
+En plus des hooks dédiés ci-dessus, zEssentials enregistre toujours un **vérificateur de permissions basé sur les événements Bukkit** (depuis la 1.0.3.6). Avant que le module WorldEdit ne modifie un bloc, il déclenche un `BlockBreakEvent` simulé pour le joueur : si un plugin de protection annule l'événement, le bloc est ignoré.
+
+- **Toujours actif**, aucune configuration requise
+- Fonctionne avec tout plugin de protection qui annule le `BlockBreakEvent` (HuskClaims, GriefPrevention, Lands, Towny, etc.)
 
 ---
 
 ## NuVotifier
 
-S'integre avec [NuVotifier](https://www.spigotmc.org/resources/nuvotifier.13449/) pour recevoir les notifications de vote. Lorsqu'un joueur vote sur un site de liste de serveurs, NuVotifier declenche un `VotifierEvent` que zEssentials ecoute et enregistre dans son systeme de suivi des votes.
+S'intègre avec [NuVotifier](https://www.spigotmc.org/resources/nuvotifier.13449/) pour recevoir les notifications de vote. Lorsqu'un joueur vote sur un site de classement, NuVotifier déclenche un `VotifierEvent` que zEssentials écoute et enregistre dans son système de suivi des votes.
 
-- **Chargement automatique** : Oui, si Votifier est present sur le serveur
-- **Aucune configuration supplementaire requise**
+- **Chargé automatiquement** : Oui, si Votifier est présent sur le serveur
+- **Aucune configuration supplémentaire requise**
 
-Les votes recus via NuVotifier sont injectes dans le module de vote de zEssentials, contribuant aux compteurs de votes par joueur et a la progression de la vote party.
+Les votes reçus via NuVotifier alimentent le module Vote de zEssentials : compteur de votes de chaque joueur et progression de la vote party.
 
 ---
 
 ## NChat
 
-S'integre avec NChat pour appliquer les sanctions de mute sur les messages publics et prives. Lorsqu'un joueur est mute via zEssentials, le mute est egalement applique aux canaux de messages NChat.
+S'intègre avec NChat pour appliquer les mutes aux messages publics comme aux messages privés. Lorsqu'un joueur est rendu muet via zEssentials, le mute s'applique aussi aux canaux de NChat.
 
-- **Chargement automatique** : Oui, si NChat est present sur le serveur
-- **Priorite d'evenement** : `HIGHEST`
-- **Applique sur** : Messages publics et messages prives
-- **Aucune configuration supplementaire requise**
+- **Chargé automatiquement** : Oui, si NChat est présent sur le serveur
+- **Priorité de l'événement** : `HIGHEST`
+- **Appliqué sur** : Messages publics et messages privés
+- **Aucune configuration supplémentaire requise**
 
 ---
 
 ## BlockTracker
 
-S'integre avec [BlockTracker](https://github.com/Krakenied/BlockTracker) pour suivre les modifications de blocs effectuees par les joueurs. Ceci est utile pour les fonctionnalites qui doivent distinguer les blocs generes naturellement des blocs places par les joueurs.
+S'intègre avec [BlockTracker](https://github.com/Krakenied/BlockTracker) pour suivre les blocs modifiés par les joueurs. C'est utile pour les fonctionnalités qui doivent distinguer les blocs générés naturellement des blocs posés par les joueurs.
 
-- **Chargement automatique** : Oui, si BlockTracker est present sur le serveur
-- **Methodes** :
-  - `isTracked()` -- verifie si un bloc a ete modifie par un joueur
-  - `track()` -- marque un bloc comme modifie par un joueur
-- **Repli** : Si BlockTracker n'est pas installe, zEssentials utilise une implementation `DefaultBlockTracker` ou `isTracked()` retourne toujours `false`
+- **Chargé automatiquement** : Oui, si BlockTracker est présent sur le serveur
+- **Méthodes** :
+  - `isTracked()` -- vérifie si un bloc a été modifié par un joueur
+  - `track()` -- marque un bloc comme modifié par un joueur
+- **Repli** : Si BlockTracker n'est pas installé, zEssentials utilise une implémentation `DefaultBlockTracker` dont `isTracked()` renvoie toujours `false`
 
 ---
 
 ## ProtocolLib
 
-S'integre avec [ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/) pour intercepter les paquets `SYSTEM_CHAT` et ajouter des suggestions de commandes cliquables aux messages du chat.
+Intégration avec [ProtocolLib](https://www.spigotmc.org/resources/protocollib.1997/) prévue pour intercepter les paquets `SYSTEM_CHAT` et rendre le motif `./commande` cliquable dans **tous** les messages envoyés aux joueurs (et pas seulement dans le chat des joueurs).
 
-- **Chargement automatique** : Oui, si ProtocolLib est present sur le serveur
-- **Paquet intercepte** : `SYSTEM_CHAT`
-- **Modele** : `./command` -- le texte correspondant a ce modele dans les messages du chat devient cliquable, suggerant la commande lorsqu'on clique dessus
+:::caution
+L'écouteur de paquets ProtocolLib est **actuellement désactivé** dans le plugin. ProtocolLib est seulement déclaré comme dépendance optionnelle et n'est requis par aucun module.
+:::
 
-### Configuration
+- **Chargé automatiquement** : Non (désactivé)
+- **Paquet intercepté** : `SYSTEM_CHAT`
 
-Configure dans `modules/chat/config.yml` sous la section `command-placeholder` :
+Le placeholder `./commande` dans le **chat des joueurs** ne nécessite pas ProtocolLib : il est géré par le module Chat, dans la section `command-placeholder` de `modules/chat/config.yml` :
 
 ```yaml
-command-placeholder:
-  enabled: true
-  # Additional settings for command suggestion behavior
+command-placeholder: # ./<command>. placeholder
+  enable: true
+  result: "<hover:show_text:'<yellow>Try this command'><click:suggest_command:'/%fixed_command%'><yellow>/%command%</yellow></click></hover>"
+  permission: "zessentials.chat.placeholder.command"
 ```
 
 ---
 
 ## MythicMobs
 
-S'integre avec [MythicMobs](https://www.spigotmc.org/resources/mythicmobs.5702/) pour afficher les noms personnalises des mobs dans les messages de mort. Lorsqu'un joueur est tue par une creature MythicMobs, le module Death Message peut afficher le nom d'affichage configure du mob au lieu du type d'entite vanilla.
+S'intègre avec [MythicMobs](https://www.spigotmc.org/resources/mythicmobs.5702/) pour afficher le nom des mobs personnalisés dans les messages de mort. Lorsqu'un joueur est tué par une créature MythicMobs, le module Messages de mort peut afficher le nom configuré du mob au lieu du type d'entité vanilla.
 
-- **Chargement automatique** : Oui, si MythicMobs est present sur le serveur
-- **Prerequis** : Le module Death Message doit etre active avec `death-message-type: CUSTOM`
-- **Methodes** :
-  - `isMythicMob()` -- verifie si une entite est une creature MythicMobs
-  - `getMythicMobName()` -- recupere le nom d'affichage de la creature MythicMobs
-- **Aucune configuration supplementaire requise**
+- **Chargé automatiquement** : Oui, si MythicMobs est présent sur le serveur
+- **Prérequis** : Le module Messages de mort doit être activé avec `death-message-type: CUSTOM`
+- **Méthodes** :
+  - `isMythicMob()` -- vérifie si une entité est une créature MythicMobs
+  - `getMythicMobName()` -- récupère le nom affiché de la créature MythicMobs
+- **Aucune configuration supplémentaire requise**
 
 ---
 
 ## AxVaults
 
-Fournit la migration de donnees depuis [AxVaults](https://www.spigotmc.org/resources/axvaults.103560/) vers le systeme de coffres de zEssentials. Ce n'est pas une integration en temps d'execution mais un outil de migration ponctuel.
+Permet la migration des données d'[AxVaults](https://www.spigotmc.org/resources/axvaults.103862/) vers le système de coffres de zEssentials. Il ne s'agit pas d'une intégration permanente mais d'un outil de migration ponctuel.
 
-- **Utilisation** : Accessible via la commande de convertisseur integree
-- **Objectif** : Migre les donnees de coffres joueurs existantes d'AxVaults vers les coffres de zEssentials
+- **Utilisation** : Via la commande de conversion intégrée
+- **Objectif** : Migrer les coffres existants des joueurs d'AxVaults vers les coffres de zEssentials
 
-Pour migrer les donnees depuis AxVaults, utilisez la commande de convertisseur de zEssentials et selectionnez AxVaults comme source.
+Pour migrer les données d'AxVaults, exécutez `/zessentials convert axvaults` (voir [Migration de données](../converters#axvaults)). Il en va de même pour PlayerVaults avec `/zessentials convert playervaultx`.

@@ -155,8 +155,13 @@ Webhook sections that use `embeds` support the following properties in each embe
 | `color` | String | Hex color code for the embed sidebar (e.g., `"#00ff00"` for green) |
 | `title` | String | Optional embed title |
 | `description` | String | Optional embed description/body text |
-| `thumbnail` | String | Optional thumbnail image URL |
-| `footer` | String | Optional footer text |
+| `url` | String | Optional URL opened when clicking the title |
+| `author.url` | String | Optional URL opened when clicking the author name |
+| `thumbnail.url` | String | Optional thumbnail image URL |
+| `image.url` | String | Optional large image URL |
+| `footer.text` | String | Optional footer text |
+| `footer.icon-url` | String | Optional footer icon URL |
+| `fields` | List | Optional list of fields, each with `name`, `value` and `inline` (Boolean) |
 
 ---
 

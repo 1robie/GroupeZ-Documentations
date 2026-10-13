@@ -12,7 +12,32 @@ description: Introduction to zMenu - The most powerful inventory plugin for Mine
 
 zMenu is a premium-quality inventory plugin that enables server administrators to create custom GUIs (Graphical User Interfaces) for their Minecraft servers. Whether you need a simple server selector, a complex shop system, or an interactive quest menu, zMenu provides all the tools you need.
 
+## Coming from DeluxeMenus? Switch in one command
+
+You don't have to rewrite your menus. zMenu **converts your DeluxeMenus menus automatically**: items, slots, click commands, requirements and open commands are translated into zMenu inventories in seconds.
+
+```
+/zm convert deluxemenus
+```
+
+Everything that cannot be converted exactly is listed at the top of each converted file, and your DeluxeMenus files are never modified. [Read the migration guide →](./convert-deluxemenus)
+
+## Edit live with the hot reload
+
+Save a file, the menu is updated in game. **No `/zm reload`, no restart.** With the [hot reload](./hot-reload) enabled, zMenu watches your `inventories/` folder and reloads, loads or unloads inventories as soon as their files change. Players with the menu open see the new version instantly, on the same page, and a file with an error never replaces the working version.
+
+```yaml
+# config.yml
+hot-reload:
+  enable: true
+```
+
 ## Key Features
+
+### Migration & Workflow
+- **[DeluxeMenus converter](./convert-deluxemenus)**: convert all your DeluxeMenus menus with `/zm convert deluxemenus`
+- **[Hot reload](./hot-reload)**: changes to your inventory files are applied instantly, without any command
+- **Online editor**: design menus visually on [minecraft-inventory-builder.com](https://minecraft-inventory-builder.com)
 
 ### Highly Customizable Inventories
 - Create inventories of any size (9 to 54 slots)
@@ -53,6 +78,8 @@ zMenu is a premium-quality inventory plugin that enables server administrators t
 
 | Feature | zMenu | Other Plugins |
 |---------|-------|---------------|
+| Import DeluxeMenus menus | One command | Rewrite by hand |
+| Hot reload | Automatic, no command | Manual reload |
 | Button Types | 9+ built-in | Limited |
 | Action Types | 28+ | Basic |
 | Multi-page Support | Native | Often requires workarounds |
@@ -100,14 +127,14 @@ This creates a simple 27-slot inventory with a diamond in the center that sends 
 
 ## Supported Minecraft Versions
 
-zMenu supports Minecraft versions **1.19 to 1.21+** and works with:
+zMenu supports Minecraft versions **1.20.6 and newer** and works with:
 - Paper (required)
 - Purpur
 - Pufferfish
 - Folia
 
 :::warning Paper Required
-As of version **1.1.1.6**, zMenu is **Paper-only**. The Spigot `plugin.yml` has been removed in favour of `paper-plugin.yml`. zMenu no longer runs on Spigot — you must use Paper or a Paper fork (Purpur, Pufferfish) or Folia.
+As of version **1.1.1.6**, zMenu is **Paper-only** — you must use Paper or a Paper fork (Purpur, Pufferfish) or Folia. On Spigot the plugin still loads, but only to print a warning explaining that Paper is required: no zMenu feature works there.
 :::
 
 ## Next Steps
@@ -115,9 +142,11 @@ As of version **1.1.1.6**, zMenu is **Paper-only**. The Spigot `plugin.yml` has 
 Ready to get started? Follow these steps:
 
 1. [Install zMenu](./installation) on your server
-2. Learn about the [configuration system](./configurations/informations)
-3. [Create your first inventory](./configurations/inventories/create-inventory)
-4. Explore [button types](./configurations/buttons/button) and [actions](./configurations/buttons/actions)
+2. Using DeluxeMenus? [Convert your menus](./convert-deluxemenus) in one command
+3. Enable the [hot reload](./hot-reload) to see your changes instantly
+4. Learn about the [configuration system](./configurations/informations)
+5. [Create your first inventory](./configurations/inventories/create-inventory)
+6. Explore [button types](./configurations/buttons/button) and [actions](./configurations/buttons/actions)
 
 ## Getting Help
 

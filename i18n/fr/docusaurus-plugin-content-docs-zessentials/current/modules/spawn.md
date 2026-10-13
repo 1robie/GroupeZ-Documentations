@@ -1,14 +1,14 @@
 ---
 sidebar_position: 16
 title: Module Spawn
-description: Gestion du spawn serveur avec comportement de réapparition configurable
+description: Gestion du spawn du serveur avec un comportement de réapparition configurable
 ---
 
 # Module Spawn
 
 **Fichier :** `modules/spawn/config.yml`
 
-Le module Spawn gère le point de spawn du serveur et contrôle la manière dont les joueurs sont gérés lors de la **réapparition** et de la **connexion**. Il offre un contrôle précis sur les priorités de réapparition (lit, home, ancre de réapparition) et vous permet de configurer si les joueurs sont téléportés au spawn lors de leur première connexion ou à chaque connexion.
+Le module Spawn gère le point de spawn du serveur et le point de premier spawn, et contrôle l'endroit où les joueurs apparaissent lors de la **réapparition** et de la **connexion**. Il permet de choisir si les lits et les ancres de réapparition sont respectés, ainsi que la priorité d'événement à laquelle zEssentials gère les réapparitions et les premières connexions, afin de cohabiter avec d'autres plugins comme Multiverse.
 
 ---
 
@@ -16,11 +16,31 @@ Le module Spawn gère le point de spawn du serveur et contrôle la manière dont
 
 ```yaml
 enable: true
-respawn-listener-priority: highest  # none, lowest, low, normal, high, highest
+
+# What priority should we use for handling respawns?
+# Set this to none, if you want vanilla respawning behaviour.
+# Set this to lowest, if you want Multiverse to handle the respawning.
+# Set this to high, if you want zEssentials to handle the respawning.
+# Set this to highest, if you want to force zEssentials to handle the respawning.
+# Note: Changes will not apply until after the server is restarted.
+respawn-listener-priority: highest
+
+# What priority should we use for handling spawning on joining the server?
+# See respawn-listener-priority for possible values.
+# Note: Changing this may impact or break spawn-on-join functionality.
+# Note: Changes will not apply until after the server is restarted.
 spawn-join-listener-priority: highest
+
+# When the player dies, does he have to respawn to the respawn anchor
 respawn-at-anchor: false
+
+# When users die, should they respawn at their first home, instead of the spawnpoint?
 respawn-at-home: false
+
+# When users die, should they respawn at their bed instead of the spawnpoint?
 respawn-at-bed: true
+
+# Allows teleporting the player to spawn when logged in
 teleport-at-spawn-on-join: false
 ```
 
@@ -30,46 +50,66 @@ teleport-at-spawn-on-join: false
 
 | Option | Type | Par Défaut | Description |
 |--------|------|------------|-------------|
-| `enable` | Boolean | `true` | Activer ou désactiver le module Spawn |
-| `respawn-listener-priority` | String | `highest` | La priorité d'événement Bukkit pour le listener de réapparition. Valeurs acceptées : `none`, `lowest`, `low`, `normal`, `high`, `highest`. Utilisez `none` pour désactiver entièrement le listener de réapparition |
-| `spawn-join-listener-priority` | String | `highest` | La priorité d'événement Bukkit pour le listener de connexion qui gère la téléportation au spawn. Valeurs acceptées : `none`, `lowest`, `low`, `normal`, `high`, `highest`. Utilisez `none` pour désactiver entièrement le listener de connexion |
-| `respawn-at-anchor` | Boolean | `false` | Si `true`, les joueurs réapparaîtront à leur ancre de réapparition (Nether) lorsqu'elle est disponible |
-| `respawn-at-home` | Boolean | `false` | Si `true`, les joueurs réapparaîtront à leur emplacement home (défini via `/sethome`) lorsqu'il est disponible |
-| `respawn-at-bed` | Boolean | `true` | Si `true`, les joueurs réapparaîtront à l'emplacement de leur lit lorsqu'il est disponible |
-| `teleport-at-spawn-on-join` | Boolean | `false` | Si `true`, les joueurs sont téléportés au point de spawn du serveur à chaque connexion |
+| `enable` | Boolean | `true` | Active ou désactive le module Spawn |
+| `respawn-listener-priority` | String | `highest` | Priorité d'événement de l'écouteur de réapparition. Valeurs acceptées : `none`, `lowest`, `low`, `normal`, `high`, `highest`. `none` désactive l'écouteur (comportement vanilla) |
+| `spawn-join-listener-priority` | String | `highest` | Priorité d'événement de l'écouteur qui définit le point d'apparition d'un joueur qui se connecte pour la première fois. Valeurs acceptées : `lowest`, `low`, `normal`, `high`, `highest` |
+| `respawn-at-anchor` | Boolean | `false` | Si `true`, un joueur qui réapparaît à une ancre de réapparition conserve cette position. Si `false`, il est envoyé au spawn du serveur |
+| `respawn-at-home` | Boolean | `false` | Réservé à une future version : la réapparition à une résidence **n'est pas encore implémentée** et cette option n'a actuellement aucun effet |
+| `respawn-at-bed` | Boolean | `true` | Si `true`, un joueur qui réapparaît à son lit conserve cette position. Si `false`, il est envoyé au spawn du serveur |
+| `teleport-at-spawn-on-join` | Boolean | `false` | Si `true`, les joueurs sont téléportés au spawn du serveur à chaque connexion |
 
-:::info Priorité du Listener
-Les options `respawn-listener-priority` et `spawn-join-listener-priority` contrôlent l'ordre dans lequel zEssentials traite les événements de réapparition et de connexion par rapport aux autres plugins. Les définir sur `highest` garantit que zEssentials a le dernier mot. Définissez-les sur `none` pour désactiver complètement ce listener, laissant d'autres plugins le gérer à la place.
+:::info Les priorités des écouteurs sont désormais respectées
+Avant la version 1.0.3.8, `respawn-listener-priority` et `spawn-join-listener-priority` étaient ignorées et les deux écouteurs étaient toujours enregistrés avec la priorité `NORMAL`. Ils utilisent maintenant la valeur configurée, `HIGHEST` par défaut, ce qui donne le dernier mot à zEssentials face aux autres plugins. Utilisez `lowest` si un autre plugin (par exemple Multiverse) doit décider à sa place.
 :::
+
+:::warning
+`none` n'est supporté que pour `respawn-listener-priority`. Ne l'utilisez pas pour `spawn-join-listener-priority`.
+:::
+
+Toute modification des priorités nécessite un **redémarrage du serveur**.
 
 ---
 
 ## Comportement de Réapparition
 
-Lorsqu'un joueur meurt et réapparaît, le plugin vérifie les emplacements suivants par ordre de priorité :
+Lorsqu'un joueur réapparaît et qu'un spawn a été défini avec `/setspawn` :
 
-1. **Ancre de Réapparition** -- Si `respawn-at-anchor` est `true` et que le joueur a une ancre de réapparition valide définie.
-2. **Home** -- Si `respawn-at-home` est `true` et que le joueur a un emplacement home défini.
-3. **Lit** -- Si `respawn-at-bed` est `true` et que le joueur a un lit de réapparition valide.
-4. **Spawn du Serveur** -- Si aucune des conditions ci-dessus n'est remplie, le joueur réapparaît au point de spawn du serveur.
+1. **Ancre de réapparition** -- Si la réapparition a lieu à une ancre et que `respawn-at-anchor` vaut `true`, l'ancre est conservée.
+2. **Lit** -- Si la réapparition a lieu à un lit et que `respawn-at-bed` vaut `true`, le lit est conservé.
+3. **Spawn du serveur** -- Sinon, le joueur réapparaît au spawn du serveur.
+
+Si aucun spawn n'est défini, zEssentials ne modifie pas le point de réapparition.
 
 :::tip
-Un seul emplacement de réapparition est utilisé par mort. La première option valide dans la chaîne de priorité ci-dessus est sélectionnée. Si vous souhaitez que les joueurs réapparaissent toujours au spawn, définissez les trois options (`respawn-at-anchor`, `respawn-at-home`, `respawn-at-bed`) sur `false`.
+Pour toujours faire réapparaître les joueurs au spawn, mettez `respawn-at-anchor` et `respawn-at-bed` à `false`.
 :::
 
-:::warning
-Si `respawn-at-bed` est `true` (la valeur par défaut), les joueurs ayant un lit valide réapparaîtront à celui-ci plutôt qu'au spawn du serveur. Il s'agit du comportement vanilla standard. Définissez-le sur `false` si vous souhaitez remplacer ce comportement pour votre serveur.
+:::note Folia
+Sur Folia, le spawn du serveur est défini comme point de réapparition du joueur au moment de sa mort.
 :::
+
+---
+
+## Première Connexion
+
+Le premier spawn se définit avec `/setfirstspawn`. Les nouveaux joueurs y sont envoyés uniquement si la **téléportation à la première connexion** est activée dans le fichier principal `config.yml` :
+
+```yaml
+# config.yml
+enable-first-join-teleport: false
+```
+
+Cette option est **désactivée par défaut** depuis la 1.0.3.9. Lorsqu'elle est activée, un joueur qui se connecte pour la première fois apparaît au premier spawn, ou au spawn du serveur si aucun premier spawn n'est défini. Le point d'apparition est défini pendant la connexion (avec `spawn-join-listener-priority`), les nouveaux joueurs apparaissent donc directement au bon endroit.
 
 ---
 
 ## Fonctionnement
 
-1. Un administrateur définit le point de spawn en utilisant `/setspawn` à l'emplacement souhaité.
-2. Optionnellement, un spawn de première connexion est défini en utilisant `/setfirstspawn` pour les nouveaux joueurs.
-3. Lorsqu'un joueur meurt, le listener de réapparition évalue les options de réapparition configurées et téléporte le joueur en conséquence.
-4. Lorsqu'un joueur se connecte, si `teleport-at-spawn-on-join` est `true`, il est téléporté au spawn du serveur.
-5. Les joueurs se connectant pour la première fois sont téléportés à l'emplacement du premier spawn (si configuré), indépendamment du paramètre `teleport-at-spawn-on-join`.
+1. Un administrateur définit le point de spawn avec `/setspawn` à l'emplacement souhaité.
+2. Optionnellement, un premier spawn est défini avec `/setfirstspawn` et `enable-first-join-teleport` est activé dans `config.yml`.
+3. Lorsqu'un joueur meurt, l'écouteur de réapparition applique les règles ci-dessus.
+4. Lorsqu'un joueur se connecte, si `teleport-at-spawn-on-join` vaut `true`, il est téléporté au spawn du serveur.
+5. Les joueurs peuvent revenir au spawn à tout moment avec `/spawn`.
 
 ---
 
@@ -77,10 +117,10 @@ Si `respawn-at-bed` est `true` (la valeur par défaut), les joueurs ayant un lit
 
 | Commande | Permission | Description |
 |----------|------------|-------------|
-| `/spawn` | `essentials.spawn` | Se téléporter au point de spawn du serveur |
-| `/setspawn` | `essentials.setspawn` | Définir le point de spawn du serveur à votre position actuelle |
-| `/firstspawn` | `essentials.firstspawn` | Se téléporter au point de spawn de première connexion |
-| `/setfirstspawn` | `essentials.setfirstspawn` | Définir le point de spawn de première connexion à votre position actuelle |
+| `/spawn [joueur]` | `essentials.spawn` | Se téléporter au spawn du serveur. Téléporter un autre joueur nécessite `essentials.spawn.other` |
+| `/setspawn` | `essentials.set.spawn` | Définit le spawn du serveur à votre position actuelle |
+| `/firstspawn [joueur]` | `essentials.spawn.first` | Se téléporter au premier spawn. Téléporter un autre joueur nécessite `essentials.spawn.other` |
+| `/setfirstspawn` | `essentials.set.first.spawn` | Définit le premier spawn à votre position actuelle |
 
 Pour la liste complète des commandes, consultez [Commandes & Permissions](../commands-permissions).
 
@@ -90,11 +130,8 @@ Pour la liste complète des commandes, consultez [Commandes & Permissions](../co
 
 ### Toujours Réapparaître au Spawn
 
-Pour forcer tous les joueurs à réapparaître au spawn du serveur indépendamment des lits, ancres ou homes :
-
 ```yaml
 respawn-at-anchor: false
-respawn-at-home: false
 respawn-at-bed: false
 ```
 
@@ -108,12 +145,12 @@ teleport-at-spawn-on-join: true
 
 ### Laisser d'Autres Plugins Gérer la Réapparition
 
-Pour désactiver la gestion de réapparition de zEssentials et laisser un autre plugin (par ex., un plugin de mini-jeu) contrôler le comportement de réapparition :
+Pour désactiver la gestion de la réapparition par zEssentials et laisser un autre plugin (par exemple un plugin de mini-jeux) la contrôler :
 
 ```yaml
 respawn-listener-priority: none
 ```
 
 :::note
-Définir la priorité du listener sur `none` désactive complètement ce listener. C'est différent de le définir sur `lowest`, qui traite quand même l'événement mais permet à d'autres plugins de le remplacer.
+Mettre la priorité de l'écouteur de réapparition à `none` le désactive complètement. C'est différent de `lowest`, qui traite toujours l'événement mais laisse les plugins écoutant à une priorité plus élevée modifier la position.
 :::

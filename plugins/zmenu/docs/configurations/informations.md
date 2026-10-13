@@ -67,7 +67,7 @@ plugins/zMenu/
 1. **One inventory per file** - Each YAML file in `inventories/` defines one inventory
 2. **Subfolders supported** - Organize inventories in subfolders
 3. **Reusability** - Use patterns and items to avoid repetition
-4. **Hot reload** - Use `/zm reload` to apply changes without restart
+4. **Hot reload** - Enable the [hot reload](../hot-reload) and your inventory changes are applied as soon as you save the file, or use `/zm reload` to apply changes without restart
 
 ## Color Codes
 

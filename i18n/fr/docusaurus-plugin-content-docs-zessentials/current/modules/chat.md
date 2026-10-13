@@ -1,14 +1,18 @@
 ---
 sidebar_position: 3
 title: Module Chat
-description: Formatage complet du chat, moderation, placeholders et fonctionnalites interactives
+description: Formatage complet du chat, modération, placeholders et fonctionnalités interactives
 ---
 
 # Module Chat
 
 **Fichier :** `modules/chat/config.yml`
 
-Le module Chat est l'un des modules les plus riches en fonctionnalites de zEssentials. Il controle tous les aspects du chat du serveur, notamment le formatage, les outils de moderation, l'anti-spam, les elements interactifs, les mentions, le chat local, l'affichage d'objets, les liens cliquables, les regles personnalisees, les boutons d'action de moderateur et le stockage optionnel de l'historique du chat. Le module utilise un **systeme de permissions base sur les priorites** pour les formats de chat et MiniMessage pour le formatage de texte enrichi.
+Le module Chat est l'un des modules les plus complets de zEssentials. Il gère tous les aspects du chat du serveur : formatage, outils de modération, anti-spam, mentions (pings), chat local, affichage d'objets, liens et commandes cliquables, règles personnalisées, boutons d'action pour les modérateurs et stockage de l'historique du chat. Le module utilise un **système de formats basé sur des priorités et des permissions** ainsi que MiniMessage pour la mise en forme.
+
+:::info Paper uniquement
+Le format du chat est appliqué via l'événement `AsyncChatEvent` de Paper. Mettez `enable-chat-format: false` si vous souhaitez qu'un autre plugin de chat gère le formatage.
+:::
 
 ---
 
@@ -18,369 +22,443 @@ Les permissions suivantes permettent aux joueurs de contourner certaines restric
 
 | Permission | Description |
 |------------|-------------|
-| `essentials.chat.bypass.alphanumeric` | Contourner le filtre regex alphanumerique |
-| `essentials.chat.bypass.dynamic.cooldown` | Contourner le temps de recharge dynamique du chat (anti-spam) |
-| `essentials.chat.bypass.link` | Contourner le filtre de liens/URL dans le chat |
-| `essentials.chat.bypass.same.message` | Contourner la detection de messages en double |
-| `essentials.chat.bypass.disable` | Contourner la restriction de chat desactive (parler lorsque le chat est desactive) |
-| `essentials.chat.moderator` | Accorde l'acces au bouton d'action de moderateur sur les messages du chat |
+| `essentials.chat.bypass.alphanumeric` | Contourne la vérification des caractères autorisés (`alphanumeric-regex`) |
+| `essentials.chat.bypass.dynamic.cooldown` | Contourne le délai dynamique du chat (anti-spam) |
+| `essentials.chat.bypass.link` | Contourne le filtre des liens (`link-regex`) |
+| `essentials.chat.bypass.same.message` | Contourne la détection des messages identiques |
+| `essentials.chat.bypass.caps` | Contourne la détection des majuscules |
+| `essentials.chat.bypass.flood` | Contourne la vérification anti-flood |
+| `essentials.chat.bypass.disable` | Permet de parler lorsque le chat est désactivé avec `/chatdisable` |
+| `essentials.chat.moderator` | Affiche le bouton `moderator-action` devant chaque message |
 
 ### Permissions de Formatage du Chat
 
-Ces permissions controlent quelles balises de formatage MiniMessage un joueur peut utiliser dans le chat :
+Ces permissions définissent les balises MiniMessage qu'un joueur peut utiliser dans le chat :
 
-| Permission | Balises Autorisees |
-|------------|-------------------|
-| `essentials.chat.color` | Balises de couleur (par exemple, `<red>`, `<#ff0000>`) |
-| `essentials.chat.decoration` | Balises de decoration (`<bold>`, `<italic>`, `<underlined>`, `<strikethrough>`, `<obfuscated>`) |
-| `essentials.chat.rainbow` | Balise de degrade arc-en-ciel (`<rainbow>`) |
-| `essentials.chat.gradient` | Balise de degrade (`<gradient:color1:color2>`) |
-| `essentials.chat.click` | Balises d'evenement de clic (`<click:action:value>`) |
-| `essentials.chat.hover` | Balises d'evenement de survol (`<hover:show_text:value>`) |
-| `essentials.chat.newline` | Balise de retour a la ligne (`<newline>`) |
-| `essentials.chat.reset` | Balise de reinitialisation (`<reset>`) |
-| `essentials.chat.font` | Balise de police (`<font:name>`) |
-| `essentials.chat.keybind` | Balise de raccourci clavier (`<keybind:key>`) |
-| `essentials.chat.link` | Balises d'URL cliquables |
+| Permission | Balises autorisées |
+|------------|--------------------|
+| `essentials.chat.color` | Couleurs (par exemple `<red>`, `<#ff0000>`) |
+| `essentials.chat.decoration` | Décorations (`<bold>`, `<italic>`, `<underlined>`, `<strikethrough>`, `<obfuscated>`) |
+| `essentials.chat.rainbow` | Arc-en-ciel (`<rainbow>`) |
+| `essentials.chat.gradient` | Dégradé (`<gradient:couleur1:couleur2>`) |
+| `essentials.chat.click` | Événements de clic (`<click:action:valeur>`) |
+| `essentials.chat.hover` | Événements de survol (`<hover:show_text:valeur>`) |
+| `essentials.chat.newline` | Retour à la ligne (`<newline>`) |
+| `essentials.chat.reset` | Réinitialisation (`<reset>`) |
+| `essentials.chat.font` | Police (`<font:nom>`) |
+| `essentials.chat.keybind` | Touche (`<key:...>`) |
+| `essentials.chat.link` | Transforme automatiquement les liens du joueur en liens cliquables (`link-transform`). Le joueur doit aussi avoir `essentials.chat.click` |
 
 ---
 
 ## Configuration Source
 
+Le fichier par défaut (les commentaires de permissions en haut du fichier et certains commentaires répétés sont omis ici) :
+
 ```yaml
 enable: true
 
-# Regex and filter toggles
+# Enables verification of authorized characters in chat
 enable-alphanumeric-regex: true
-enable-link-regex: true
-enable-itemadders-font-regex: true
 
-# Anti-spam systems
+# Check whether the message contains links
+enable-link-regex: true
+
+# Allows to apply a dynamic cooldown between each message of a player, the more the player will spam the more he will have a great cooldown
 enable-chat-dynamic-cooldown: true
+
+# Check player tries to put the same message multiple times
 enable-same-message-cancel: true
 
-# Local (distance-based) chat
+# Enables local chat where messages are only visible to nearby players unless prefixed with '!'
 enable-local-chat: false
+
+# Maximum distance in blocks for local chat messages
 local-chat-distance: 100
 
-# Core chat features
+# Apply a format to the chat, disabled on if you want another plugin to handle this
 enable-chat-format: true
+
+# Turns links into clickable links if the player has the essentials.chat.link permission, the player must also have permission: essentials.chat.click
+# check out link-transform
 enable-link-transform: true
+
+# Stores all player messages in the database. Works only with MYSQL storage
+# Also provides access to all player messages with the /chathistory command
 enable-chat-messages: true
 
-# Caps detection
+# Regex to check allowed characters
+# You can test the regex here before changing the default one: https://regex101.com/
+alphanumeric-regex: '^[a-zA-Z0-9_.?!^¨%ù*&é"#''{(\[-|èêë`\\çà)\]=}ûî+<>:²€$/\\-\\,-â@;ô ]+$'
+
+# Regex to check links
+# You can test the regex here before changing the default one: https://regex101.com/
+link-regex: '[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)'
+
+# Regex to check pub message
+pub-regex: '.*(&[0-9a-fk-or]|#[0-9a-fA-F]{6}|%[^%]+%|<[^>]+>).*'
+
+# Allows to activate the flood check in the message, if the player will write messages with too many characters in capital letter, the message will be blocked
 enable-caps: true
+
+# Maximum character percentage per sentence, between 0 and 1
 caps-threshold: 0.5
 
-# Anti-flood
+# Enable anti-flood regex
 enable-anti-flood: true
+
+# Allows players to avoid writing the same characters several times in a row, here 4 times. Thus avoid messages like "AHHHHHHHHHHHH"
 anti-flood-regex: "(.)\\1{3,}"
 
-# Ping (@mention) system
-enable-ping: true
-enable-player-ping-sound: true
-player-ping-sound: BLOCK_NOTE_BLOCK_PLING
-player-ping-sound-volume: 0.8
-player-ping-sound-pitch: 1
-player-ping-color: "<red>%name%</red><red>"
-player-ping-color-other: "<white>%name%</white>"
-
-# Date format for chat history
-date-format: "yyyy-MM-dd HH:mm:ss"
-
-# Dynamic cooldown thresholds
+# Set the number of messages and cooldown between each message in milliseconds
+# The faster the player will send message the faster the cooldown between each message will be
 chat-cooldowns:
-  2: 1500
-  4: 12000
-  10: 60000
+  - messages: 2
+    cooldown: 1500 # max 1.5s
+  - messages: 4
+    cooldown: 12000 # max 12s
+  - messages: 10
+    cooldown: 60000 # max 60s
+
+# Number of messages that will be in memory to be analyzed during the cooldown
 chat-cooldown-max: 50
 
-# Chat format with priority-based permissions
+# Chat format with permissions
+#
+# Use https://webui.advntr.dev/ to create your format quickly
+#
+# Available placeholder (you can use PlaceholderAPI here):
+# %player% - Player's name
+# %displayName% - Player's display name
+# <message> - Player's message, Attention for message it's not %message% !
+# %moderator_action% - Moderation action, see moderator-action
 chat-formats:
-  - priority: 0
-    permission: "zessentials.chat.default"
-    format: "<gray>%player% <dark_gray>>> <white>%message%"
   - priority: 1
-    permission: "zessentials.chat.vip"
-    format: "<gold>[VIP] <yellow>%player% <dark_gray>>> <white>%message%"
+    permission: "essentials.chat.format.vip"
+    format: "<hover:show_text:'&cReport this message'><click:run_command:'/report %player% chat'><#ff0000>⚠</click></hover> %moderator_action%<#ffffff><hover:show_text:'#ffd353ℹ Informations#3f3f3f:<newline>#3f3f3f• &7Money#3f3f3f: #4cd5ff%zessentials_user_formatted_balance_money%<newline>#3f3f3f• &7Coins#3f3f3f: #4cd5ff%zessentials_user_formatted_balance_coins%<newline><newline>&f➥ &7Click for more information'>%player%</hover> <#333333>» <#ffff6b><click:suggest_command:'/msg %player% '><hover:show_text:'&fSend a private message'><message></hover></click>"
   - priority: 2
-    permission: "zessentials.chat.admin"
-    format: "<red>[Admin] <white>%player% <dark_gray>>> <white>%message%"
+    permission: "essentials.chat.format.admin"
+    format: "<#ffffff><hover:show_text:'#ffd353ℹ Informations#3f3f3f:<newline>#3f3f3f• &7Money#3f3f3f: #4cd5ff%zessentials_user_formatted_balance_money%<newline>#3f3f3f• &7Coins#3f3f3f: #4cd5ff%zessentials_user_formatted_balance_coins%<newline><newline>&f➥ &7Click for more information'>%player%</hover> <#333333>» <#ff4444><click:suggest_command:'/msg %player% '><hover:show_text:'&fSend a private message'><message></hover></click>"
 
-# Chat placeholders (custom replacements in chat)
+# Default chat format
+default-chat-format: "<hover:show_text:'&cReport this message'><click:run_command:'/report %player% chat'><#ff0000>⚠</click></hover> %moderator_action%<#ffffff><hover:show_text:'#ffd353ℹ Informations#3f3f3f:<newline>#3f3f3f• &7Money#3f3f3f: #4cd5ff%zessentials_user_formatted_balance_money%<newline>#3f3f3f• &7Coins#3f3f3f: #4cd5ff%zessentials_user_formatted_balance_coins%<newline><newline>&f➥ &7Click for more information'>%player%</hover> <#333333>» <gray><click:suggest_command:'/msg %player% '><hover:show_text:'&fSend a private message'><message></hover></click>"
+
+# Allows players who have the essentials.chat.moderator permission to have a different view from other players.
+# By default, moderators will have a button to punish the player
+#
+# Available placeholder (you can use PlaceholderAPI here):
+# %player% - Player's name
+moderator-action: "<hover:show_text:'<#ff8888>Punish the player'><click:run_command:'/sc %player%'><#ff8888>✗</click></hover> "
+
+# Turns a link into a clickable link by players
+link-transform: "<hover:show_text:'&fOpen the link'><click:open_url:'%url%'>%url%</click></hover>"
+
+# Date format for /chathistory
+date-format: "yyyy-MM-dd HH:mm:ss"
+
+# Chat ping
+
+# To ping a player you must use the prefix @<nickname>
+enable-ping: true
+
+# Allows to activate the sound during a player ping, the player can disable the sound with the command /pingsound
+enable-player-ping-sound: true
+
+# Sound played when player is pinged
+player-ping-sound: BLOCK_NOTE_BLOCK_PLING
+
+# Ping sound volume
+player-ping-sound-volume: 0.8
+
+# Ping sound pitch
+player-ping-sound-pitch: 1
+
+# Color of ping displayed to the player
+player-ping-color: "<red>%name%</red><red>"
+
+# Color of ping displayed for other players
+player-ping-color-other: "<white>%name%</white>"
+
+# Placeholders
+
 chat-placeholders:
-  - placeholder: "[ping]"
-    replacement: "<yellow>%player_ping%ms</yellow>"
-  - placeholder: "[money]"
-    replacement: "<green>%zessentials_user_formatted_balance_default%</green>"
+  - name: "ping" # Placeholder name, the name must consist only of lowercase letters, numbers 0 to 9 and characters _ and -
+    regex: "(?i)\\[ping\\]" # [ping] placeholder
+    result: "%player_ping% ms" # PlaceholderAPI extension Player: https://api.extendedclip.com/expansions/player/
+    permission: "zessentials.chat.placeholder.ping" # You must define a permission
+  - name: "block"
+    regex: "(?i)\\[blocks\\]" # [blocks] placeholder
+    result: "&a%statistic_mine_block% &fblocks" # PlaceholderAPI extension Statistic: https://api.extendedclip.com/expansions/statistic/
+    permission: "zessentials.chat.placeholder.block"
+  - name: "money"
+    regex: "(?i)\\[money\\]" # [money] placeholder
+    result: "%zessentials_user_formatted_balance_money%"
+    permission: "zessentials.chat.placeholder.money"
+  - name: "coins"
+    regex: "(?i)\\[coins\\]" # [coins] placeholder
+    result: "%zessentials_user_formatted_balance_coins%"
+    permission: "zessentials.chat.placeholder.coins"
+  - name: "playtime"
+    regex: "(?i)\\[playtime\\]" # [playtime] placeholder
+    result: "&fI've played &7%zessentials_user_playtime_formatted%"
+    permission: "zessentials.chat.placeholder.playtime"
+  - name: "pos"
+    regex: "(?i)\\[pos\\]" # [pos] placeholder
+    result: "&bWorld: &f%player_world% &eX: &f%player_x% &eY: &f%player_y% &eZ: &f%player_z%"
+    permission: "zessentials.chat.placeholder.pos"
 
-# Item display in chat
-show-item:
+# Displays the item in your hand
+item-placeholder:
   enable: true
-  placeholder: "[item]"
-  format: "<hover:show_item:%item_nbt%><gold>[%item_name% x%item_amount%]</hover>"
+  regex: "(?i)\\[item\\]|\\[i\\]" # [item] or [i] placeholder
+  result: "&bx<amount> &f<item>"
+  permission: "zessentials.chat.placeholder.item" # You must define a permission
+  # Regex used to ensure item names do not contain forbidden characters when displayed in chat
+  item-name-regex: "^[a-zA-Z0-9_.?!^¨%ù*&é\"#'{(\\[-|èêë`\\\\çà)\\]=}ûî+<>:²€$/\\-\\,-â@;ô ]+$"
 
-# Command placeholder (./command becomes clickable)
-command-placeholder:
+# Allows to replace a text to transform it into clickable text to suggest a command
+# Message: "Please open the auction house with the ./zah" will be transformed into "Please open the auction house with the /zah" with /zah that will be clickable
+# If you want to use a command in a sentence, you must do this: ./<your command> [<aliases>].
+# Example: "Please use ./zah. to open the auction house"
+command-placeholder: # ./<command>. placeholder
   enable: true
+  result: "<hover:show_text:'<yellow>Try this command'><click:suggest_command:'/%fixed_command%'><yellow>/%command%</yellow></click></hover>"
+  permission: "zessentials.chat.placeholder.command" # You must define a permission
 
-# Custom rules (regex-based)
+  # Replace check all messages sent to players and replace the command if it exists
+  # You must use the ProtocolLib plugin
+  # You must be on a paper basis, using spigot will not work
+  enable-replace-all-message: false
+
+# Allows to define custom rules with regex
 custom-rules:
-  - regex: "(?i)(badword1|badword2)"
-    action: cancel
-    message: "&cThat word is not allowed."
-  - regex: "(?i)(advertising\\.com)"
-    action: cancel
-    message: "&cAdvertising is not allowed."
-
-# Ping system
-ping:
-  enable: true
-  sound: BLOCK_NOTE_BLOCK_PLING
-  volume: 0.8
-  pitch: 1.0
-
-# Moderator action button
-moderator-button:
-  enable: true
-
-# Link transform (clickable URLs)
-link-transform:
-  enable: true
-
-# Chat history storage (MySQL only)
-chat-history:
-  enable: false
+  - regex: "(can|may|would you like if) i (have|be|become|get|has) (op|admin|mod|builder)"
+    permission: "essentials.chat.bypass.custom.rules"
+    message: "&cCurrently, we are not looking for new staff."
+  - regex: "(do|are) you (need|wish|looking for) (any|some|one|good) (op|ops|operators|admins|mods|builders|new people|ateam)"
+    permission: "essentials.chat.bypass.custom.rules"
+    message: "&cCurrently, we are not looking for new staff."
+  - regex: "((admin|op|team|server|owner) (is|are)) + *(dick|cock|duck|noob)"
+    permission: "essentials.chat.bypass.custom.rules"
+    message: "&cYet so much hate, we are only love"
+  - regex: "this server (is (bad|crappy|shitty)|suck)"
+    permission: "essentials.chat.bypass.custom.rules"
+    message: "&cNo, the server is great, you’re the bad one!"
 ```
+
+:::note Option supprimée
+Les options `enable-itemadders-font-regex` / `itemadders-font-regex` ont été supprimées en 1.0.3.8 : la fonctionnalité n'a jamais été branchée et ces options n'avaient aucun effet. Vous pouvez les retirer de votre fichier existant sans risque.
+:::
 
 ---
 
 ## Options
 
-### Options Generales
+### Options Générales
 
-| Option | Type | Par Defaut | Description |
+| Option | Type | Par Défaut | Description |
 |--------|------|------------|-------------|
-| `enable` | Boolean | `true` | Activer ou desactiver entierement le module Chat |
-| `enable-chat-format` | Boolean | `true` | Activer le formatage du chat base sur les priorites |
-| `enable-chat-messages` | Boolean | `true` | Activer le pipeline de traitement des messages du chat |
-| `date-format` | String | `yyyy-MM-dd HH:mm:ss` | Format de date utilise pour les horodatages de l'historique du chat. Utilise les motifs Java `SimpleDateFormat` |
+| `enable` | Boolean | `true` | Active ou désactive entièrement le module Chat |
+| `enable-chat-format` | Boolean | `true` | Applique le format de chat de zEssentials (`chat-formats` / `default-chat-format`). Désactivez-le si un autre plugin formate le chat. Une fois désactivé, les filtres restent actifs mais le formatage, les pings, les placeholders de chat, la transformation des liens et le stockage de l'historique ne sont plus appliqués |
+| `enable-chat-messages` | Boolean | `true` | Enregistre chaque message du chat en base de données, pour les consulter avec `/chathistory`. Nécessite un stockage SQL (les messages ne sont pas enregistrés avec le stockage `JSON`) |
+| `date-format` | String | `yyyy-MM-dd HH:mm:ss` | Format de date utilisé par `/chathistory`. Suit les motifs Java `SimpleDateFormat` |
 
-### Filtres Regex
+### Filtres
 
-| Option | Type | Par Defaut | Description |
+| Option | Type | Par Défaut | Description |
 |--------|------|------------|-------------|
-| `enable-alphanumeric-regex` | Boolean | `true` | Lorsqu'active, les messages contenant des caracteres non alphanumeriques (sauf la ponctuation standard) sont bloques. Contournable avec `essentials.chat.bypass.alphanumeric` |
-| `enable-link-regex` | Boolean | `true` | Lorsqu'active, les messages contenant des URL/liens sont bloques. Contournable avec `essentials.chat.bypass.link` |
-| `enable-itemadders-font-regex` | Boolean | `true` | Lorsqu'active, filtre les caracteres de police personnalises ItemAdders des messages du chat |
+| `enable-alphanumeric-regex` | Boolean | `true` | Bloque les messages contenant des caractères non autorisés par `alphanumeric-regex`. Contournement : `essentials.chat.bypass.alphanumeric` |
+| `alphanumeric-regex` | String | *(voir ci-dessus)* | Regex des caractères autorisés |
+| `enable-link-regex` | Boolean | `true` | Bloque les messages contenant un lien (les espaces sont retirés avant la vérification). Contournement : `essentials.chat.bypass.link` |
+| `link-regex` | String | *(voir ci-dessus)* | Regex utilisée pour détecter les liens |
+| `pub-regex` | String | *(voir ci-dessus)* | Regex du contenu interdit dans les messages `/pub` (codes couleur, couleurs hexadécimales, placeholders et balises MiniMessage) |
+| `enable-caps` | Boolean | `true` | Bloque les messages (de plus de 3 caractères) contenant trop de majuscules. Les pseudos des joueurs connectés sont ignorés. Contournement : `essentials.chat.bypass.caps` |
+| `caps-threshold` | Double | `0.5` | Proportion maximale de majuscules, entre `0` et `1`. `0.5` bloque les messages contenant plus de 50 % de majuscules |
+| `enable-anti-flood` | Boolean | `true` | Bloque les messages correspondant à `anti-flood-regex`. Contournement : `essentials.chat.bypass.flood` |
+| `anti-flood-regex` | String | `(.)\\1{3,}` | Regex utilisée pour détecter le flood. Par défaut, bloque tout caractère répété 4 fois ou plus d'affilée |
 
-### Systemes Anti-Spam
+### Anti-Spam
 
-| Option | Type | Par Defaut | Description |
+| Option | Type | Par Défaut | Description |
 |--------|------|------------|-------------|
-| `enable-chat-dynamic-cooldown` | Boolean | `true` | Active le temps de recharge progressif qui augmente lorsqu'un joueur envoie des messages plus rapidement |
-| `enable-same-message-cancel` | Boolean | `true` | Annule les messages identiques au message precedent du joueur. Contournable avec `essentials.chat.bypass.same.message` |
-| `chat-cooldowns` | Map (Integer to Integer) | `{2: 1500, 4: 12000, 10: 60000}` | Seuils de temps de recharge dynamiques. Cle = nombre de messages, Valeur = temps de recharge en millisecondes applique apres avoir atteint ce nombre de messages |
-| `chat-cooldown-max` | Integer | `50` | Duree maximale du temps de recharge en secondes que le systeme dynamique peut imposer |
+| `enable-chat-dynamic-cooldown` | Boolean | `true` | Active le délai dynamique défini par `chat-cooldowns`. Contournement : `essentials.chat.bypass.dynamic.cooldown` |
+| `chat-cooldowns` | Liste | *(voir ci-dessus)* | Liste de règles, chacune avec `messages` et `cooldown` (millisecondes). Une règle signifie : un joueur peut envoyer au maximum `messages` messages en `cooldown` millisecondes |
+| `chat-cooldown-max` | Integer | `50` | Nombre de messages récents gardés en mémoire pour chaque joueur afin d'évaluer les règles. Doit être supérieur ou égal à la plus grande valeur de `messages` |
+| `enable-same-message-cancel` | Boolean | `true` | Annule un message identique (sans tenir compte de la casse) au message précédent du joueur. Contournement : `essentials.chat.bypass.same.message` |
 
-:::info Temps de Recharge Dynamique
-Le systeme de temps de recharge dynamique suit le nombre de messages qu'un joueur envoie dans une fenetre glissante. A mesure que le compteur augmente, des temps de recharge progressivement plus longs sont appliques :
-- Apres **2** messages rapides : **1500ms** (1,5 secondes) de temps de recharge
-- Apres **4** messages rapides : **12000ms** (12 secondes) de temps de recharge
-- Apres **10** messages rapides : **60000ms** (60 secondes) de temps de recharge
+:::info Délai dynamique
+Avec les règles par défaut, un joueur qui envoie :
+- **2** messages en **1,5 seconde**,
+- **4** messages en **12 secondes**,
+- ou **10** messages en **60 secondes**
 
-Les joueurs avec la permission `essentials.chat.bypass.dynamic.cooldown` sont exemptes.
+doit attendre la fin de la fenêtre correspondante avant de pouvoir envoyer un nouveau message. Le temps d'attente est affiché au joueur.
 :::
-
-### Detection des Majuscules
-
-| Option | Type | Par Defaut | Description |
-|--------|------|------------|-------------|
-| `enable-caps` | Boolean | `true` | Active la detection et le blocage des messages avec un nombre excessif de caracteres en majuscules |
-| `caps-threshold` | Double | `0.5` | Le ratio de caracteres en majuscules par rapport au total de caracteres qui declenche la detection. `0.5` signifie que les messages avec plus de 50% de lettres majuscules sont signales |
-
-### Anti-Flood
-
-| Option | Type | Par Defaut | Description |
-|--------|------|------------|-------------|
-| `enable-anti-flood` | Boolean | `true` | Active la detection et la suppression du flood de caracteres (par exemple, "helloooooo") |
-| `anti-flood-regex` | String | `(.)\\1{3,}` | Motif regex utilise pour detecter la repetition de caracteres. La valeur par defaut correspond a tout caractere repete 4 fois ou plus consecutivement |
 
 ### Chat Local
 
-| Option | Type | Par Defaut | Description |
+| Option | Type | Par Défaut | Description |
 |--------|------|------------|-------------|
-| `enable-local-chat` | Boolean | `false` | Active le chat local base sur la distance. Lorsqu'active, les messages ne sont visibles que par les joueurs situes dans la distance configuree |
-| `local-chat-distance` | Integer | `100` | Distance maximale en blocs dans laquelle les joueurs peuvent voir les messages des autres lorsque le chat local est active |
-
-:::tip
-Le chat local est utile pour les serveurs roleplay ou survie ou vous souhaitez que les joueurs ne communiquent qu'avec les joueurs proches. Les joueurs peuvent utiliser `/pub` pour envoyer des messages visibles par tous, quelle que soit la distance.
-:::
-
-### Systeme de Ping (@Mention)
-
-| Option | Type | Par Defaut | Description |
-|--------|------|------------|-------------|
-| `enable-ping` | Boolean | `true` | Active le systeme de ping par @mention dans le chat. Les joueurs peuvent taper `@NomDuJoueur` pour mentionner un autre joueur |
-| `enable-player-ping-sound` | Boolean | `true` | Jouer un effet sonore au joueur mentionne |
-| `player-ping-sound` | String | `BLOCK_NOTE_BLOCK_PLING` | L'effet sonore Minecraft joue lorsqu'un joueur est mentionne |
-| `player-ping-sound-volume` | Float | `0.8` | Volume du son de ping (0.0 a 1.0) |
-| `player-ping-sound-pitch` | Float | `1` | Tonalite du son de ping |
-| `player-ping-color` | String | `<red>%name%</red><red>` | Format MiniMessage pour la facon dont le joueur mentionne voit son propre nom mis en evidence dans le message |
-| `player-ping-color-other` | String | `<white>%name%</white>` | Format MiniMessage pour la facon dont les autres joueurs voient le nom du joueur mentionne dans le message |
+| `enable-local-chat` | Boolean | `false` | Active le chat local : les messages ne sont visibles que par les joueurs du même monde situés à moins de `local-chat-distance` blocs. Un message commençant par `!` est envoyé à tout le monde (le `!` est retiré) |
+| `local-chat-distance` | Double | `100` | Distance maximale en blocs des messages du chat local |
 
 ### Formats de Chat
 
-Les formats de chat utilisent un systeme de permissions base sur les priorites. Le plugin verifie chaque entree de format dans l'ordre de priorite (le plus bas en premier) et applique le premier format pour lequel le joueur possede la permission requise.
-
-| Option | Type | Par Defaut | Description |
+| Option | Type | Par Défaut | Description |
 |--------|------|------------|-------------|
-| `chat-formats` | List | *(voir ci-dessus)* | Liste des entrees de format de chat, chacune avec une priorite, une permission et une chaine de format MiniMessage |
-| `chat-formats[].priority` | Integer | - | Ordre de priorite. Les valeurs plus basses sont verifiees en premier |
-| `chat-formats[].permission` | String | - | Noeud de permission requis pour que ce format s'applique |
-| `chat-formats[].format` | String | - | Chaine de format de chat MiniMessage. Utilisez `%player%` pour le nom du joueur et `%message%` pour le contenu du message |
+| `chat-formats` | Liste | *(voir ci-dessus)* | Formats avec une `priority`, une `permission` et un `format` |
+| `chat-formats[].priority` | Integer | - | Parmi les formats dont le joueur possède la permission, celui avec la priorité la **plus élevée** est utilisé |
+| `chat-formats[].permission` | String | - | Permission requise pour ce format |
+| `chat-formats[].format` | String | - | Format MiniMessage. Placeholders : `%player%`, `%displayName%`, `<message>` (le message, **pas** `%message%`), `%moderator_action%` et les placeholders PlaceholderAPI |
+| `default-chat-format` | String | *(voir ci-dessus)* | Format utilisé lorsque le joueur ne possède aucune des permissions de `chat-formats` |
+| `moderator-action` | String | *(voir ci-dessus)* | Texte inséré à la place de `%moderator_action%` pour les lecteurs ayant `essentials.chat.moderator` (vide pour les autres). Par défaut, un bouton qui exécute `/sc %player%` |
+
+### Liens
+
+| Option | Type | Par Défaut | Description |
+|--------|------|------------|-------------|
+| `enable-link-transform` | Boolean | `true` | Transforme les URL `http://` et `https://` des joueurs ayant `essentials.chat.link` en liens cliquables. Le joueur doit aussi avoir `essentials.chat.click` |
+| `link-transform` | String | *(voir ci-dessus)* | Format MiniMessage d'un lien transformé. `%url%` est remplacé par l'URL |
+
+:::info
+Depuis la 1.0.3.6, les URL contenant `~`, `+` ou `#` sont correctement détectées, et les caractères spéciaux d'une URL ne cassent plus le remplacement.
+:::
+
+### Ping (@Mention)
+
+| Option | Type | Par Défaut | Description |
+|--------|------|------------|-------------|
+| `enable-ping` | Boolean | `true` | Active les pings : écrire `@<pseudo>` (3 à 16 caractères) met le pseudo en valeur dans le message |
+| `enable-player-ping-sound` | Boolean | `true` | Interrupteur global du son de ping. Lorsqu'il vaut `true`, chaque joueur peut encore le désactiver pour lui-même avec `/pingsound` |
+| `player-ping-sound` | String | `BLOCK_NOTE_BLOCK_PLING` | Son joué au joueur mentionné. Résolu via l'API XSound de zMenu, il fonctionne donc sur toutes les versions supportées. Un nom inconnu de XSound est joué comme son personnalisé (resource pack) |
+| `player-ping-sound-volume` | Float | `0.8` | Volume du son de ping |
+| `player-ping-sound-pitch` | Float | `1` | Hauteur (pitch) du son de ping |
+| `player-ping-color` | String | `<red>%name%</red><red>` | Affichage de la mention pour le joueur mentionné. `%name%` est remplacé par `@<pseudo>` |
+| `player-ping-color-other` | String | `<white>%name%</white>` | Affichage de la mention pour les autres joueurs |
+
+:::info
+Avant la 1.0.3.8, le son de ping ne se jouait pas sur Paper 1.21.3+ (`org.bukkit.Sound` est devenu une interface) et `enable-player-ping-sound` était ignoré. Ces deux problèmes sont corrigés.
+:::
 
 ### Placeholders de Chat
 
-Remplacements de texte personnalises dans les messages du chat. Lorsqu'un joueur tape un mot-cle de placeholder, il est remplace par du contenu dynamique.
+Mots-clés personnalisés remplacés dans les messages du chat.
 
-| Option | Type | Par Defaut | Description |
-|--------|------|------------|-------------|
-| `chat-placeholders` | List | *(voir ci-dessus)* | Liste des definitions de remplacement de placeholders |
-| `chat-placeholders[].placeholder` | String | - | Le motif de texte a rechercher dans le chat (par exemple, `[ping]`, `[money]`) |
-| `chat-placeholders[].replacement` | String | - | Le texte de remplacement MiniMessage. Supporte les placeholders PlaceholderAPI |
+| Option | Type | Description |
+|--------|------|-------------|
+| `chat-placeholders[].name` | String | Nom unique du placeholder : lettres minuscules, chiffres, `_` et `-` uniquement |
+| `chat-placeholders[].regex` | String | Regex recherchée dans le message (par exemple `(?i)\\[ping\\]` pour `[ping]`) |
+| `chat-placeholders[].result` | String | Texte de remplacement. Supporte les couleurs, MiniMessage, `%player%` et les placeholders PlaceholderAPI (résolus pour l'expéditeur) |
+| `chat-placeholders[].permission` | String | Permission associée au placeholder |
 
 ### Affichage d'Objets
 
-| Option | Type | Par Defaut | Description |
+| Option | Type | Par Défaut | Description |
 |--------|------|------------|-------------|
-| `show-item.enable` | Boolean | `true` | Active le placeholder `[item]` qui permet aux joueurs de montrer l'objet tenu en main dans le chat |
-| `show-item.placeholder` | String | `[item]` | Le texte que les joueurs tapent dans le chat pour afficher l'objet tenu en main |
-| `show-item.format` | String | *(voir ci-dessus)* | Format MiniMessage pour l'affichage de l'objet. Supporte `%item_name%`, `%item_amount%`, `%item_nbt%` |
+| `item-placeholder.enable` | Boolean | `true` | Active l'affichage d'objets |
+| `item-placeholder.regex` | String | `(?i)\\[item\\]\|\\[i\\]` | Texte remplacé par l'objet tenu en main principale (`[item]` ou `[i]`) |
+| `item-placeholder.result` | String | `&bx<amount> &f<item>` | Affichage de l'objet. `<amount>` et `<item>` sont remplacés. Le survol affiche l'infobulle de l'objet, le clic ouvre un aperçu de l'objet (via `/showitem`, valable 5 minutes) |
+| `item-placeholder.permission` | String | `zessentials.chat.placeholder.item` | Permission associée à l'affichage d'objets |
+| `item-placeholder.item-name-regex` | String | *(voir ci-dessus)* | Regex que le nom de l'objet doit respecter, sinon le message est refusé. Utilise `alphanumeric-regex` si elle est absente |
 
 ### Placeholder de Commande
 
-| Option | Type | Par Defaut | Description |
+| Option | Type | Par Défaut | Description |
 |--------|------|------------|-------------|
-| `command-placeholder.enable` | Boolean | `true` | Lorsqu'active, taper `./commande` dans le chat cree un texte cliquable qui execute la commande au clic |
+| `command-placeholder.enable` | Boolean | `true` | Transforme `./<commande>` (terminé par un `.` ou la fin du message) en texte cliquable qui suggère `/<commande>` |
+| `command-placeholder.result` | String | *(voir ci-dessus)* | Affichage de la commande. `%command%` est la commande, `%fixed_command%` la commande avec les apostrophes échappées |
+| `command-placeholder.permission` | String | `zessentials.chat.placeholder.command` | Permission associée au placeholder de commande |
+| `command-placeholder.enable-replace-all-message` | Boolean | `false` | Transforme aussi les commandes dans tous les messages envoyés aux joueurs. Nécessite ProtocolLib et Paper |
 
-### Regles Personnalisees
+### Règles Personnalisées
 
-Regles basees sur les regex qui peuvent detecter et agir sur les messages du chat. Les regles sont verifiees dans l'ordre.
+Règles basées sur des regex, vérifiées avant tous les autres filtres. Lorsqu'une règle correspond, le message est annulé et le `message` de la règle est envoyé au joueur.
 
-| Option | Type | Par Defaut | Description |
-|--------|------|------------|-------------|
-| `custom-rules` | List | *(voir ci-dessus)* | Liste des definitions de regles de chat personnalisees |
-| `custom-rules[].regex` | String | - | Motif d'expression reguliere a comparer aux messages du chat |
-| `custom-rules[].action` | String | - | Action a effectuer lorsque la regle correspond. `cancel` bloque le message |
-| `custom-rules[].message` | String | - | Message envoye au joueur lorsque son message est bloque par cette regle |
-
-### Bouton d'Action de Moderateur
-
-| Option | Type | Par Defaut | Description |
-|--------|------|------------|-------------|
-| `moderator-button.enable` | Boolean | `true` | Lorsqu'active, les joueurs avec la permission `essentials.chat.moderator` voient un bouton d'action a cote de chaque message du chat, permettant un acces rapide aux actions de moderation (mute, kick, etc.) sur l'expediteur du message |
-
-### Transformation de Liens
-
-| Option | Type | Par Defaut | Description |
-|--------|------|------------|-------------|
-| `link-transform.enable` | Boolean | `true` | Convertit automatiquement les URL postees dans le chat en liens cliquables |
-| `enable-link-transform` | Boolean | `true` | Bouton global pour la transformation de liens |
-
-### Historique du Chat
-
-| Option | Type | Par Defaut | Description |
-|--------|------|------------|-------------|
-| `chat-history.enable` | Boolean | `false` | Active le stockage des messages du chat dans la base de donnees pour la consultation de l'historique. **Necessite MySQL** |
+| Option | Type | Description |
+|--------|------|-------------|
+| `custom-rules[].regex` | String | Regex comparée au message |
+| `custom-rules[].permission` | String | Facultatif. Si elle est définie, la règle **ne s'applique qu'aux joueurs possédant cette permission** ; si elle est absente, la règle s'applique à tout le monde |
+| `custom-rules[].message` | String | Message envoyé au joueur lorsque la règle bloque un message |
 
 :::warning
-Le stockage de l'historique du chat necessite une base de donnees **MySQL** (ou MariaDB). Il n'est pas disponible avec SQLite. Activer cette fonctionnalite sur un serveur actif generera un nombre important d'ecritures en base de donnees.
+Malgré son nom, la permission `essentials.chat.bypass.custom.rules` utilisée dans le fichier par défaut n'exempte pas les joueurs d'une règle : une règle avec une `permission` ne s'applique qu'aux joueurs qui la **possèdent**. Pour appliquer une règle à tous les joueurs, supprimez sa ligne `permission`.
 :::
 
 ---
 
-## Commandes Associees
+## Commandes Associées
 
 | Commande | Alias | Permission | Description |
 |----------|-------|------------|-------------|
-| `/chathistory` | `ct` | `essentials.chat.history` | Consulter l'historique du chat stocke |
-| `/chatclear` | `cl` | `essentials.chat.clear` | Effacer le chat pour tous les joueurs |
-| `/chatenable` | `ce` | `essentials.chat.enable` | Activer le chat du serveur (apres qu'il a ete desactive) |
-| `/chatdisable` | `cd` | `essentials.chat.disable` | Desactiver le chat du serveur (empeche les joueurs de discuter) |
-| `/broadcast` | `bc` | `essentials.chat.broadcast` | Diffuser un message a tous les joueurs |
-| `/showitem` | - | `essentials.show.item` | Montrer l'objet actuellement tenu en main dans le chat |
-| `/pub` | - | `essentials.pub` | Envoyer un message mis en evidence/public visible par tous (utile avec le chat local) |
+| `/chathistory <joueur> [page]` | `ct` | `essentials.chat.history` | Affiche les messages enregistrés d'un joueur (10 par page). Nécessite `enable-chat-messages` et un stockage SQL |
+| `/chatclear` | `cl` | `essentials.chat.clear` | Vide le chat pour tous les joueurs |
+| `/chatenable` | `ce` | `essentials.chat.enable` | Réactive le chat après sa désactivation |
+| `/chatdisable` | `cd` | `essentials.chat.disable` | Désactive le chat (contournement avec `essentials.chat.bypass.disable`) |
+| `/broadcast <message>` | `bc` | `essentials.chat.broadcast` | Diffuse un message à tous les joueurs |
+| `/pingsound` | `pingsounds` | `essentials.ping.sound` | Active ou désactive le son de ping pour vous-même |
+| `/pub <message>` | - | `essentials.pub` | Envoie un message publicitaire mis en avant à tous les joueurs. Les messages correspondant à `pub-regex` sont refusés |
+| `/showitem <code>` | - | `essentials.show.item` | Ouvre l'aperçu d'un objet affiché dans le chat (utilisé par le clic sur `[item]`) |
 
-Pour la liste complete des commandes, voir [Commandes & Permissions](../commands-permissions).
+:::note
+La commande d'historique du chat est `/chathistory` (alias `/ct`). `/sc` est l'alias de `/sanction`, utilisé par le `moderator-action` par défaut.
+:::
 
----
-
-## Placeholders Associes
-
-Le module Chat n'enregistre pas de placeholders PlaceholderAPI dedies. Cependant, le module utilise largement PlaceholderAPI dans son systeme de formatage. Tout placeholder enregistre peut etre utilise dans les formats de chat, les placeholders de chat et les formats d'affichage d'objets.
-
-Pour la liste complete des placeholders, voir [Placeholders](../placeholders).
+Pour la liste complète des commandes, consultez [Commandes & Permissions](../commands-permissions).
 
 ---
 
-## Details des Fonctionnalites
+## Placeholders Associés
 
-### Formatage du Chat Base sur les Priorites
+Le module Chat n'enregistre pas de placeholders PlaceholderAPI dédiés. En revanche, n'importe quel placeholder PlaceholderAPI peut être utilisé dans les formats de chat, `moderator-action` et les placeholders de chat.
 
-Les formats de chat sont evalues dans l'ordre de priorite (le nombre le plus bas en premier). Le premier format dont le joueur possede la permission est applique. Cela vous permet de definir une hierarchie :
+Pour la liste complète des placeholders, consultez [Placeholders](../placeholders).
+
+---
+
+## Détails des Fonctionnalités
+
+### Formats de Chat par Priorité
+
+Parmi les entrées de `chat-formats` dont le joueur possède la permission, celle avec la `priority` la **plus élevée** est utilisée. Si le joueur n'en possède aucune, `default-chat-format` est utilisé.
 
 ```yaml
 chat-formats:
-  - priority: 0
-    permission: "zessentials.chat.default"
-    format: "<gray>%player% <dark_gray>>> <white>%message%"
   - priority: 1
-    permission: "zessentials.chat.vip"
-    format: "<gold>[VIP] <yellow>%player% <dark_gray>>> <white>%message%"
+    permission: "essentials.chat.format.vip"
+    format: "<gold>[VIP] <yellow>%player% <dark_gray>» <white><message>"
   - priority: 2
-    permission: "zessentials.chat.admin"
-    format: "<red>[Admin] <white>%player% <dark_gray>>> <white>%message%"
+    permission: "essentials.chat.format.admin"
+    format: "<red>[Admin] <white>%player% <dark_gray>» <white><message>"
+
+default-chat-format: "<gray>%player% <dark_gray>» <white><message>"
 ```
 
-:::info
-Un joueur possedant a la fois `zessentials.chat.default` et `zessentials.chat.vip` utilisera le format `default` car il a un numero de priorite plus bas et est verifie en premier. Pour utiliser le format VIP, supprimez la permission par defaut ou structurez votre hierarchie de permissions afin que les joueurs ne possedent qu'une seule permission de chat.
+Un joueur possédant à la fois `essentials.chat.format.vip` et `essentials.chat.format.admin` utilise le format admin (priorité `2`).
+
+:::warning
+Le message est inséré avec la balise `<message>`, et non `%message%`.
 :::
-
-### Systeme de Temps de Recharge Dynamique
-
-Le temps de recharge dynamique augmente les restrictions en fonction de la frequence des messages :
-
-| Messages Envoyes | Temps de Recharge Applique |
-|------------------|---------------------------|
-| 2 messages rapides | 1 500 ms (1,5s) |
-| 4 messages rapides | 12 000 ms (12s) |
-| 10 messages rapides | 60 000 ms (60s) |
-
-Le plafond maximum du temps de recharge est controle par `chat-cooldown-max` (par defaut : 50 secondes). Le compteur de temps de recharge se reinitialise apres une periode d'inactivite.
 
 ### Chat Local
 
-Lorsque `enable-local-chat` est `true`, les messages ne sont transmis qu'aux joueurs situes dans un rayon de `local-chat-distance` blocs de l'expediteur. Ceci est mesure en distance 3D. Les joueurs hors de portee ne verront pas le message. La commande `/pub` envoie un message qui contourne la restriction de distance et est visible sur tout le serveur.
+Lorsque `enable-local-chat` vaut `true`, les messages ne sont envoyés qu'aux joueurs du même monde situés à moins de `local-chat-distance` blocs de l'expéditeur. Commencez un message par `!` pour l'envoyer à tout le serveur, par exemple `!Bonjour à tous`.
 
-### Placeholders de Chat Personnalises
+### Son de Ping
 
-Les placeholders de chat vous permettent de creer des mots-cles raccourcis qui se developpent en contenu enrichi :
+Lorsqu'un joueur est mentionné avec `@<pseudo>`, le son configuré lui est joué. Les joueurs que cela dérange peuvent exécuter `/pingsound` pour le désactiver pour eux-mêmes (le choix est sauvegardé) ; une nouvelle exécution le réactive. Mettez `enable-player-ping-sound: false` pour désactiver le son pour tout le monde.
+
+### Placeholders de Chat Personnalisés
 
 ```yaml
 chat-placeholders:
-  - placeholder: "[ping]"
-    replacement: "<yellow>%player_ping%ms</yellow>"
-  - placeholder: "[money]"
-    replacement: "<green>%zessentials_user_formatted_balance_default%</green>"
+  - name: "money"
+    regex: "(?i)\\[money\\]"
+    result: "%zessentials_user_formatted_balance_money%"
+    permission: "zessentials.chat.placeholder.money"
 ```
 
-Lorsqu'un joueur tape `[ping]` dans le chat, cela est remplace par son ping actuel en jaune. Lorsqu'il tape `[money]`, cela affiche son solde formate en vert.
+Lorsqu'un joueur écrit `[money]` dans le chat, le texte est remplacé par son solde formaté.
 
-### Bouton d'Action de Moderateur
+### Bouton d'Action de Modérateur
 
-Lorsqu'active, les membres du staff avec la permission `essentials.chat.moderator` voient un petit bouton d'action ajoute a chaque message du chat. Cliquer sur ce bouton ouvre un menu d'actions rapides pour l'expediteur du message, fournissant des raccourcis vers les commandes de moderation telles que mute, kick ou ban.
-
-### Transformation de Liens
-
-Les URL detectees dans les messages du chat sont automatiquement converties en liens cliquables. Les joueurs peuvent cliquer directement sur l'URL dans le chat pour l'ouvrir. Cela fonctionne conjointement avec le filtre regex de liens -- si `enable-link-regex` est `true`, les liens sont bloques sauf si le joueur possede `essentials.chat.bypass.link`, auquel cas le lien est a la fois autorise et rendu cliquable.
+Les lecteurs ayant la permission `essentials.chat.moderator` voient le texte `moderator-action` à la place de `%moderator_action%`. Par défaut, il s'agit d'un bouton rouge `✗` qui exécute `/sc <joueur>` pour ouvrir l'interface de sanction de l'expéditeur.

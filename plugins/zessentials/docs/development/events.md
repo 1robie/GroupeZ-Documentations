@@ -57,6 +57,45 @@ public void onEnable() {
 
 ---
 
+## Depending on zEssentials
+
+Since 1.0.4.0, zEssentials is loaded as a **Paper plugin** (`paper-plugin.yml`). Declare it as a dependency of your plugin so that it is loaded first and its classes are visible to your plugin:
+
+**Bukkit plugin (`plugin.yml`)**
+
+```yaml
+softdepend: [ zEssentials ] # or depend: [ zEssentials ]
+```
+
+**Paper plugin (`paper-plugin.yml`)**
+
+Paper plugins are isolated from each other: set `join-classpath: true` to access the zEssentials API.
+
+```yaml
+dependencies:
+  server:
+    zEssentials:
+      load: BEFORE
+      required: false
+      join-classpath: true
+```
+
+The main zEssentials instance is registered in the Bukkit `ServicesManager` as `EssentialsPlugin`:
+
+```java
+RegisteredServiceProvider<EssentialsPlugin> provider = Bukkit.getServicesManager().getRegistration(EssentialsPlugin.class);
+if (provider != null) {
+    EssentialsPlugin essentials = provider.getProvider();
+    // Use the API
+}
+```
+
+:::info
+zEssentials requires Paper 1.20.6+ (Mojang mappings). On Spigot the plugin stays inactive and the API is **not** available.
+:::
+
+---
+
 ## Event Reference
 
 ### UserFirstJoinEvent

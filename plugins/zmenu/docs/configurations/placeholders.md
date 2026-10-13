@@ -302,6 +302,45 @@ items:
         - "&7Price: &a$%price%"
 ```
 
+## Placeholder Modifiers
+
+zMenu's own placeholders (command arguments, `%page%`, `%player%`, Bedrock form inputs, dialog inputs...) can be transformed directly in the placeholder, by adding one or more modifiers after a dot:
+
+```yaml
+# /shop <category>
+- "&7Category: &f%category.capitalize%"     # weapons -> Weapons
+- "&7Page &f%page.pad:2%"                   # 3 -> 03
+- "&7Name: &f%name.trim.max:16%"            # modifiers can be chained
+- "&7Amount: &f%amount.default:1%"          # 1 when the argument is empty
+- "console-command: give %player% diamond %amount.int.safe%"
+```
+
+| Modifier | Example | Result |
+|----------|---------|--------|
+| `upper` / `lower` | `%name.upper%` | Upper / lower case |
+| `capitalize` | `%name.capitalize%` | First letter upper case, the rest lower case |
+| `trim` | `%name.trim%` | Removes surrounding spaces |
+| `length` | `%name.length%` | Number of characters |
+| `empty` | `%name.empty%` | `true` when blank |
+| `isnumber` | `%amount.isnumber%` | `true` when the value is a number |
+| `safe` | `%name.safe%` | Removes `;`, `&`, `§` and line breaks (safe to put in a command) |
+| `default:<value>` | `%amount.default:1%` | `<value>` when blank |
+| `max:<n>` | `%name.max:16%` | Cut to `<n>` characters |
+| `pad:<n>` | `%page.pad:3%` | Left-padded with zeros to `<n>` characters |
+| `int`, `round`, `floor`, `ceil` | `%price.round%` | Whole number |
+| `abs` | `%value.abs%` | Absolute value |
+| `negative`, `even` | `%value.even%` | `true` / `false` |
+| `0f`, `1f`, `2f`, `3f` | `%price.2f%` | Number with 0 to 3 decimals |
+| `comma` | `%price.comma%` | Thousands separator (`1,234,567`) |
+| `add_one`, `remove_one` | `%page.add_one%` | Value + 1 / - 1 |
+| `add:<n>`, `sub:<n>` | `%page.add:10%` | Value + n / - n |
+
+An unknown modifier, a missing argument or a numeric modifier applied to a non-numeric value gives an empty result. The previous prefixes (`%upper_key%`, `%lower_key%`, `%capitalize_key%`, `%add_one_key%`, `%remove_one_key%`) still work.
+
+:::info
+Modifiers apply to zMenu's own placeholders, not to PlaceholderAPI placeholders. For PlaceholderAPI, use the formatting options of the expansion.
+:::
+
 ## Placeholder Caching
 
 For better performance, you can enable placeholder caching in `config.yml`:

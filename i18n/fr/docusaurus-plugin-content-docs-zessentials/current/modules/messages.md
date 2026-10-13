@@ -8,7 +8,7 @@ description: Système de messagerie privée avec support de réponse et social s
 
 **Fichier :** `modules/messages/config.yml`
 
-Le module Messages fournit un système complet de messagerie privée entre joueurs. Il inclut la messagerie directe, un raccourci de réponse pour des conversations rapides, une option pour désactiver les messages entrants, et une fonctionnalité de social spy qui permet aux membres du staff de surveiller tous les messages privés sur le serveur.
+Le module Messages fournit un système complet de messagerie privée entre joueurs. Il comprend l'envoi de messages directs, un raccourci de réponse pour les conversations rapides, une option pour désactiver les messages entrants, un système d'ignore persistant, et une fonctionnalité de social spy permettant aux membres du staff de surveiller tous les messages privés du serveur.
 
 ---
 
@@ -27,18 +27,19 @@ enable: true
 | `enable` | Boolean | `true` | Activer ou désactiver le module Messages |
 
 :::info
-Ce module possède un fichier de configuration minimal. Le comportement du module est principalement contrôlé via le fichier `messages.yml` (pour les formats de messages) et via les commandes en jeu. Activer ou désactiver ce module contrôle si la fonctionnalité de messagerie privée est disponible sur le serveur.
+Ce module possède un fichier de configuration minimal. Son comportement est principalement contrôlé par le fichier de messages (pour les formats) et par les commandes en jeu. Activer ou désactiver ce module détermine si la messagerie privée, le système d'ignore et `/tptoggle` sont disponibles sur le serveur.
 :::
 
 ---
 
 ## Fonctionnement
 
-1. Un joueur envoie un message privé à un autre joueur en utilisant la commande `/message`.
-2. Le destinataire reçoit le message en privé. L'expéditeur et le destinataire voient des versions formatées du message.
-3. L'un ou l'autre des joueurs peut répondre rapidement en utilisant `/reply`, qui cible automatiquement la dernière personne avec laquelle ils ont échangé des messages.
+1. Un joueur envoie un message privé à un autre joueur avec la commande `/message`.
+2. Le destinataire reçoit le message en privé. L'expéditeur et le destinataire voient chacun une version formatée du message.
+3. Les deux joueurs peuvent répondre rapidement avec `/reply`, qui cible automatiquement la dernière personne avec qui ils ont échangé.
 4. Les joueurs qui ne souhaitent pas recevoir de messages privés peuvent les désactiver avec `/messagetoggle`.
-5. Les membres du staff disposant de la permission `essentials.socialspy` peuvent activer `/socialspy` pour voir tous les messages privés échangés entre les joueurs sur le serveur.
+5. Les joueurs peuvent bloquer un joueur précis avec `/ignore` : ce joueur ne peut plus leur envoyer de messages privés ni de demandes de téléportation.
+6. Les membres du staff possédant la permission `essentials.socialspy` peuvent activer `/socialspy` pour voir tous les messages privés échangés entre les joueurs du serveur.
 
 ---
 
@@ -46,12 +47,15 @@ Ce module possède un fichier de configuration minimal. Le comportement du modul
 
 | Commande | Alias | Permission | Description |
 |----------|-------|------------|-------------|
-| `/message` | `msg`, `tell`, `whisper`, `m`, `w` | `essentials.message` | Envoyer un message privé à un autre joueur |
-| `/reply` | `r` | `essentials.reply` | Répondre au dernier joueur qui vous a envoyé un message privé |
-| `/messagetoggle` | `msgtoggle`, `mtg` | `essentials.message.toggle` | Activer ou désactiver la réception des messages privés |
-| `/socialspy` | - | `essentials.socialspy` | Activer ou désactiver le mode social spy pour surveiller tous les messages privés sur le serveur |
+| `/message <joueur> <message>` | `msg`, `tell`, `whisper`, `m`, `w` | `essentials.message` | Envoyer un message privé à un autre joueur |
+| `/reply <message>` | `r` | `essentials.reply` | Répondre au dernier joueur qui vous a envoyé un message privé |
+| `/messagetoggle [joueur]` | `msgtoggle`, `mtg` | `essentials.message.toggle` | Activer ou désactiver la réception des messages privés |
+| `/socialspy [joueur]` | - | `essentials.socialspy` | Activer ou désactiver le social spy pour surveiller tous les messages privés du serveur |
+| `/ignore <joueur>` | - | `essentials.ignore` | Ignorer un joueur, ce qui bloque ses messages privés et ses demandes de téléportation |
+| `/unignore <joueur>` | `unignor` | `essentials.ignore` | Ne plus ignorer un joueur |
+| `/ignorelist` | `ignores` | `essentials.ignore.list` | Lister les joueurs que vous ignorez |
 
-Pour la liste complète des commandes, voir [Commandes & Permissions](../commands-permissions).
+Pour la liste complète des commandes, consultez [Commandes & Permissions](../commands-permissions).
 
 ---
 
@@ -59,10 +63,13 @@ Pour la liste complète des commandes, voir [Commandes & Permissions](../command
 
 | Permission | Description |
 |------------|-------------|
-| `essentials.message` | Permet au joueur d'envoyer des messages privés en utilisant `/message` |
-| `essentials.reply` | Permet au joueur de répondre aux messages privés en utilisant `/reply` |
-| `essentials.message.toggle` | Permet au joueur d'activer ou désactiver les messages privés en utilisant `/messagetoggle` |
-| `essentials.socialspy` | Permet au joueur d'activer le mode social spy pour voir tous les messages privés |
+| `essentials.message` | Autorise l'envoi de messages privés avec `/message` |
+| `essentials.reply` | Autorise la réponse aux messages privés avec `/reply` |
+| `essentials.message.toggle` | Autorise l'activation ou la désactivation des messages privés avec `/messagetoggle` |
+| `essentials.message.toggle.other` | Autorise l'activation ou la désactivation des messages privés d'un autre joueur avec `/messagetoggle <joueur>` |
+| `essentials.socialspy` | Autorise l'activation du social spy pour voir tous les messages privés |
+| `essentials.ignore` | Autorise l'utilisation de `/ignore` et `/unignore` |
+| `essentials.ignore.list` | Autorise l'utilisation de `/ignorelist` |
 
 ---
 
@@ -70,29 +77,31 @@ Pour la liste complète des commandes, voir [Commandes & Permissions](../command
 
 ### Messages Privés
 
-La commande `/message` (et ses alias `msg`, `tell`, `whisper`, `m`, `w`) permet aux joueurs d'envoyer des messages privés qui ne sont visibles que par l'expéditeur et le destinataire. Le format des messages pour l'expéditeur et le destinataire est configuré dans le fichier `messages.yml`.
+La commande `/message` (et ses alias `msg`, `tell`, `whisper`, `m`, `w`) permet d'envoyer des messages privés visibles uniquement par l'expéditeur et le destinataire. Le format du message pour l'expéditeur et le destinataire est configuré dans le fichier de messages.
 
 ```
-/message <player> <message>
-/msg Steve Hello, how are you?
+/message <joueur> <message>
+/msg Steve Salut, comment ça va ?
 ```
+
+Un joueur muet ne peut pas envoyer de messages privés, et les messages privés passent par les mêmes vérifications que le chat public (voir [Module Chat](./chat)).
 
 ### Réponse
 
-La commande `/reply` (alias `r`) envoie un message au dernier joueur avec lequel vous avez échangé des messages privés. Cela fournit un raccourci pratique pour les conversations en cours sans avoir besoin de retaper le nom du destinataire.
+La commande `/reply` (alias `r`) envoie un message au dernier joueur avec qui vous avez échangé des messages privés. C'est un raccourci pratique pour les conversations en cours, sans avoir à retaper le nom du destinataire.
 
 ```
-/reply I'm doing great, thanks!
-/r See you later!
+/reply Très bien, merci !
+/r À plus tard !
 ```
 
 :::tip
-La commande `/reply` cible le dernier joueur qui vous a envoyé un message **ou** le dernier joueur à qui vous avez envoyé un message, selon le plus récent. Cela facilite le maintien d'une conversation aller-retour.
+La commande `/reply` cible le dernier joueur qui vous a écrit **ou** le dernier joueur à qui vous avez écrit, selon le plus récent. Cela facilite les échanges dans une conversation.
 :::
 
 ### Activation/Désactivation des Messages
 
-Les joueurs peuvent désactiver les messages privés entrants en utilisant `/messagetoggle`. Lorsque cette option est désactivée, les autres joueurs essayant de leur envoyer un message seront informés que le destinataire a désactivé les messages privés.
+Les joueurs peuvent désactiver les messages privés entrants avec `/messagetoggle`. Lorsqu'ils sont désactivés, les joueurs qui tentent de leur écrire sont informés que le destinataire a désactivé ses messages privés. Le staff possédant `essentials.message.toggle.other` peut le faire pour un autre joueur avec `/messagetoggle <joueur>`.
 
 ```
 /messagetoggle
@@ -100,43 +109,65 @@ Les joueurs peuvent désactiver les messages privés entrants en utilisant `/mes
 /mtg
 ```
 
+### Système d'Ignore
+
+Un joueur peut ignorer un autre joueur (connecté ou non) avec `/ignore <joueur>`. Tant qu'un joueur est ignoré :
+
+- ses messages privés sont bloqués (il reçoit un message indiquant que le joueur l'ignore)
+- ses demandes de téléportation (`/tpa` et `/tpahere`) sont bloquées
+- ses mails texte sont bloqués (voir [Module Mailbox](./mailbox))
+
+```
+/ignore Steve
+/unignore Steve
+/ignorelist
+```
+
+La liste des joueurs ignorés est persistante : elle est stockée dans la table `user_ignores` (ou dans le fichier du joueur avec le stockage JSON) et survit aux redémarrages.
+
+:::info
+La vérification du vanish est prioritaire sur celle de l'ignore : envoyer un message privé à un joueur en vanish renvoie toujours « joueur introuvable », même si ce joueur ignore l'expéditeur, afin de ne jamais révéler sa présence.
+:::
+
 ### Social Spy
 
-Les membres du staff peuvent activer le mode social spy avec `/socialspy` pour surveiller tous les messages privés échangés entre les joueurs sur le serveur. Cela est utile à des fins de modération, comme la détection de harcèlement ou de violations des règles dans les conversations privées.
+Les membres du staff peuvent activer le social spy avec `/socialspy` pour surveiller tous les messages privés échangés entre les joueurs du serveur. C'est utile pour la modération, par exemple pour détecter du harcèlement ou des infractions aux règles dans les conversations privées. `/socialspy <joueur>` l'active ou le désactive pour un autre joueur.
 
 ```
 /socialspy
 ```
 
 :::warning
-Le social spy doit être restreint aux membres du staff de confiance uniquement. La permission `essentials.socialspy` donne la capacité de lire toutes les conversations privées sur le serveur. Assurez-vous que votre configuration des permissions limite cela aux rôles appropriés.
+Le social spy doit être réservé aux membres du staff de confiance. La permission `essentials.socialspy` permet de lire toutes les conversations privées du serveur. Assurez-vous que votre configuration de permissions la limite aux rôles appropriés.
 :::
 
 ---
 
 ## Format des Messages
 
-Le format des messages privés (ce que l'expéditeur voit, ce que le destinataire voit, et ce que le social spy affiche) est configuré dans le fichier `messages.yml`, et non dans la configuration du module. Les placeholders de format typiques incluent :
+Le format des messages privés est configuré dans le fichier de messages, et non dans la configuration du module :
 
-| Placeholder | Description |
-|-------------|-------------|
-| `%sender%` | Le nom du joueur envoyant le message |
-| `%receiver%` | Le nom du joueur recevant le message |
-| `%message%` | Le contenu du message privé |
+| Clé du message | Placeholders | Description |
+|----------------|--------------|-------------|
+| `command-message-me` | `%target%`, `<message>` | Ce que voit l'expéditeur |
+| `command-message-other` | `%target%`, `<message>` | Ce que voit le destinataire |
+| `command-message-social-spy` | `%sender%`, `%receiver%`, `%message%` | Ce que voit le staff ayant activé le social spy |
+| `command-message-ignore-player` | `%player%` | Envoyé lorsque le destinataire ignore l'expéditeur |
+| `command-ignore-list-header` / `command-ignore-list-line` | `%count%` / `%player%` | Format de `/ignorelist` |
 
 ---
 
 ## Exemple : Configuration de Surveillance pour le Staff
 
-Pour configurer une équipe de staff avec accès au social spy :
+Pour donner l'accès au social spy à votre équipe :
 
-1. Assurez-vous que le module Messages est activé :
+1. Vérifiez que le module Messages est activé :
    ```yaml
    enable: true
    ```
 
-2. Accordez la permission `essentials.socialspy` à votre rôle staff dans votre plugin de permissions.
+2. Donnez la permission `essentials.socialspy` au rôle staff dans votre plugin de permissions.
 
 3. Les membres du staff peuvent ensuite activer ou désactiver le social spy à tout moment avec `/socialspy`.
 
-Tous les messages privés entre les joueurs seront visibles par les membres du staff ayant activé le social spy, en utilisant le format configuré dans `messages.yml`.
+Tous les messages privés entre joueurs seront visibles par les membres du staff ayant activé le social spy, avec le format configuré dans le fichier de messages.

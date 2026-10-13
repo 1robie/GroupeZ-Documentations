@@ -12,13 +12,14 @@ zEssentials repose sur une **architecture modulaire** dans laquelle chaque fonct
 
 ## Modules Disponibles
 
-Le tableau suivant liste les 23 modules inclus dans zEssentials :
+Le tableau suivant liste les 24 modules inclus dans zEssentials :
 
 | Module | Fichier de Configuration | Description |
 |--------|--------------------------|-------------|
 | [AFK](./afk) | `modules/afk/config.yml` | Detection d'inactivite (Away From Keyboard) et systeme d'expulsion automatique |
 | [AutoMessage](./automessage) | `modules/automessage/config.yml` | Messages de diffusion automatiques a intervalles configurables |
 | [Chat](./chat) | `modules/chat/config.yml` | Formatage du chat, canaux et outils de moderation |
+| [Custom Commands](./custom-commands) | `modules/customcommands/config.yml` | Créez vos propres commandes (`/discord`, `/map`, `/store`...) avec messages, titres, boss bars et actions zMenu |
 | [Death Message](./death-message) | `modules/death_message/config.yml` | Messages de mort personnalisables avec configuration par cause |
 | [Discord](./discord) | `modules/discord/config.yml` | Integration Discord pour la communication serveur-Discord |
 | [Economy](./economy) | `modules/economy/config.yml` | Systeme economique multi-devises avec integration Vault |
@@ -27,10 +28,10 @@ Le tableau suivant liste les 23 modules inclus dans zEssentials :
 | [Items](./items) | `modules/items/config.yml` | Definitions et gestion d'objets personnalises |
 | [JoinQuit](./join-quit) | `modules/join_quit/config.yml` | Messages personnalisables de connexion, deconnexion et premiere connexion avec MOTD |
 | [Kits](./kits) | `modules/kits/config.yml` | Kits d'objets predefinis avec temps de recharge et permissions |
-| [Mailbox](./mailbox) | `modules/mailbox/config.yml` | Systeme de messagerie entre joueurs |
+| [Mailbox](./mailbox) | `modules/mailbox/config.yml` | Livraison d'objets hors ligne et courriers texte entre joueurs |
 | [Messages](./messages) | `modules/messages/config.yml` | Messages prives et espionnage social pour le staff |
 | [Rules](./rules) | `modules/rules/config.yml` | Systeme d'affichage des regles du serveur |
-| [Sanction](./sanction) | `modules/sanction/config.yml` | Systeme de sanctions des joueurs (bannissement, mute, expulsion, avertissement) |
+| [Sanction](./sanction) | `modules/sanction/config.yml` | Système de sanctions des joueurs (bannissement, mute, expulsion, gel) et `/seen` |
 | [Scoreboard](./scoreboard) | `modules/scoreboard/config.yml` | Affichage personnalisable du scoreboard lateral |
 | [Spawn](./spawn) | `modules/spawn/config.yml` | Gestion du point d'apparition du serveur et teleportation |
 | [Steps](./steps) | `modules/steps/config.yml` | Systeme de progression et de suivi par etapes |
@@ -90,6 +91,8 @@ La plupart des modules fonctionnent de maniere independante, mais certains modul
 - Le module **Warp** peut utiliser les inventaires **zMenu** pour la navigation des warps via une interface graphique.
 - Le module **Economy** s'integre avec **Vault** pour la compatibilite avec les plugins tiers.
 - Les modules **JoinQuit**, **Rules** et **AutoMessage** lisent le contenu des messages depuis `messages.yml`.
+- Le module **Custom Commands** utilise **zMenu** pour exécuter les `actions` de chaque commande.
+- Les courriers texte du module **Mailbox** respectent les mutes du module **Sanction** et la liste `/ignore`.
 
 :::info
 Desactiver un module dont un autre module depend peut provoquer une degradation silencieuse de la fonctionnalite dependante. Par exemple, desactiver le module Economy empechera le module WorldEdit de facturer les joueurs, et les operations pourront echouer ou devenir gratuites selon l'implementation.

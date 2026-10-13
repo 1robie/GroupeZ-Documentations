@@ -14,7 +14,7 @@ Avant d'installer zMenu, assurez-vous que votre serveur repond aux exigences sui
 
 | Prerequis | Version minimum |
 |-----------|-----------------|
-| Minecraft | 1.19 a 1.21+ (Paper 26+ supporte) |
+| Minecraft | 1.20.6 et plus recent (Paper 26+ supporte) |
 | Java | **Java 21** (requis) |
 | Logiciel serveur | **Paper**, Purpur, Pufferfish ou Folia |
 
@@ -26,6 +26,10 @@ Sur Spigot, le plugin se charge et s'active quand meme, mais **rien ne fonctionn
 
 :::tip Configuration recommandee
 Pour une meilleure experience, nous recommandons d'utiliser **Paper** ou **Purpur** avec **Java 21**. Cela active le support du formatage MiniMessage et offre de meilleures performances.
+:::
+
+:::tip Vous migrez depuis DeluxeMenus ?
+Gardez vos menus : une fois zMenu installe, lancez `/zm convert deluxemenus` pour convertir chaque menu DeluxeMenus en inventaire zMenu. Consultez [Migrer depuis DeluxeMenus](./convert-deluxemenus).
 :::
 
 :::info Le premier demarrage necessite Internet

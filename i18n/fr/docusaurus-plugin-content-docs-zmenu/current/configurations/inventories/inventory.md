@@ -465,7 +465,7 @@ items:
 
 ### inventory-replacement
 
-Rediriger automatiquement les joueurs Bedrock vers un formulaire Bedrock natif lorsqu'ils tentent d'ouvrir cet inventaire. Les joueurs Java verront l'inventaire classique normalement.
+Rediriger automatiquement les joueurs Bedrock vers un formulaire Bedrock natif (ou vers un autre inventaire) lorsqu'ils tentent d'ouvrir cet inventaire. Les joueurs Java verront l'inventaire classique normalement.
 
 :::warning Prerequis
 Cette fonctionnalite necessite **Geyser** ou **Floodgate** installe sur votre serveur.
@@ -484,6 +484,7 @@ inventory-replacement:
 | `name` | String | - | Le nom du fichier de formulaire Bedrock (sans `.yml`) |
 | `plugin` | String | `zMenu` | Le plugin proprietaire du formulaire Bedrock |
 | `pages` | Liste | vide | Rediriger uniquement sur ces pages (vide = toutes les pages) |
+| `mode` | String | `CUMULUS` | `CUMULUS` : ouvrir un formulaire Bedrock. `CHEST` : ouvrir a la place un autre inventaire zMenu nomme `name` |
 
 Voir [Formulaires Bedrock](../bedrock) pour la documentation complete sur la creation de formulaires Bedrock.
 

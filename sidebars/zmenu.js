@@ -3,6 +3,8 @@ const sidebars = {
   zmenuSidebar: [
     'getting-started',
     'installation',
+    'convert-deluxemenus',
+    'hot-reload',
     'supported-plugins',
     'zmenu-plus',
     {

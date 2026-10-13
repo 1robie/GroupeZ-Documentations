@@ -12,7 +12,32 @@ description: Introduction a zMenu - Le plugin d'inventaire le plus puissant pour
 
 zMenu est un plugin d'inventaire de qualite premium qui permet aux administrateurs de serveurs de creer des GUIs (Interfaces Graphiques Utilisateur) personnalisees pour leurs serveurs Minecraft. Que vous ayez besoin d'un simple selecteur de serveur, d'un systeme de boutique complexe ou d'un menu de quetes interactif, zMenu fournit tous les outils necessaires.
 
+## Vous venez de DeluxeMenus ? Changez en une commande
+
+Vous n'avez pas a reecrire vos menus. zMenu **convertit automatiquement vos menus DeluxeMenus** : items, slots, commandes de clic, prerequis et commandes d'ouverture sont traduits en inventaires zMenu en quelques secondes.
+
+```
+/zm convert deluxemenus
+```
+
+Tout ce qui ne peut pas etre converti a l'identique est liste en haut de chaque fichier converti, et vos fichiers DeluxeMenus ne sont jamais modifies. [Lire le guide de migration →](./convert-deluxemenus)
+
+## Modifiez en direct avec le hot reload
+
+Enregistrez un fichier, le menu est a jour en jeu. **Pas de `/zm reload`, pas de redemarrage.** Avec le [hot reload](./hot-reload) active, zMenu surveille votre dossier `inventories/` et recharge, charge ou decharge les inventaires des que leurs fichiers changent. Les joueurs qui ont le menu ouvert voient la nouvelle version instantanement, sur la meme page, et un fichier contenant une erreur ne remplace jamais la version fonctionnelle.
+
+```yaml
+# config.yml
+hot-reload:
+  enable: true
+```
+
 ## Fonctionnalites cles
+
+### Migration et workflow
+- **[Convertisseur DeluxeMenus](./convert-deluxemenus)** : convertissez tous vos menus DeluxeMenus avec `/zm convert deluxemenus`
+- **[Hot reload](./hot-reload)** : les modifications de vos fichiers d'inventaire sont appliquees instantanement, sans aucune commande
+- **Editeur en ligne** : concevez vos menus visuellement sur [minecraft-inventory-builder.com](https://minecraft-inventory-builder.com)
 
 ### Inventaires hautement personnalisables
 - Creez des inventaires de toutes tailles (9 a 54 emplacements)
@@ -53,6 +78,8 @@ zMenu est un plugin d'inventaire de qualite premium qui permet aux administrateu
 
 | Fonctionnalite | zMenu | Autres plugins |
 |----------------|-------|----------------|
+| Import des menus DeluxeMenus | Une commande | Reecriture a la main |
+| Hot reload | Automatique, sans commande | Rechargement manuel |
 | Types de boutons | 9+ integres | Limite |
 | Types d'actions | 28+ | Basique |
 | Support multi-pages | Natif | Necessite souvent des contournements |
@@ -100,21 +127,26 @@ Ceci cree un inventaire simple de 27 emplacements avec un diamant au centre qui 
 
 ## Versions Minecraft supportees
 
-zMenu supporte les versions Minecraft **1.8 a 1.21.x** et fonctionne avec :
-- Spigot
-- Paper (recommande)
+zMenu supporte les versions Minecraft **1.20.6 et plus recentes** et fonctionne avec :
+- Paper (requis)
 - Purpur
 - Pufferfish
 - Folia
+
+:::warning Paper requis
+Depuis la version **1.1.1.6**, zMenu fonctionne **uniquement sur Paper** — vous devez utiliser Paper, un fork de Paper (Purpur, Pufferfish) ou Folia. Sur Spigot, le plugin se charge quand meme, mais uniquement pour afficher un avertissement expliquant que Paper est requis : aucune fonctionnalite de zMenu n'y fonctionne.
+:::
 
 ## Prochaines etapes
 
 Pret a commencer ? Suivez ces etapes :
 
 1. [Installez zMenu](./installation) sur votre serveur
-2. Apprenez le [systeme de configuration](./configurations/informations)
-3. [Creez votre premier inventaire](./configurations/inventories/create-inventory)
-4. Explorez les [types de boutons](./configurations/buttons/button) et les [actions](./configurations/buttons/actions)
+2. Vous utilisez DeluxeMenus ? [Convertissez vos menus](./convert-deluxemenus) en une commande
+3. Activez le [hot reload](./hot-reload) pour voir vos modifications instantanement
+4. Apprenez le [systeme de configuration](./configurations/informations)
+5. [Creez votre premier inventaire](./configurations/inventories/create-inventory)
+6. Explorez les [types de boutons](./configurations/buttons/button) et les [actions](./configurations/buttons/actions)
 
 ## Obtenir de l'aide
 

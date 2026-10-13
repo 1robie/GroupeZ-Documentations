@@ -108,9 +108,18 @@ La commande principale est `/zm` (alias : `/zmenu`).
 
 | Commande | Permission | Description |
 |----------|-----------|-------------|
-| `/zm convert` | `zmenu.convert` | Convertir les configurations d'autres plugins |
 | `/zm testdupe` | `zmenu.dupe` | Tester le systeme anti-duplication |
 | `/zm dumplog` | `zmenu.dumplog` | Exporter les logs de debug |
+
+### Commandes de conversion
+
+Vous venez de DeluxeMenus ? Convertissez tous vos menus en inventaires zMenu en une seule commande. Consultez [Migrer depuis DeluxeMenus](../convert-deluxemenus) pour tout ce qui est converti.
+
+| Commande | Permission | Description |
+|----------|-----------|-------------|
+| `/zm convert deluxemenus` | `zmenu.convert` | Convertir tous les menus de `plugins/DeluxeMenus/gui_menus/` en inventaires zMenu |
+| `/zm convert deluxemenus <menu>` | `zmenu.convert` | Convertir un seul menu DeluxeMenus (nom du fichier, avec ou sans `.yml`) |
+| `/zm convert dm [menu]` | `zmenu.convert` | Alias de `/zm convert deluxemenus` |
 
 ## Liste des permissions
 
@@ -143,7 +152,7 @@ La commande principale est `/zm` (alias : `/zmenu`).
 
 | Permission | Description | Par defaut |
 |------------|-------------|------------|
-| `zmenu.convert` | Convertir depuis d'autres plugins | op |
+| `zmenu.convert` | Convertir les menus DeluxeMenus | op |
 | `zmenu.dupe` | Tester le systeme anti-duplication | op |
 | `zmenu.documentation` | Voir la documentation | op |
 | `zmenu.dialog` | Ouvrir les dialogues | op |
