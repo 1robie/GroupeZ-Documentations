@@ -12,11 +12,11 @@ Starting from Minecraft 1.20.5, items use a new component system. zMenu provides
 Components require Minecraft 1.20.5 or higher. Some components are only available in newer versions, indicated by a badge next to each component name.
 :::
 
-:::tip Placeholders in components
+:::tip[Placeholders in components]
 Component field values may contain placeholders. Any value that contains a `%` is resolved per viewer when the item is built (local placeholders first, then PlaceholderAPI). This works for colors, enums, numbers and strings — for example `dyed-color: "%my_color_placeholder%"`.
 :::
 
-:::tip Color formats
+:::tip[Color formats]
 Every color field (`dyed-color`, `map-color`, `firework-explosion` `colors`/`fade-colors`, `custom-model-data` `colors`, `potion-contents` `custom-color`, collar colors, ...) accepts all of these formats:
 
 - Hex string — `"#FFAA00"` (RRGGBB) or `"#80FFAA00"` (AARRGGBB)
@@ -26,7 +26,7 @@ Every color field (`dyed-color`, `map-color`, `firework-explosion` `colors`/`fad
 - List of ints — `[255, 128, 0]` (RGB[A], 0–255)
 :::
 
-:::tip Enum and registry values
+:::tip[Enum and registry values]
 Most components read a value that is either a Java enum or an entry of a Minecraft registry. The rules are the same everywhere:
 
 - **Enums** (animation types, rarity, book `generation`, variants such as `fox/variant`, ...) are case-insensitive, and `-` or spaces are read as `_`. `copy-of-original`, `COPY_OF_ORIGINAL` and `Copy of original` are equivalent.
@@ -50,7 +50,7 @@ item:
 
 ---
 
-## attack-animation <span class="badge badge--danger">26.3+</span> {#attack-animation}
+## attack-animation <span class="badge badge--danger">26.3+</span> {/* #attack-animation */}
 
 Configures the animation played when attacking with the item. This is the 26.3 name of [`swing-animation`](#swing-animation); the old name is still read, with a warning.
 
@@ -1422,7 +1422,7 @@ components:
 
 ---
 
-## swing-animation <span class="badge badge--danger">1.21.11+</span> {#swing-animation}
+## swing-animation <span class="badge badge--danger">1.21.11+</span> {/* #swing-animation */}
 
 Configures the swing animation when using the item.
 
@@ -1488,7 +1488,7 @@ components:
 
 ---
 
-## tooltip-display <span class="badge badge--danger">1.21.5+</span> {#tooltip-display}
+## tooltip-display <span class="badge badge--danger">1.21.5+</span> {/* #tooltip-display */}
 
 Controls tooltip visibility.
 
@@ -1760,7 +1760,7 @@ components:
 
 ---
 
-## sign-text-front <span class="badge badge--danger">Paper only</span> <span class="badge badge--danger">26.3+</span> {#sign-text-front}
+## sign-text-front <span class="badge badge--danger">Paper only</span> <span class="badge badge--danger">26.3+</span> {/* #sign-text-front */}
 
 Sets the text of the front side of a sign item. Requires `enableMiniMessageFormat` in `config.yml`, otherwise the component is ignored. `sign-text-back` uses the same keys for the back side.
 
@@ -1846,7 +1846,7 @@ components:
 
 ---
 
-## Entity variants {#entity-variants}
+## Entity variants {/* #entity-variants */}
 
 These components take a single value (a variant or a color).
 

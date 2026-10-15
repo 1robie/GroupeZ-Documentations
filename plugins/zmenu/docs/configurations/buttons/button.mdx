@@ -358,7 +358,7 @@ items:
 
 ### open-link
 
-:::warning Deprecated
+:::warning[Deprecated]
 This configuration is deprecated. Use MiniMessage format to open links instead:
 ```yaml
 item:
@@ -562,7 +562,7 @@ Use `placeholders` when you need to gate a button on several independent placeho
 
 ### commands
 
-:::tip Recommendation
+:::tip[Recommendation]
 It is recommended to use [Actions](./actions) instead of `commands` for more flexibility and features.
 :::
 
@@ -721,7 +721,7 @@ You can also specify commands for specific click types:
 
 ### console-commands
 
-:::tip Recommendation
+:::tip[Recommendation]
 It is recommended to use [Actions](./actions) with `type: console-command` instead for more flexibility.
 :::
 
@@ -798,7 +798,7 @@ items:
 
 ### error-item
 
-:::warning zMenu+ Required
+:::warning[zMenu+ Required]
 This feature requires [zMenu+](../../zmenu-plus) to work.
 :::
 
@@ -848,7 +848,7 @@ items:
 
 Place the item in the player's inventory instead of displaying it in the menu.
 
-:::warning zMenu+ Required
+:::warning[zMenu+ Required]
 This feature requires [zMenu+](../../zmenu-plus) to work.
 :::
 
@@ -1022,7 +1022,7 @@ If requirements aren't met, the button won't be displayed.
 
 Control whether the button can be clicked. The button is still visible, but clicking may be denied.
 
-:::caution Named groups required
+:::caution[Named groups required]
 `click-requirement` uses **named groups**. Every entry directly under `click-requirement` is a group name (e.g. `default`, `purchase`). The keys `requirements`, `success`, and `clicks` must be nested **inside** that named group — placing them directly under `click-requirement` will not work.
 :::
 

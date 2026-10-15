@@ -17,7 +17,7 @@ Un type de requirement est composé de deux classes, comme les [boutons](./api-b
 
 zMenu lit pour vous les listes d'actions `deny` et `success` grâce aux méthodes d'aide du loader, exécute les actions `deny` quand `hasPermission` retourne `false` et les actions `success` quand elle retourne `true`. Tout le reste (`minimum-requirement`, chaînes `else`, `clicks`, `refresh-requirements`) fonctionne avec votre type sans code supplémentaire.
 
-## Créer un Permissible {#creer-un-permissible}
+## Créer un Permissible {/* #creer-un-permissible */}
 
 ```java
 import fr.maxlego08.menu.api.button.Button;
@@ -144,7 +144,7 @@ Rule rule = ...;                         // voir ci-dessous
 boolean ok = rule.matches(context);      // context : ItemRuleContext de l'item (materiau, nom, lore, custom model data)
 ```
 
-:::caution Pas d'enregistrement public pour le moment
+:::caution[Pas d'enregistrement public pour le moment]
 Les loaders de règles (`RuleLoader`, `AbstractPluginRuleLoader`) sont découverts dans le jar de zMenu grâce à l'annotation `@AutoRuleLoader`. Un plugin tiers enregistre plutôt son propre loader :
 
 ```java

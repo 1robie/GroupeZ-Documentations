@@ -197,7 +197,7 @@ Send a list of chat lines to every online player.
 
 **Placeholders:** `%sender%` is replaced by the name of the player who triggered the action, `%receiver%` by the name of each player receiving the line.
 
-:::info Difference with `broadcast`
+:::info[Difference with `broadcast`]
 `broadcast_message` resolves its placeholders **once**, for the player who triggered it, then sends that same result to everyone — only `%receiver%` varies. [`broadcast`](#broadcast) resolves them **again for each recipient** and supports a `requirements` list to filter who receives the message.
 
 Use `broadcast` when the text must differ per recipient or be filtered, `broadcast_message` for a plain announcement about the player who clicked.
@@ -308,7 +308,7 @@ Display a title and a subtitle to every online player at once. It takes the same
 
 Placeholders are resolved **once, for the player who triggered the action**, so `%player_name%` refers to that player and not to each recipient — which is usually what an announcement wants.
 
-:::warning Always write both lines, and all three timings
+:::warning[Always write both lines, and all three timings]
 `title` and `subtitle` have no default value: omitting one sends the literal text `null` to every player. The three timings default to `0`, which makes the title appear and disappear immediately on most clients. Set them explicitly, as in the examples above.
 :::
 
@@ -318,7 +318,7 @@ Placeholders are resolved **once, for the player who triggered the action**, so 
 
 Change the inventory title.
 
-:::warning Requires PacketEvents
+:::warning[Requires PacketEvents]
 This action is only available when the [PacketEvents](https://github.com/retrooper/packetevents) plugin is installed on your server. Without it, the action is simply not registered and will silently do nothing.
 :::
 
@@ -421,7 +421,7 @@ Play a sound to the player.
 - `BLOCK_CHEST_OPEN`
 - `BLOCK_CHEST_CLOSE`
 
-:::tip Sound Reference
+:::tip[Sound Reference]
 View the complete list of available sounds in the [Bukkit Sound JavaDocs](https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html).
 :::
 
@@ -596,7 +596,7 @@ By default every command in the list runs, whatever the previous ones did. With 
     - "lp user %player% parent add vip"
 ```
 
-:::warning Why it is off by default
+:::warning[Why it is off by default]
 Bukkit returns a failure both for a command that does not exist **and** for a command whose executor returned `false` — which many plugins do simply to print their usage. Enabling this option blindly can therefore stop a chain that was working. Test each chain before turning it on.
 :::
 
@@ -622,7 +622,7 @@ Force the player to send a chat message.
 
 ### random-player-command
 
-:::info zMenu+
+:::info[zMenu+]
 This action requires [zMenu+](https://minecraft-music-inventory.com/resources/zmenu.music.331).
 :::
 
@@ -653,7 +653,7 @@ Execute a random selection of commands as the player from a list. The commands a
 
 ### random-console-command
 
-:::info zMenu+
+:::info[zMenu+]
 This action requires [zMenu+](https://minecraft-music-inventory.com/resources/zmenu.music.331).
 :::
 
@@ -972,7 +972,7 @@ Open a written book for the player.
 
 Open a dialog popup. Dialogs provide a modern UI experience with forms, confirmations, and interactive buttons.
 
-:::warning Requirements
+:::warning[Requirements]
 Dialogs require **Paper 1.21.7+** installed on your server.
 :::
 
@@ -1013,7 +1013,7 @@ See [Dialogues](../dialogues) for complete dialog configuration documentation.
 
 Open a native Bedrock form for players connected via Geyser/Floodgate.
 
-:::warning Requirements
+:::warning[Requirements]
 Bedrock forms require **Geyser** or **Floodgate** installed on your server.
 :::
 

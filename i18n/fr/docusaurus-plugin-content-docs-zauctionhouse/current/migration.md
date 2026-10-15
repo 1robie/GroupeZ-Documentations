@@ -8,7 +8,7 @@ description: Migrer les données d'autres plugins d'enchères vers zAuctionHouse
 
 zAuctionHouse V4 inclut un système de migration intégré qui vous permet d'importer des données depuis d'autres plugins d'enchères. Cela assure une transition fluide sans perdre les annonces existantes, les objets expirés ou l'historique des transactions.
 
-:::warning Avant de Commencer
+:::warning[Avant de Commencer]
 1. **Sauvegardez votre base de données** avant d'exécuter toute migration.
 2. **Arrêtez le serveur** ou assurez-vous qu'aucun joueur n'est en ligne pendant la migration pour éviter les conflits de données.
 3. Vérifiez que les fichiers de données ou la base de données du plugin source sont accessibles.
@@ -119,7 +119,7 @@ Le système de migration lit les données directement depuis la base de données
 - Le fichier de base de données ZelAuction (`.db` pour SQLite) doit être présent dans le dossier ZelAuction
 - zAuctionHouse V4 doit être correctement configuré avec son propre stockage
 
-:::info Aucune Configuration Nécessaire
+:::info[Aucune Configuration Nécessaire]
 Contrairement à la migration V3, la migration ZelAuction ne nécessite aucune configuration dans `config.yml`. Le migrateur lit tous les paramètres de connexion directement depuis le fichier `database.yml` de ZelAuction.
 :::
 
@@ -166,11 +166,11 @@ DonutAuction stocke tout dans un seul fichier YAML Bukkit à `plugins/DonutAucti
 5. Les données des objets (ItemStacks Bukkit en Base64 de DonutAuction) sont converties au format V4 via une liste blanche de classes renforcée qui protège contre les fichiers de données malveillants
 6. Tous les objets importés utilisent l'économie `vault` (DonutAuction ne supporte que Vault)
 
-:::info Aucune Configuration Nécessaire
+:::info[Aucune Configuration Nécessaire]
 Comme la migration ZelAuction, la migration DonutAuction ne nécessite aucune configuration dans `config.yml`. Le migrateur lit tout depuis `plugins/DonutAuction/ah.data`.
 :::
 
-:::note Ce Qui N'est Pas Migré
+:::note[Ce Qui N'est Pas Migré]
 Les `pendingPayments` (argent de vente non réclamé, pas des objets) et les achats déjà livrés sont volontairement ignorés - DonutAuction livre les objets achetés directement dans l'inventaire de l'acheteur, il n'y a donc rien à importer pour ceux-ci.
 :::
 

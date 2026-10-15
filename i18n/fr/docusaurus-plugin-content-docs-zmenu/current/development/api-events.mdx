@@ -4,11 +4,11 @@ title: Événements
 description: Écouter les événements zMenu dans votre plugin
 ---
 
-# Événements {#evenements}
+# Événements {/* #evenements */}
 
 zMenu déclenche divers événements que vous pouvez écouter dans votre plugin. Cela vous permet de réagir aux actions d'inventaire, aux chargements de boutons, et plus encore.
 
-## Événements disponibles {#evenements-disponibles}
+## Événements disponibles {/* #evenements-disponibles */}
 
 | Événement | Description |
 |-----------|-------------|
@@ -133,7 +133,7 @@ event.setOldInventories(newHistory);   // List<Inventory>
 
 L'événement est aussi déclenché pour les [dialogues](../configurations/dialogues) et les formulaires Bedrock : `getInventory()` est alors un `DialogInventory` / `BedrockInventory` (tous deux étendent `Inventory`).
 
-### Annuler l'événement {#annuler-levenement}
+### Annuler l'événement {/* #annuler-levenement */}
 
 ```java
 @EventHandler
@@ -204,7 +204,7 @@ public class ItemsLoadListener implements Listener {
 
 Les événements Bukkit passent par tout le plugin manager à chaque appel. Quand [`enable-fast-event`](../configurations/config-yml#enable-fast-event) vaut `true` dans `config.yml`, zMenu ne déclenche plus `ButtonLoadEvent`, `InventoryLoadEvent` et `PlayerOpenInventoryEvent` comme événements Bukkit et appelle à la place les listeners `FastEvent` enregistrés avec `InventoryManager#registerFastEvent`. `ButtonLoaderRegisterEvent` et `ZMenuItemsLoad` ne sont pas concernés et restent des événements Bukkit.
 
-:::warning Un seul système par serveur
+:::warning[Un seul système par serveur]
 Avec `enable-fast-event: true`, un `@EventHandler` classique pour ces trois événements n'est **jamais appelé**. Les plugins qui utilisent uniquement des listeners Bukkit ne les reçoivent plus : n'activez l'option que si tous les plugins qui se branchent sur zMenu utilisent `FastEvent`. Quand l'option vaut `false` (par défaut), les listeners `FastEvent` ne sont jamais appelés.
 :::
 
@@ -291,7 +291,7 @@ manager.unregisterInventoryListener(listener);
 List<InventoryListener> all = manager.getInventoryListeners();
 ```
 
-## Enregistrer les écouteurs d'événements {#enregistrer-les-ecouteurs-devenements}
+## Enregistrer les écouteurs d'événements {/* #enregistrer-les-ecouteurs-devenements */}
 
 Enregistrez vos écouteurs dans le `onEnable` de votre plugin :
 
@@ -374,7 +374,7 @@ public class MenuAnalytics implements Listener {
 }
 ```
 
-## Exemple complet : contrôle d'accès aux menus {#exemple-complet--controle-dacces-aux-menus}
+## Exemple complet : contrôle d'accès aux menus {/* #exemple-complet--controle-dacces-aux-menus */}
 
 Contrôler l'accès aux menus en fonction de conditions personnalisées :
 
@@ -538,7 +538,7 @@ public class MenuLogger implements Listener {
 }
 ```
 
-## Priorités des événements {#priorites-des-evenements}
+## Priorités des événements {/* #priorites-des-evenements */}
 
 Utilisez les priorités d'événements pour contrôler quand votre écouteur s'exécute :
 
@@ -570,7 +570,7 @@ public void onMenuOpenMonitor(PlayerOpenInventoryEvent event) {
 4. **Garder les écouteurs légers** - Éviter les opérations lourdes dans les gestionnaires d'événements
 5. **Enregistrer correctement les écouteurs** - Utiliser le gestionnaire de plugins
 
-## Étapes suivantes {#etapes-suivantes}
+## Étapes suivantes {/* #etapes-suivantes */}
 
 - Créer des [Boutons personnalisés](./api-buttons)
 - Créer des [Actions personnalisées](./api-actions)

@@ -8,17 +8,17 @@ description: Liste complète de toutes les commandes et permissions pour zEssent
 
 Cette page contient la liste complète de toutes les commandes et permissions disponibles dans zEssentials. Les commandes sont organisées par catégorie pour faciliter la consultation.
 
-:::info Guide de Syntaxe
+:::info[Guide de Syntaxe]
 - `< >` indique un argument **obligatoire**.
 - `[ ]` indique un argument **optionnel**.
 - `|` sépare plusieurs alias pour la même commande.
 :::
 
-:::tip Format des permissions
+:::tip[Format des permissions]
 Chaque permission est générée à partir de son nom interne : les underscores deviennent des points. Par exemple `ESSENTIALS_TP_TOGGLE` devient `essentials.tp.toggle` et `ESSENTIALS_UN_BAN` devient `essentials.un.ban`. Copiez toujours la permission exactement comme elle est écrite sur cette page.
 :::
 
-:::note Commandes personnalisées
+:::note[Commandes personnalisées]
 Les commandes créées avec le module [Custom Commands](./modules/custom-commands) (`modules/customcommands/config.yml`, par exemple `/discord` ou `/map`) ne sont pas listées ici. Chacune utilise la `permission` définie dans sa propre configuration (une permission vide signifie que tout le monde peut l'utiliser).
 :::
 

@@ -14,14 +14,14 @@ description: Convertissez vos menus DeluxeMenus en inventaires zMenu avec une se
 
 C'est tout. Chaque menu de `plugins/DeluxeMenus/gui_menus/` est converti, et vous gardez toute votre configuration tout en profitant de tout ce que zMenu apporte en plus : [pagination](./configurations/buttons/types/pagination), [patterns](./configurations/patterns), [données joueur](./configurations/player-data), [dialogues](./configurations/dialogues), [formulaires Bedrock](./configurations/bedrock), [hot reload](./hot-reload) et bien plus.
 
-:::tip Pourquoi migrer ?
+:::tip[Pourquoi migrer ?]
 - **Zéro réécriture** : vos menus sont convertis en quelques secondes, pas réécrits à la main pendant des jours.
 - **Rien de caché** : tout ce qui ne peut pas être converti à l'identique est listé en haut du fichier converti et dans la console.
 - **Sécurisé par conception** : une fonctionnalité que zMenu ne peut pas reproduire n'accorde jamais plus que DeluxeMenus. Un prérequis non supporté refuse toujours, et une action non supportée arrête les actions qui la suivent.
 - **DeluxeMenus non requis** : le convertisseur lit directement les fichiers YAML. DeluxeMenus n'a pas besoin d'être installé, ni même activé.
 :::
 
-## Démarrage rapide {#demarrage-rapide}
+## Démarrage rapide {/* #demarrage-rapide */}
 
 1. Copiez votre dossier DeluxeMenus dans `plugins/` (ou laissez-le en place) pour que les menus soient dans `plugins/DeluxeMenus/gui_menus/`.
 2. Lancez `/zm convert deluxemenus` (ou `/zm convert dm`) depuis la console ou en jeu.
@@ -30,7 +30,7 @@ C'est tout. Chaque menu de `plugins/DeluxeMenus/gui_menus/` est converti, et vou
 5. **Désactivez DeluxeMenus** (retirez son jar), sinon ses commandes d'ouverture entrent en conflit avec celles converties.
 6. Lancez `/zm reload` pour charger les inventaires convertis et leurs commandes.
 
-:::tip Combinez-le avec le hot reload
+:::tip[Combinez-le avec le hot reload]
 Activez le [hot reload](./hot-reload) avant de convertir : les menus convertis sont chargés dès qu'ils sont écrits, et chaque correction que vous faites en les relisant est appliquée instantanément, sans `/zm reload`.
 :::
 
@@ -51,7 +51,7 @@ Exemple de résultat :
 Converted 2/3 menus. Review them, then run /zm reload to load them.
 ```
 
-## Où sont les fichiers convertis ? {#ou-sont-les-fichiers-convertis}
+## Où sont les fichiers convertis ? {/* #ou-sont-les-fichiers-convertis */}
 
 | Quoi | Emplacement |
 |------|-------------|
@@ -139,7 +139,7 @@ La première commande devient la commande zMenu, les autres deviennent ses alias
 | `tooltip_style` | `tooltip-style` | |
 | `item_model` | `item-model` | |
 
-### Matériaux {#materiaux}
+### Matériaux {/* #materiaux */}
 
 | Matériau DeluxeMenus | Matériau zMenu |
 |----------------------|----------------|
@@ -184,7 +184,7 @@ Les commandes de clic, d'ouverture et de fermeture de DeluxeMenus sont convertie
 
 Tout autre tag (`[meta]`, `[json]`, `[givepermission]`...) est signalé, et les actions qui le suivent **ne s'exécutent pas** : un menu ne peut donc jamais donner une récompense sans l'étape qui devait la précéder.
 
-### Prérequis {#prerequis}
+### Prérequis {/* #prerequis */}
 
 `open_requirement`, `view_requirement` et les prérequis de clic sont convertis en [prérequis](./configurations/requirements) zMenu, avec leurs `deny_commands` et `success_commands`.
 
@@ -224,7 +224,7 @@ Tout ce qui suit est listé en haut du fichier converti et affiché dans la cons
 | Options d'item `rgb`, `banner_meta`, `base_color`, `potion_effects`, `trim_material`, `trim_pattern`, `model_data_component`, `light_level`, `lore_append_mode` | Non converties, utilisez les [options d'item](./configurations/items/item) ou les [composants](./configurations/items/components) zMenu |
 | Matériaux `stack-...` et `simpleitemgenerator-...` | Non convertis |
 
-:::warning Relisez toujours le résultat
+:::warning[Relisez toujours le résultat]
 Le convertisseur fait le gros du travail, mais votre serveur est unique. Ouvrez chaque inventaire converti une fois, testez ses boutons et corrigez les lignes listées sous **Not converted exactly** avant de passer en production.
 :::
 
@@ -242,7 +242,7 @@ Non. Le convertisseur lit seulement les fichiers de `plugins/DeluxeMenus/gui_men
 **Mon menu utilise des placeholders. Fonctionnent-ils toujours ?**
 Oui. Les placeholders PlaceholderAPI sont conservés tels quels et résolus par zMenu.
 
-## Prochaines étapes {#prochaines-etapes}
+## Prochaines étapes {/* #prochaines-etapes */}
 
 - Activez le [hot reload](./hot-reload) pour peaufiner vos menus convertis en temps réel
 - Découvrez ce que zMenu ajoute : [types de boutons](./configurations/buttons/button), [actions](./configurations/buttons/actions), [patterns](./configurations/patterns)

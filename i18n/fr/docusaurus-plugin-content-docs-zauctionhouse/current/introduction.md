@@ -70,6 +70,6 @@ Besoin d'aide ? Voici vos options :
 - **Documentation** : Vous êtes en train de la lire !
 - **GitHub** : Signalez les problèmes sur [GitHub](https://github.com/GroupeZ-dev/zAuctionHouse)
 
-:::info Support Premium
+:::info[Support Premium]
 Le support est fourni aux utilisateurs ayant acheté le plugin. Les utilisateurs de la version d'essai gratuite peuvent accéder au support communautaire sur Discord.
 :::

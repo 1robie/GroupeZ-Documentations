@@ -320,7 +320,7 @@ La section `items` définit les baguettes WorldEdit qui peuvent être données a
 | `items.<wand>.item.name` | String | - | Le nom affiché de l'objet baguette. Prend en charge les codes couleur |
 | `items.<wand>.item.lore` | List of Strings | - | Lignes de lore affichées sur l'objet baguette. Prend en charge le placeholder `%uses%` pour les utilisations restantes |
 
-:::info Définitions des Baguettes par Défaut
+:::info[Définitions des Baguettes par Défaut]
 - **player-wand** -- Une `WOODEN_AXE` avec 50 utilisations et un multiplicateur de prix de 1.2x. Destinée aux joueurs réguliers qui paient pour leurs modifications.
 - **admin-Wand** -- Une `GOLDEN_AXE` avec des utilisations illimitées (`max-use: -1`) et un multiplicateur de prix de 0x (gratuit). Destinée aux membres du staff.
 :::

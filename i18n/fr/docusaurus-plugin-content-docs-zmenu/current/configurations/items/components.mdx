@@ -12,11 +12,11 @@ description: Référence complète des composants d'item dans zMenu (Minecraft 1
 Les composants nécessitent Minecraft 1.20.5 ou supérieur. Certains composants ne sont disponibles que dans les versions plus récentes, indiqués par un badge à côté du nom de chaque composant.
 :::
 
-:::tip Placeholders dans les composants
+:::tip[Placeholders dans les composants]
 Les valeurs des champs de composant peuvent contenir des placeholders. Toute valeur qui contient un `%` est résolue par joueur lors de la construction de l'item (placeholders locaux d'abord, puis PlaceholderAPI). Cela fonctionne pour les couleurs, les enums, les nombres et les chaînes — par exemple `dyed-color: "%my_color_placeholder%"`.
 :::
 
-:::tip Formats de couleur
+:::tip[Formats de couleur]
 Chaque champ de couleur (`dyed-color`, `map-color`, `firework-explosion` `colors`/`fade-colors`, `custom-model-data` `colors`, `potion-contents` `custom-color`, couleurs de collier, ...) accepte tous ces formats :
 
 - Chaîne hex — `"#FFAA00"` (RRGGBB) ou `"#80FFAA00"` (AARRGGBB)
@@ -26,7 +26,7 @@ Chaque champ de couleur (`dyed-color`, `map-color`, `firework-explosion` `colors
 - Liste d'entiers — `[255, 128, 0]` (RGB[A], 0–255)
 :::
 
-:::tip Valeurs d'enum et de registre
+:::tip[Valeurs d'enum et de registre]
 La plupart des components lisent une valeur qui est soit un enum Java, soit une entrée d'un registre Minecraft. Les règles sont les mêmes partout :
 
 - Les **enums** (types d'animation, rareté, `generation` de livre, variantes comme `fox/variant`, ...) sont insensibles à la casse, et `-` ou les espaces sont lus comme `_`. `copy-of-original`, `COPY_OF_ORIGINAL` et `Copy of original` sont équivalents.
@@ -50,7 +50,7 @@ item:
 
 ---
 
-## attack-animation <span class="badge badge--danger">26.3+</span> {#attack-animation}
+## attack-animation <span class="badge badge--danger">26.3+</span> {/* #attack-animation */}
 
 Configure l'animation jouée lors d'une attaque avec l'item. C'est le nom 26.3 de [`swing-animation`](#swing-animation) ; l'ancien nom est toujours lu, avec un avertissement.
 
@@ -334,7 +334,7 @@ components:
 
 ---
 
-## consumable <span class="badge badge--danger">1.21.2+</span> {#consumable}
+## consumable <span class="badge badge--danger">1.21.2+</span> {/* #consumable */}
 
 Configure comment un item est consommé.
 
@@ -1155,7 +1155,7 @@ Configure les effets de potion et l'apparence.
 | `custom-name` | String | Nom de potion personnalisé |
 | `custom-effects` | List | Liste des effets de potion personnalisés |
 
-#### Propriétés des effets de potion {#proprietes-des-effets-de-potion}
+#### Propriétés des effets de potion {/* #proprietes-des-effets-de-potion */}
 
 Utilisées par `custom-effects`, `suspicious-stew-effects` et `APPLY_EFFECTS` (`consumable`, `death-protection`).
 
@@ -1348,7 +1348,7 @@ components:
 
 ---
 
-## swing-animation <span class="badge badge--danger">1.21.11+</span> {#swing-animation}
+## swing-animation <span class="badge badge--danger">1.21.11+</span> {/* #swing-animation */}
 
 Configure l'animation de balancement lors de l'utilisation de l'item.
 
@@ -1414,7 +1414,7 @@ components:
 
 ---
 
-## tooltip-display <span class="badge badge--danger">1.21.5+</span> {#tooltip-display}
+## tooltip-display <span class="badge badge--danger">1.21.5+</span> {/* #tooltip-display */}
 
 Contrôle la visibilité de l'infobulle.
 
@@ -1671,7 +1671,7 @@ components:
 
 ---
 
-## sign-text-front <span class="badge badge--danger">Paper uniquement</span> <span class="badge badge--danger">26.3+</span> {#sign-text-front}
+## sign-text-front <span class="badge badge--danger">Paper uniquement</span> <span class="badge badge--danger">26.3+</span> {/* #sign-text-front */}
 
 Définit le texte de la face avant d'un panneau. Nécessite `enableMiniMessageFormat` dans `config.yml`, sinon le composant est ignoré. `sign-text-back` utilise les mêmes clés pour la face arrière.
 
@@ -1757,7 +1757,7 @@ components:
 
 ---
 
-## Variantes d'entités {#variantes-dentites}
+## Variantes d'entités {/* #variantes-dentites */}
 
 Ces composants prennent une valeur simple (une variante ou une couleur).
 
@@ -2115,7 +2115,7 @@ item:
 
 ---
 
-## Compatibilité des versions {#compatibilite-des-versions}
+## Compatibilité des versions {/* #compatibilite-des-versions */}
 
 | Composant | Version minimale |
 |-----------|------------------|
@@ -2135,7 +2135,7 @@ Composants de Minecraft 26.x (builds Paper de ces versions) :
 | `sulfur-cube-content` | 26.2 |
 | `attack-animation`, `interact-animation`, `mob-visibility`, `provides-pottery-pattern`, `sign-text-front`, `sign-text-back`, `villager-food`, `waxed`, `cushion/color` | 26.3 |
 
-## Prochaines étapes {#prochaines-etapes}
+## Prochaines étapes {/* #prochaines-etapes */}
 
 - Apprenez à utiliser les composants dans [Configuration d'item](./item)
 - Ajoutez des items aux [Boutons](../buttons/button)

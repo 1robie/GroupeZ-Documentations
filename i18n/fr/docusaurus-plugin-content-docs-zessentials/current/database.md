@@ -55,7 +55,7 @@ database-configuration:
 Le driver JDBC MariaDB n'est pas inclus dans le JAR : il est téléchargé depuis Maven Central par Paper au démarrage du serveur (voir [Installation](./installation#3-installer-le-plugin)).
 :::
 
-:::tip Recommandé
+:::tip[Recommandé]
 Pour tout serveur accueillant de vrais joueurs, utilisez **HIKARICP** (ou `MARIADB` si votre serveur utilise MariaDB). Il gère efficacement les accès concurrents à la base et est indispensable pour partager les données entre plusieurs serveurs.
 :::
 

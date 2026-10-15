@@ -4,15 +4,15 @@ title: Données joueur
 description: Stocker et récupérer des données spécifiques aux joueurs
 ---
 
-# Données joueur {#donnees-joueur}
+# Données joueur {/* #donnees-joueur */}
 
 zMenu inclut un système de données joueur intégré qui vous permet de stocker et récupérer des valeurs spécifiques à chaque joueur. C'est parfait pour suivre la progression, créer des bascules, stocker des statistiques et plus encore.
 
-## Comment ça fonctionne {#comment-ca-fonctionne}
+## Comment ça fonctionne {/* #comment-ca-fonctionne */}
 
 Les données joueur sont stockées dans une base de données (SQLite par défaut, MySQL/MariaDB en option) et persistent entre les redémarrages du serveur. Chaque joueur a son propre ensemble de paires clé-valeur.
 
-## Accéder aux données joueur {#acceder-aux-donnees-joueur}
+## Accéder aux données joueur {/* #acceder-aux-donnees-joueur */}
 
 ### Placeholder
 
@@ -57,7 +57,7 @@ item:
 /zm players keys <joueur>
 ```
 
-## Modifier les données avec des actions {#modifier-les-donnees-avec-des-actions}
+## Modifier les données avec des actions {/* #modifier-les-donnees-avec-des-actions */}
 
 ### L'action Data
 
@@ -80,7 +80,7 @@ actions:
 | `SUBTRACT` | Soustraire de la valeur actuelle | `value: "25"` |
 | `REMOVE` | Supprimer entièrement la clé | - |
 
-### Expressions mathématiques {#expressions-mathematiques}
+### Expressions mathématiques {/* #expressions-mathematiques */}
 
 Activez les maths avec `math: true` :
 
@@ -95,7 +95,7 @@ actions:
 
 ## Exemples
 
-### Système de pièces/monnaie {#systeme-de-piecesmonnaie}
+### Système de pièces/monnaie {/* #systeme-de-piecesmonnaie */}
 
 ```yaml
 # Afficher les pieces
@@ -156,7 +156,7 @@ items:
           - type: refresh
 ```
 
-### Paramètre à bascule {#parametre-a-bascule}
+### Paramètre à bascule {/* #parametre-a-bascule */}
 
 ```yaml
 items:
@@ -203,7 +203,7 @@ items:
         - type: refresh
 ```
 
-### Système de récompense quotidienne {#systeme-de-recompense-quotidienne}
+### Système de récompense quotidienne {/* #systeme-de-recompense-quotidienne */}
 
 ```yaml
 items:
@@ -339,7 +339,7 @@ items:
         - "&8&m───────────────"
 ```
 
-## Configuration de la base de données {#configuration-de-la-base-de-donnees}
+## Configuration de la base de données {/* #configuration-de-la-base-de-donnees */}
 
 Configurez le stockage dans `config.yml` :
 
@@ -367,7 +367,7 @@ Si vous utilisiez précédemment le stockage JSON :
 
 Cela migre les données des fichiers JSON vers la base de données configurée.
 
-## Valeurs par défaut {#valeurs-par-defaut}
+## Valeurs par défaut {/* #valeurs-par-defaut */}
 
 ### default_values.yml
 
@@ -385,7 +385,7 @@ values:
 
 La valeur par défaut ne s'applique qu'aux placeholders `%zmenu_player_value_<cle>%`, `%zmenu_player_expire_<cle>%` et `%zmenu_player_expire_format_<cle>%` ; elle ne **crée pas** la clé (`%zmenu_player_key_exist_<cle>%` reste `false` tant qu'aucune valeur n'est écrite). L'[exemple cookie clicker](./example-menus) s'appuie dessus.
 
-### Autres façons de gérer les clés manquantes {#autres-facons-de-gerer-les-cles-manquantes}
+### Autres façons de gérer les clés manquantes {/* #autres-facons-de-gerer-les-cles-manquantes */}
 
 ```yaml
 # Dans les exigences, verifiez l'existence
@@ -430,7 +430,7 @@ items:
 5. **Sauvegardez votre base de données** : surtout avant les changements majeurs
 6. **Documentez vos clés** : gardez une trace des données que vous stockez
 
-## Conventions de nommage des clés {#conventions-de-nommage-des-cles}
+## Conventions de nommage des clés {/* #conventions-de-nommage-des-cles */}
 
 ```
 # Bons exemples
@@ -446,7 +446,7 @@ data1    # Pas descriptif
 x        # Sans signification
 ```
 
-## Prochaines étapes {#prochaines-etapes}
+## Prochaines étapes {/* #prochaines-etapes */}
 
 - Créez des [Boutons à bascule](./buttons/types/switch) avec les données joueur
 - Configurez les [Commandes personnalisées](./custom-commands)

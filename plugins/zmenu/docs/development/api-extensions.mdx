@@ -37,7 +37,7 @@ MenuPlugin menuPlugin = (MenuPlugin) Bukkit.getPluginManager().getPlugin("zMenu"
 | Inventories | `Inventory` files | `InventoryManager#loadInventory...` | - |
 | Dialogs / Bedrock forms | `DialogInventory` / `BedrockInventory` files | `DialogManager` / `BedrockManager` | - |
 
-:::info Registration order
+:::info[Registration order]
 For buttons, actions and requirements, an inventory that uses an element zMenu does not know yet is kept on hold and loaded the moment the element gets registered (`ButtonManager#register`, `registerAction`, `registerPermissible`; the same applies to pattern files loaded with `PatternManager#loadPattern`). Your plugin can therefore enable after zMenu.
 :::
 

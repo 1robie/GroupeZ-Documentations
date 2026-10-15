@@ -10,7 +10,7 @@ description: Formatage complet du chat, modération, placeholders et fonctionnal
 
 Le module Chat est l'un des modules les plus complets de zEssentials. Il gère tous les aspects du chat du serveur : formatage, outils de modération, anti-spam, mentions (pings), chat local, affichage d'objets, liens et commandes cliquables, règles personnalisées, boutons d'action pour les modérateurs et stockage de l'historique du chat. Le module utilise un **système de formats basé sur des priorités et des permissions** ainsi que MiniMessage pour la mise en forme.
 
-:::info Paper uniquement
+:::info[Paper uniquement]
 Le format du chat est appliqué via l'événement `AsyncChatEvent` de Paper. Mettez `enable-chat-format: false` si vous souhaitez qu'un autre plugin de chat gère le formatage.
 :::
 
@@ -246,7 +246,7 @@ custom-rules:
     message: "&cNo, the server is great, you’re the bad one!"
 ```
 
-:::note Option supprimée
+:::note[Option supprimée]
 Les options `enable-itemadders-font-regex` / `itemadders-font-regex` ont été supprimées en 1.0.3.8 : la fonctionnalité n'a jamais été branchée et ces options n'avaient aucun effet. Vous pouvez les retirer de votre fichier existant sans risque.
 :::
 
@@ -286,7 +286,7 @@ Les options `enable-itemadders-font-regex` / `itemadders-font-regex` ont été s
 | `chat-cooldown-max` | Integer | `50` | Nombre de messages récents gardés en mémoire pour chaque joueur afin d'évaluer les règles. Doit être supérieur ou égal à la plus grande valeur de `messages` |
 | `enable-same-message-cancel` | Boolean | `true` | Annule un message identique (sans tenir compte de la casse) au message précédent du joueur. Contournement : `essentials.chat.bypass.same.message` |
 
-:::info Délai dynamique
+:::info[Délai dynamique]
 Avec les règles par défaut, un joueur qui envoie :
 - **2** messages en **1,5 seconde**,
 - **4** messages en **12 secondes**,

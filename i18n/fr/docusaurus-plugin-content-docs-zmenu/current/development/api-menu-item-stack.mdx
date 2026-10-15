@@ -8,7 +8,7 @@ description: Créer et manipuler des items dynamiques avec MenuItemStack
 
 Apprenez à utiliser `MenuItemStack` pour créer des items dynamiques, compatibles avec les placeholders, dans zMenu.
 
-## Aperçu {#apercu}
+## Aperçu {/* #apercu */}
 
 `MenuItemStack` est une abstraction de l'`ItemStack` de Bukkit qui fournit :
 - Le support des placeholders dans les noms, lores et autres propriétés
@@ -16,7 +16,7 @@ Apprenez à utiliser `MenuItemStack` pour créer des items dynamiques, compatibl
 - Une manipulation simple des propriétés de l'item
 - Le support du custom model data, des enchantements, etc.
 
-## Récupérer un MenuItemStack {#recuperer-un-menuitemstack}
+## Récupérer un MenuItemStack {/* #recuperer-un-menuitemstack */}
 
 ### Depuis la configuration d'un bouton
 
@@ -65,7 +65,7 @@ MenuItemStack menuItemStack = getItemStack();
 ItemStack item = menuItemStack.build(player);
 ```
 
-### Construction avec contrôle du cache {#construction-avec-controle-du-cache}
+### Construction avec contrôle du cache {/* #construction-avec-controle-du-cache */}
 
 ```java
 // Sans cache (toujours a jour)
@@ -75,7 +75,7 @@ ItemStack item = menuItemStack.build(player, false);
 ItemStack itemCached = menuItemStack.build(player, true);
 ```
 
-### Construction avec des placeholders personnalisés {#construction-avec-des-placeholders-personnalises}
+### Construction avec des placeholders personnalisés {/* #construction-avec-des-placeholders-personnalises */}
 
 ```java
 import fr.maxlego08.menu.api.utils.Placeholders;
@@ -92,9 +92,9 @@ placeholders.register("stock", "42");
 ItemStack item = menuItemStack.build(player, false, placeholders);
 ```
 
-## Placeholders personnalisés {#placeholders-personnalises}
+## Placeholders personnalisés {/* #placeholders-personnalises */}
 
-### Créer des placeholders {#creer-des-placeholders}
+### Créer des placeholders {/* #creer-des-placeholders */}
 
 ```java
 Placeholders placeholders = new Placeholders();
@@ -218,7 +218,7 @@ items:
         - "&eClick to purchase!"
 ```
 
-## Exemple complet : bouton de tri avec états {#exemple-complet--bouton-de-tri-avec-etats}
+## Exemple complet : bouton de tri avec états {/* #exemple-complet--bouton-de-tri-avec-etats */}
 
 ### SortButton.java
 
@@ -411,7 +411,7 @@ public class ToggleButton extends Button {
 
 ## Charger un MenuItemStack depuis la configuration
 
-### ButtonLoader personnalisé {#buttonloader-personnalise}
+### ButtonLoader personnalisé {/* #buttonloader-personnalise */}
 
 ```java
 package com.example.loader;
@@ -474,7 +474,7 @@ items:
         - "&eClick to %action%"
 ```
 
-## Propriétés de MenuItemStack {#proprietes-de-menuitemstack}
+## Propriétés de MenuItemStack {/* #proprietes-de-menuitemstack */}
 
 `MenuItemStack` est chargé depuis la même section `item:` utilisée partout dans zMenu : toutes les clés sont donc documentées dans la [référence des items](../configurations/items/item) et la [référence des composants](../configurations/items/components). Un court exemple :
 

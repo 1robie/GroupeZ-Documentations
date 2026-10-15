@@ -4,7 +4,7 @@ title: API des données joueur
 description: Travailler avec le stockage des données joueur de zMenu
 ---
 
-# API des données joueur {#api-des-donnees-joueur}
+# API des données joueur {/* #api-des-donnees-joueur */}
 
 Apprenez à lire et écrire les [données joueur](../configurations/player-data) de zMenu depuis votre plugin.
 
@@ -32,7 +32,7 @@ DataManager dataManager = menuPlugin.getDataManager();
 // ou : Bukkit.getServicesManager().load(DataManager.class)
 ```
 
-## Lire des données {#lire-des-donnees}
+## Lire des données {/* #lire-des-donnees */}
 
 ```java
 UUID uuid = player.getUniqueId();
@@ -46,7 +46,7 @@ int coins = data.map(Data::getValue)
         .orElse(0);
 ```
 
-### Toutes les données d'un joueur {#toutes-les-donnees-dun-joueur}
+### Toutes les données d'un joueur {/* #toutes-les-donnees-dun-joueur */}
 
 ```java
 Optional<PlayerData> playerData = dataManager.getPlayer(uuid);   // vide si le joueur n'a pas encore de donnees
@@ -74,7 +74,7 @@ Les entrées expirées sont supprimées automatiquement quand vous les lisez.
 | `add(int)` / `remove(int)` | Modifie la valeur en mémoire (voir plus bas) |
 | `negate()` | Remplace la valeur par son opposé |
 
-## Écrire des données {#ecrire-des-donnees}
+## Écrire des données {/* #ecrire-des-donnees */}
 
 L'API ne fournit pas de classe `Data` toute prête : vous implémentez vous-même la petite interface (la classe de zMenu est dans le module du plugin et ne fait pas partie de l'API) :
 
@@ -102,7 +102,7 @@ public class SimpleData implements Data {
 }
 ```
 
-### Définir une valeur {#definir-une-valeur}
+### Définir une valeur {/* #definir-une-valeur */}
 
 `addData` crée l'entrée du joueur si besoin, **remplace** toute valeur précédente de la même clé et l'enregistre dans la base :
 
@@ -114,7 +114,7 @@ long inOneHour = System.currentTimeMillis() + 3_600_000L;
 dataManager.addData(uuid, new SimpleData("vip_boost", "true", inOneHour));
 ```
 
-### Ajouter ou soustraire à un nombre {#ajouter-ou-soustraire-a-un-nombre}
+### Ajouter ou soustraire à un nombre {/* #ajouter-ou-soustraire-a-un-nombre */}
 
 `Data#add` ne modifie la valeur **qu'en mémoire** ; persistez-la avec `StorageManager#upsertData` :
 
@@ -131,7 +131,7 @@ if (existing.isPresent()) {
 
 `add` et `remove` travaillent sur des entiers : une valeur décimale comme `"1.5"` est tronquée à `1` avant l'opération.
 
-### Supprimer des données {#supprimer-des-donnees}
+### Supprimer des données {/* #supprimer-des-donnees */}
 
 ```java
 dataManager.getPlayer(uuid).ifPresent(playerData -> playerData.removeData("coins")); // une cle d'un joueur
@@ -140,7 +140,7 @@ dataManager.clearPlayer(uuid);        // tout ce qui concerne un joueur
 dataManager.clearAll();               // tout
 ```
 
-## Valeurs par défaut {#valeurs-par-defaut}
+## Valeurs par défaut {/* #valeurs-par-defaut */}
 
 Quand une clé n'existe pas pour un joueur, `%zmenu_player_value_<cle>%` retourne le texte `Key '<cle>' doesn't exist for this player`. Pour obtenir une valeur par défaut propre, déclarez-la dans `plugins/zMenu/default_values.yml` (relu par `/zm reload`) :
 
@@ -165,7 +165,7 @@ menuPlugin.registerPlaceholder("myplugin_coins_", (offlinePlayer, key) -> {
 
 Le préfixe est comparé avec `startsWith` dans l'ordre d'enregistrement : choisissez-en un distinctif. Si PlaceholderAPI est installé, le même placeholder fonctionne aussi sous la forme `%zmenu_myplugin_coins_<cle>%`. Voir [Points d'extension](./api-extensions#placeholders).
 
-## Exemple complet : système de monnaie {#exemple-complet--systeme-de-monnaie}
+## Exemple complet : système de monnaie {/* #exemple-complet--systeme-de-monnaie */}
 
 ```java
 public class CurrencyManager {
@@ -224,7 +224,7 @@ actions:
     value: "10"
 ```
 
-## Exemple complet : récompense quotidienne avec donnée expirante {#exemple-complet--recompense-quotidienne-avec-donnee-expirante}
+## Exemple complet : récompense quotidienne avec donnée expirante {/* #exemple-complet--recompense-quotidienne-avec-donnee-expirante */}
 
 Une entrée qui expire toute seule est un cooldown pratique : une fois disparue, la récompense peut être réclamée de nouveau.
 
@@ -259,7 +259,7 @@ Le `DataManager` garde ses données dans une simple map en mémoire et sauvegard
 5. **Utilisez l'expiration** pour les cooldowns plutôt que de stocker vos propres timestamps
 6. **Déclarez des valeurs par défaut** dans `default_values.yml` pour les valeurs affichées dans les menus
 
-## Étapes suivantes {#etapes-suivantes}
+## Étapes suivantes {/* #etapes-suivantes */}
 
 - Écoutez les [Événements](./api-events)
 - Parcourez tous les [Points d'extension](./api-extensions)

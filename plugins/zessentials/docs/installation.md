@@ -39,7 +39,7 @@ zEssentials ships one NMS adapter per Minecraft version. The following versions 
 | 1.21, 1.21.1, 1.21.3, 1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.9, 1.21.10, 1.21.11 | 21+ |
 | 26.2 | 25+ |
 
-:::info Mojang mappings
+:::info[Mojang mappings]
 Since Minecraft 26.1, Paper no longer reobfuscates plugins to Spigot mappings. zEssentials is therefore built with **Mojang mappings**, which can only be loaded by Paper **1.20.5 or newer**. Minecraft **1.20.4 and older are no longer supported**. Minecraft 26.x uses year-based versioning (26.2 is the second release of 2026) and requires **Java 25**.
 :::
 
@@ -53,7 +53,7 @@ Since Minecraft 26.1, Paper no longer reobfuscates plugins to Spigot mappings. z
 | Folia | Supported (regionised threading) |
 | Spigot / CraftBukkit | **Not supported** |
 
-:::danger Paper is required
+:::danger[Paper is required]
 zEssentials is a **Paper-only** plugin. The JAR contains a `paper-plugin.yml`, which Paper (and its forks) loads in priority.
 
 The JAR also contains a minimal `plugin.yml` that is only used by Spigot. On Spigot, zEssentials stays **completely inactive** (no commands, no modules, no API): it only logs a warning in the console and, when a player with the `zessentials.paper.warning` permission (operators by default) joins, tells them that the server must run Paper. Download Paper at [papermc.io/downloads](https://papermc.io/downloads).
@@ -99,7 +99,7 @@ See [Hooks & Integrations](./development/hooks) for details on each integration.
 3. Start your server
 4. The plugin will generate all default configuration files and module configs
 
-:::info Runtime library download
+:::info[Runtime library download]
 When the server starts, zEssentials asks Paper (through its plugin loader, `ZEssentialsPluginLoader`) to provide the **MariaDB JDBC driver** (`org.mariadb.jdbc:mariadb-java-client`), which is downloaded from Maven Central the first time. The server therefore needs internet access on first start. If your host blocks Maven Central, you can use a mirror with the `PAPER_DEFAULT_CENTRAL_REPOSITORY` environment variable or the `org.bukkit.plugin.java.LibraryLoader.centralURL` system property, exactly like for Paper itself.
 :::
 
@@ -241,7 +241,7 @@ server-type: PAPER
 | `PAPER` | Default mode. All data is handled locally, no cross-server communication. |
 | `REDIS` | Multi-server mode using Redis pub/sub. |
 
-:::caution Redis mode in development
+:::caution[Redis mode in development]
 The `REDIS` server type is **still in development**: in the current version the Redis server is not started, so setting `server-type: REDIS` has no effect and the plugin behaves as with `PAPER`. For a network, share the same MySQL/MariaDB database between your servers.
 :::
 

@@ -8,7 +8,7 @@ description: Liste complète de toutes les commandes et permissions pour zSpawne
 
 Cette page contient la liste complète de toutes les commandes et permissions disponibles dans zSpawner.
 
-:::info Guide de Syntaxe
+:::info[Guide de Syntaxe]
 - `< >` indique un argument **requis**.
 - `[ ]` indique un argument **optionnel**.
 - `|` sépare plusieurs alias pour la même commande.

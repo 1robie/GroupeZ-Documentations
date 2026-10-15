@@ -68,7 +68,7 @@ You can use custom model data to display unique textures for your vault icons wh
 | `vault-permissions[].slots` | Integer | - | The number of inventory slots granted by this permission. Must be a multiple of 9 for proper inventory rendering (up to 54 per page) |
 | `vault-slot-type` | String | `MAX` | Determines how multiple permission slot values are combined. Accepts `MAX` or `ADDITION` |
 
-:::info Slot Type Modes
+:::info[Slot Type Modes]
 - **`MAX`** -- The player's vault size is determined by the **highest** matching permission value. For example, if a player has both `zessentials.vault.size.player` (45 slots) and `zessentials.vault.size.vip` (90 slots), their vault size will be **90 slots**.
 - **`ADDITION`** -- All matching permission slot values are **added together**. Using the same example, the player's vault size would be **135 slots** (45 + 90).
 :::

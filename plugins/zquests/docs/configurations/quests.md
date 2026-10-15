@@ -61,7 +61,7 @@ A unique identifier for the quest. This value is used internally to track player
 name: "stone-breaker-1"
 ```
 
-:::warning Important
+:::warning[Important]
 The quest name must be **unique** across all quest files. Changing this value after players have started the quest will reset their progress!
 :::
 

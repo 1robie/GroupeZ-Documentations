@@ -30,7 +30,7 @@ enable-no-argument-message: true
 | `enable-inventory` | Boolean | `false` | Lorsque `true`, l'exécution de `/warps` ouvre une interface graphique d'inventaire zMenu (`warps.yml`) affichant tous les warps disponibles. Lorsque `false`, les warps sont listés dans le chat à la place |
 | `enable-no-argument-message` | Boolean | `true` | Lorsque `true` et que `enable-inventory` est `false`, l'exécution de `/warp` sans arguments envoie un message dans le chat listant tous les warps disponibles |
 
-:::info Modes d'Affichage
+:::info[Modes d'Affichage]
 - **Mode inventaire** (`enable-inventory: true`) -- L'exécution de `/warps` ouvre un inventaire interactif zMenu défini dans `warps.yml`. Les joueurs peuvent cliquer sur les éléments de warp pour se téléporter. Cela offre une expérience de navigation riche et visuelle.
 - **Mode chat** (`enable-inventory: false`, `enable-no-argument-message: true`) -- L'exécution de `/warp` sans arguments liste tous les warps disponibles directement dans le chat du joueur. Les joueurs peuvent ensuite utiliser `/warp <name>` pour se téléporter.
 :::

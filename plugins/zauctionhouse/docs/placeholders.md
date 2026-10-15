@@ -41,7 +41,7 @@ Used in `item-lore` section of `config.yml`:
 | `%player%` | Player involved in the action |
 | `%target%` | Target player (admin operations) |
 
-:::tip Performance
+:::tip[Performance]
 Only the placeholders actually used in your lore templates are computed at render time. The plugin pre-detects which placeholders each lore section references when the configuration is loaded.
 :::
 

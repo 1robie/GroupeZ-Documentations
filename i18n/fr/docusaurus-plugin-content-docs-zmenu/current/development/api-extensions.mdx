@@ -37,11 +37,11 @@ MenuPlugin menuPlugin = (MenuPlugin) Bukkit.getPluginManager().getPlugin("zMenu"
 | Inventaires | fichiers `Inventory` | `InventoryManager#loadInventory...` | - |
 | Dialogues / formulaires Bedrock | fichiers `DialogInventory` / `BedrockInventory` | `DialogManager` / `BedrockManager` | - |
 
-:::info Ordre d'enregistrement
+:::info[Ordre d'enregistrement]
 Pour les boutons, actions et conditions, un inventaire qui utilise un élément que zMenu ne connaît pas encore est mis en attente et chargé dès que l'élément est enregistré (`ButtonManager#register`, `registerAction`, `registerPermissible` ; idem pour les fichiers de pattern chargés avec `PatternManager#loadPattern`). Votre plugin peut donc s'activer après zMenu.
 :::
 
-## Annotations d'auto-enregistrement (interne à zMenu) {#annotations-dauto-enregistrement-interne-a-zmenu}
+## Annotations d'auto-enregistrement (interne à zMenu) {/* #annotations-dauto-enregistrement-interne-a-zmenu */}
 
 Les propres loaders de zMenu sont découverts avec des annotations plutôt que par des appels manuels. Au démarrage, il scanne le package `fr.maxlego08.menu` de **son propre** jar et enregistre toute classe portant l'une de ces annotations :
 
@@ -265,7 +265,7 @@ Voir [Événements](./api-events#fastevent-alternative-haute-performance) pour `
 
 Les animations de titre sont produites par un `TitleAnimationLoader` enregistré avec `TitleAnimationManager#registerLoader(id, loader)` ; l'`id` est ce que les joueurs écrivent dans `title-animation.plugin`. Voir [Services et managers](./api-services#titleanimationmanager) pour le guide complet.
 
-## Items personnalisés et mécaniques {#items-personnalises-et-mecaniques}
+## Items personnalisés et mécaniques {/* #items-personnalises-et-mecaniques */}
 
 Les plugins peuvent attacher des comportements aux items personnalisés définis dans `items/*.yml` ([Items personnalisés](../configurations/items/custom-items), [Mécaniques](../configurations/items/mechanics)). Une `MechanicFactory` lit la section `mechanics.<id>` de chaque item ; un `MechanicListener` réagit au gameplay.
 

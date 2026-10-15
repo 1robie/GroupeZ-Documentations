@@ -8,11 +8,11 @@ description: Migrate data from other plugins to zEssentials
 
 zEssentials includes built-in data converters that allow you to migrate player data from other popular plugins. Each converter reads data from the source plugin's storage format and imports it into the zEssentials database.
 
-:::warning Prerequisites
+:::warning[Prerequisites]
 All converters require zEssentials to be configured with **SQL storage** (`SQLITE`, `MYSQL`, `MARIADB` or `HIKARICP`). The `JSON` storage is not supported as a target for data migration. Ensure your database is configured and working before running any converter. For production, use MySQL/MariaDB rather than SQLite.
 :::
 
-:::tip Before You Start
+:::tip[Before You Start]
 1. **Back up your database** before running any converter.
 2. **Close the server to players** (e.g. with the whitelist) or ensure no players are online during migration to prevent data conflicts.
 3. Verify that the source plugin's data files are accessible from the server.
@@ -36,7 +36,7 @@ All converters are started with the same command:
 
 The conversion runs asynchronously. Progress and the final result (`You have just converted your ... data to zEssentials !`) are sent to the command sender.
 
-:::tip Homes only from EssentialsX
+:::tip[Homes only from EssentialsX]
 If you only want to import the **homes** of EssentialsX (without balances), you can also use `/homeimport essentialsx` (permission `essentials.home.import`). It reads the same `plugins/Essentials/userdata/` files, skips homes whose world does not exist, and works with every storage type. See the [Home module](./modules/home).
 :::
 

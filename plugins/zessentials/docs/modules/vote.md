@@ -10,7 +10,7 @@ description: Vote tracking with vote party system and per-site cooldowns
 
 The Vote module tracks player votes from external voting sites, provides configurable rewards based on cumulative vote counts, and includes a **Vote Party** system that triggers global rewards when the server reaches a collective vote goal. It supports per-site cooldowns, tiered reward brackets, offline vote notifications, and automatic monthly resets.
 
-:::warning Dependency
+:::warning[Dependency]
 This module requires [NuVotifier](https://github.com/NuVotifier/NuVotifier) to be installed and configured. NuVotifier receives incoming votes from voting sites and forwards them to zEssentials for processing.
 :::
 

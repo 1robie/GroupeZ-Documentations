@@ -10,7 +10,7 @@ description: Suivi des votes avec système de vote party et cooldowns par site
 
 Le module Vote suit les votes des joueurs provenant de sites de vote externes, fournit des récompenses configurables basées sur le nombre cumulé de votes, et inclut un système de **Vote Party** qui déclenche des récompenses globales lorsque le serveur atteint un objectif collectif de votes. Il prend en charge les cooldowns par site, les paliers de récompenses, les notifications de vote hors ligne et les réinitialisations mensuelles automatiques.
 
-:::warning Dépendance
+:::warning[Dépendance]
 Ce module nécessite l'installation et la configuration de [NuVotifier](https://github.com/NuVotifier/NuVotifier). NuVotifier reçoit les votes entrants des sites de vote et les transmet à zEssentials pour traitement.
 :::
 

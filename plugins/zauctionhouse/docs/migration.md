@@ -8,7 +8,7 @@ description: How to migrate data from other auction plugins to zAuctionHouse V4
 
 zAuctionHouse V4 includes a built-in migration system that allows you to import data from other auction plugins. This ensures a smooth transition without losing existing listings, expired items, or transaction history.
 
-:::warning Before You Start
+:::warning[Before You Start]
 1. **Back up your database** before running any migration.
 2. **Stop the server** or ensure no players are online during migration to avoid data conflicts.
 3. Verify the source plugin's data files or database are accessible.
@@ -31,7 +31,7 @@ Before migrating, ensure your server meets the v4 requirements:
 | **zMenu** | [modrinth.com/plugin/zmenu](https://modrinth.com/plugin/zmenu) |
 | **PlaceholderAPI** | [spigotmc.org/resources/6245](https://www.spigotmc.org/resources/placeholderapi.6245/) |
 
-:::warning Important
+:::warning[Important]
 Both **zMenu** and **PlaceholderAPI** are mandatory for zAuctionHouse v4 to work. The plugin will not function without them.
 :::
 
@@ -132,7 +132,7 @@ migration:
 
 ### Configuration
 
-:::danger Configuration Cannot Be Migrated
+:::danger[Configuration Cannot Be Migrated]
 The configuration system has been completely rewritten in v4. **You cannot migrate your v3 configuration** - you will need to reconfigure the plugin from scratch.
 :::
 
@@ -196,7 +196,7 @@ The migration system reads data directly from the ZelAuction database by using i
 - The ZelAuction database file (`.db` for SQLite) must be present in the ZelAuction folder
 - zAuctionHouse V4 must be properly configured with its own storage
 
-:::info No Configuration Needed
+:::info[No Configuration Needed]
 Unlike the V3 migration, ZelAuction migration does not require any configuration in `config.yml`. The migrator reads all connection settings directly from ZelAuction's own `database.yml` file.
 :::
 
@@ -243,11 +243,11 @@ DonutAuction stores everything in a single Bukkit YAML file at `plugins/DonutAuc
 5. Item data (DonutAuction's Base64 Bukkit ItemStacks) is converted to V4's format through a hardened class allowlist that guards against malicious data files
 6. All imported items use the `vault` economy (DonutAuction only supports Vault)
 
-:::info No Configuration Needed
+:::info[No Configuration Needed]
 Like the ZelAuction migration, DonutAuction migration requires no `config.yml` setup. The migrator reads everything from `plugins/DonutAuction/ah.data`.
 :::
 
-:::note What Is Not Migrated
+:::note[What Is Not Migrated]
 `pendingPayments` (unclaimed sale **money**, not items) and already-delivered purchases are intentionally skipped - DonutAuction delivers bought items straight to the buyer's inventory, so there is nothing to import for those.
 :::
 

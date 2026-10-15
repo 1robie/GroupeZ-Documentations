@@ -144,7 +144,7 @@ Rule rule = ...;                         // see below
 boolean ok = rule.matches(context);      // context: ItemRuleContext of the item (material, name, lore, custom model data)
 ```
 
-:::caution No public registration yet
+:::caution[No public registration yet]
 Rule loaders (`RuleLoader`, `AbstractPluginRuleLoader`) are discovered inside the zMenu jar with the `@AutoRuleLoader` annotation. A third-party plugin registers its own loader instead:
 
 ```java

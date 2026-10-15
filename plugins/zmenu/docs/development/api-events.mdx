@@ -20,7 +20,7 @@ zMenu fires various events that you can listen to in your plugin. This allows yo
 
 All of them live in `fr.maxlego08.menu.api.event.events`. `ButtonLoadEvent`, `InventoryLoadEvent`, `PlayerOpenInventoryEvent` and `ButtonLoaderRegisterEvent` extend `MenuEvent` (a regular Bukkit `Event` with a `call()` helper); `PlayerOpenInventoryEvent` extends `CancelledMenuEvent`, which adds `Cancellable`.
 
-:::info FastEvent
+:::info[FastEvent]
 If `enable-fast-event` is `true` in `config.yml`, `ButtonLoadEvent`, `InventoryLoadEvent` and `PlayerOpenInventoryEvent` are **not** sent through Bukkit anymore: only listeners registered with the [FastEvent API](#fastevent-high-performance-alternative) are called. Keep it `false` if other plugins listen to these events.
 :::
 
@@ -208,7 +208,7 @@ public class ItemsLoadListener implements Listener {
 
 Bukkit events go through the whole plugin manager every time they are fired. When [`enable-fast-event`](../configurations/config-yml#enable-fast-event) is `true` in `config.yml`, zMenu stops firing `ButtonLoadEvent`, `InventoryLoadEvent` and `PlayerOpenInventoryEvent` as Bukkit events and instead calls the `FastEvent` listeners registered with `InventoryManager#registerFastEvent`. `ButtonLoaderRegisterEvent` and `ZMenuItemsLoad` are not concerned and stay Bukkit events.
 
-:::warning Choose one system per server
+:::warning[Choose one system per server]
 With `enable-fast-event: true`, a regular `@EventHandler` for those three events is **never called**. Plugins that only use Bukkit listeners stop receiving them, so only enable the option if every plugin hooking into zMenu uses `FastEvent`. When the option is `false` (the default), `FastEvent` listeners are never called.
 :::
 

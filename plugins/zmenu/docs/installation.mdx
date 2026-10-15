@@ -18,21 +18,21 @@ Before installing zMenu, make sure your server meets the following requirements:
 | Java | **Java 21** (required) |
 | Server Software | **Paper**, Purpur, Pufferfish, or Folia |
 
-:::warning Paper is required
+:::warning[Paper is required]
 zMenu is a **Paper-only** plugin — it ships a `paper-plugin.yml`, which only Paper reads. Run it on Paper, a Paper fork (Purpur / Pufferfish) or Folia.
 
 On Spigot the plugin still loads and enables, but **nothing works**: no menu, no command, no API. It only prints a warning in the console, and sends the same warning on join to players holding `zmenu.paper.warning` (operators by default), telling you to install Paper.
 :::
 
-:::tip Recommended Setup
+:::tip[Recommended Setup]
 For the best experience, we recommend using **Paper** or **Purpur**. This enables MiniMessage formatting support and provides better performance.
 :::
 
-:::tip Migrating from DeluxeMenus?
+:::tip[Migrating from DeluxeMenus?]
 Keep your menus: once zMenu is installed, run `/zm convert deluxemenus` to convert every DeluxeMenus menu into a zMenu inventory. See [Migrate from DeluxeMenus](./convert-deluxemenus).
 :::
 
-:::info First start needs internet
+:::info[First start needs internet]
 On first load zMenu downloads a few runtime libraries (the MariaDB driver and Reflections) through Paper's library loader. On a restricted network you can point it at a mirror with the `PAPER_DEFAULT_CENTRAL_REPOSITORY` environment variable or the `-Dorg.bukkit.plugin.java.LibraryLoader.centralURL` JVM flag.
 :::
 
@@ -43,7 +43,7 @@ You can download zMenu from the following sources:
 - **Modrinth** (Primary): [https://modrinth.com/plugin/zmenu](https://modrinth.com/plugin/zmenu)
 - **SpigotMC**: [https://www.spigotmc.org/resources/zmenu.110402/](https://www.spigotmc.org/resources/zmenu.110402/)
 
-:::info Development Builds
+:::info[Development Builds]
 Get the latest development versions in the `#builds` channel on [Discord](https://discord.groupez.dev).
 :::
 
@@ -139,7 +139,7 @@ These plugins allow you to use custom items in your menus:
 | [Geyser](https://geysermc.org/) / [Floodgate](https://geysermc.org/) | Bedrock forms for Bedrock players |
 | [ViaVersion](https://viaversion.com/) / ProtocolSupport | Detect the real client version of players (used to fall back from dialogs to inventories for old clients) |
 
-:::info Dialogs need no extra plugin
+:::info[Dialogs need no extra plugin]
 [Dialogs](./configurations/dialogues) use Paper's own dialog API: Paper 1.21.7+ and `enable-mini-message-format: true` are enough.
 :::
 
@@ -212,7 +212,7 @@ To update zMenu:
 4. Start your server
 5. Run `/zm reload` if configurations haven't changed
 
-:::warning Backup First
+:::warning[Backup First]
 Always backup your `plugins/zMenu/` folder before updating, especially if you've customized configurations.
 :::
 

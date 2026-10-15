@@ -70,6 +70,6 @@ Need help? Here are your options:
 - **Documentation**: You're reading it!
 - **GitHub**: Report issues on [GitHub](https://github.com/GroupeZ-dev/zAuctionHouse)
 
-:::info Premium Support
+:::info[Premium Support]
 Support is provided to users who have purchased the plugin. Free trial users can access community support on Discord.
 :::

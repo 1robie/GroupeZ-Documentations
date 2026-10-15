@@ -64,11 +64,11 @@ items:
 
 With `item-source: INVENTORY`, the amounts of all matching stacks in the player's inventory are added up and compared with `amount`. With any other source, a single stack must match and contain at least `amount` items.
 
-:::warning A broken rule is not an error
+:::warning[A broken rule is not an error]
 If a rule cannot be built (unknown `type`, empty list, only unknown materials or tags, plugin of a plugin rule not installed), zMenu logs `Unknown rule type` when the type is unknown. On an `item_drag` button, a broken rule makes the button **refuse every item** and logs a warning. On an `item-rule` requirement, the requirement is dropped. Check the console after a reload, and test the refusal case in game.
 :::
 
-:::info Lenient lists
+:::info[Lenient lists]
 In `and` / `or`, sub-rules that fail to build are skipped silently, so an `and` made of one valid and one broken rule behaves like the valid rule alone. Materials can be written `DIAMOND` or `minecraft:diamond` (case does not matter); unknown names are skipped.
 :::
 

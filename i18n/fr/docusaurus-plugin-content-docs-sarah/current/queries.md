@@ -196,7 +196,7 @@ requestHelper.upsert("players", schema -> {
 });
 ```
 
-:::warning Exigence SQLite
+:::warning[Exigence SQLite]
 Pour SQLite, vous devez marquer la colonne de clé primaire avec `.primary()` :
 ```java
 schema.uuid("uuid", playerUuid).primary();  // Obligatoire pour SQLite !

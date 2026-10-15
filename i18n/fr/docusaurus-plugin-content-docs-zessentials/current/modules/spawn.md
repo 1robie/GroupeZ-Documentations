@@ -58,7 +58,7 @@ teleport-at-spawn-on-join: false
 | `respawn-at-bed` | Boolean | `true` | Si `true`, un joueur qui réapparaît à son lit conserve cette position. Si `false`, il est envoyé au spawn du serveur |
 | `teleport-at-spawn-on-join` | Boolean | `false` | Si `true`, les joueurs sont téléportés au spawn du serveur à chaque connexion |
 
-:::info Les priorités des écouteurs sont désormais respectées
+:::info[Les priorités des écouteurs sont désormais respectées]
 Avant la version 1.0.3.8, `respawn-listener-priority` et `spawn-join-listener-priority` étaient ignorées et les deux écouteurs étaient toujours enregistrés avec la priorité `NORMAL`. Ils utilisent maintenant la valeur configurée, `HIGHEST` par défaut, ce qui donne le dernier mot à zEssentials face aux autres plugins. Utilisez `lowest` si un autre plugin (par exemple Multiverse) doit décider à sa place.
 :::
 
@@ -84,7 +84,7 @@ Si aucun spawn n'est défini, zEssentials ne modifie pas le point de réappariti
 Pour toujours faire réapparaître les joueurs au spawn, mettez `respawn-at-anchor` et `respawn-at-bed` à `false`.
 :::
 
-:::note Folia
+:::note[Folia]
 Sur Folia, le spawn du serveur est défini comme point de réapparition du joueur au moment de sa mort.
 :::
 

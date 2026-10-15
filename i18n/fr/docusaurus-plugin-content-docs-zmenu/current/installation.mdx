@@ -18,21 +18,21 @@ Avant d'installer zMenu, assurez-vous que votre serveur répond aux exigences su
 | Java | **Java 21** (requis) |
 | Logiciel serveur | **Paper**, Purpur, Pufferfish ou Folia |
 
-:::warning Paper est requis
+:::warning[Paper est requis]
 zMenu est un plugin **exclusivement Paper** : il fournit un `paper-plugin.yml`, que seul Paper lit. Utilisez Paper, un fork de Paper (Purpur / Pufferfish) ou Folia.
 
 Sur Spigot, le plugin se charge et s'active quand même, mais **rien ne fonctionne** : aucun menu, aucune commande, aucune API. Il affiche seulement un avertissement dans la console, et envoie le même avertissement à la connexion aux joueurs possédant `zmenu.paper.warning` (les opérateurs par défaut), vous indiquant d'installer Paper.
 :::
 
-:::tip Configuration recommandée
+:::tip[Configuration recommandée]
 Pour une meilleure expérience, nous recommandons d'utiliser **Paper** ou **Purpur** avec **Java 21**. Cela active le support du formatage MiniMessage et offre de meilleures performances.
 :::
 
-:::tip Vous migrez depuis DeluxeMenus ?
+:::tip[Vous migrez depuis DeluxeMenus ?]
 Gardez vos menus : une fois zMenu installé, lancez `/zm convert deluxemenus` pour convertir chaque menu DeluxeMenus en inventaire zMenu. Consultez [Migrer depuis DeluxeMenus](./convert-deluxemenus).
 :::
 
-:::info Le premier démarrage nécessite Internet
+:::info[Le premier démarrage nécessite Internet]
 Au premier chargement, zMenu télécharge quelques librairies d'exécution (le driver MariaDB et Reflections) via le chargeur de librairies de Paper. Sur un réseau restreint, vous pouvez indiquer un miroir avec la variable d'environnement `PAPER_DEFAULT_CENTRAL_REPOSITORY` ou l'option JVM `-Dorg.bukkit.plugin.java.LibraryLoader.centralURL`.
 :::
 
@@ -136,7 +136,7 @@ Ces plugins vous permettent d'utiliser des items personnalisés dans vos menus :
 | [Geyser](https://geysermc.org/) / [Floodgate](https://geysermc.org/) | Formulaires Bedrock pour les joueurs Bedrock |
 | [ViaVersion](https://viaversion.com/) / ProtocolSupport | Détecter la vraie version client des joueurs (sert à basculer des dialogues vers les inventaires pour les anciens clients) |
 
-:::info Les dialogues ne nécessitent aucun plugin supplémentaire
+:::info[Les dialogues ne nécessitent aucun plugin supplémentaire]
 Les [dialogues](./configurations/dialogues) utilisent l'API de dialogues native de Paper : Paper 1.21.7+ et `enable-mini-message-format: true` suffisent.
 :::
 
@@ -209,7 +209,7 @@ Pour mettre à jour zMenu :
 4. Démarrez votre serveur
 5. Exécutez `/zm reload` si les configurations n'ont pas changé
 
-:::warning Sauvegardez d'abord
+:::warning[Sauvegardez d'abord]
 Sauvegardez toujours votre dossier `plugins/zMenu/` avant la mise à jour, surtout si vous avez personnalisé les configurations.
 :::
 

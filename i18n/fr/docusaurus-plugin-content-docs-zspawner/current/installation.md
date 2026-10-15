@@ -32,7 +32,7 @@ Avant l'installation, assurez-vous que votre serveur répond à ces exigences :
 | Pufferfish | Supporté |
 | Folia | Supporté |
 
-:::tip Recommandé
+:::tip[Recommandé]
 **Paper** est la plateforme serveur recommandée. Elle offre les meilleures performances et compatibilité avec zSpawner.
 :::
 

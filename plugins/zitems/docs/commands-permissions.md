@@ -77,7 +77,7 @@ Gives the physical representation of an effect (if configured) to a player.
 /zitems giveeffect hammer_rune Steve
 ```
 
-:::note Effect Representation Required
+:::note[Effect Representation Required]
 This command only works for effects that have a `representation` configured in their settings.
 :::
 
@@ -158,7 +158,7 @@ This reloads:
 - All files in `items/` - Item definitions
 - All files in `effects/` - Effect definitions
 
-:::warning Reload Limitations
+:::warning[Reload Limitations]
 Some changes may require a server restart:
 - Custom recipes may not update immediately
 - Custom block data may require restart

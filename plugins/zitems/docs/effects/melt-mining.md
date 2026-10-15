@@ -51,7 +51,7 @@ The effect uses vanilla furnace recipes to determine outputs:
 | Wet Sponge | Wet Sponge | Sponge |
 | Kelp | Kelp | Dried Kelp |
 
-:::info Fortune Compatibility
+:::info[Fortune Compatibility]
 The effect works with Fortune enchantment. If Fortune gives you 3 raw iron, you get 3 iron ingots.
 :::
 

@@ -4,13 +4,13 @@ title: Règles d'items
 description: Système flexible de correspondance d'items utilisé pour valider les items déposés dans un menu
 ---
 
-# Règles d'items {#regles-ditems}
+# Règles d'items {/* #regles-ditems */}
 
 Les règles d'items sont un **système flexible de correspondance d'items**. Au lieu de comparer un item à un seul item fixe, une règle décrit un ensemble de conditions qu'un item doit respecter (son matériau, son nom, son lore, une plage de custom-model-data, l'identifiant d'un item de plugin, etc.).
 
 Les règles sont principalement utilisées par le bouton [`item_drag`](#le-bouton-item_drag) pour décider si un joueur a le droit de déposer un item dans un slot.
 
-## Définir une règle {#definir-une-regle}
+## Définir une règle {/* #definir-une-regle */}
 
 Une règle se définit avec une section `rule`. Chaque règle possède un `type` et ses propres options :
 
@@ -24,7 +24,7 @@ rule:
 
 Vous pouvez combiner plusieurs règles avec les types composites `and` / `or` (voir [Combiner des règles](#combiner-des-regles)).
 
-## Où utiliser les règles {#ou-utiliser-les-regles}
+## Où utiliser les règles {/* #ou-utiliser-les-regles */}
 
 Les règles sont acceptées à deux endroits seulement :
 
@@ -64,11 +64,11 @@ items:
 
 Avec `item-source: INVENTORY`, les quantités de tous les stacks correspondants de l'inventaire du joueur sont additionnées puis comparées à `amount`. Avec toute autre source, un seul stack doit correspondre et contenir au moins `amount` items.
 
-:::warning Une règle cassée n'est pas une erreur
+:::warning[Une règle cassée n'est pas une erreur]
 Si une règle ne peut pas être construite (`type` inconnu, liste vide, uniquement des matériaux ou tags inconnus, plugin d'une règle de plugin non installé), zMenu écrit `Unknown rule type` dans la console quand le type est inconnu. Sur un bouton `item_drag`, une règle cassée fait **refuser tous les items** au bouton et affiche un avertissement. Sur un requirement `item-rule`, le requirement est supprimé. Vérifiez la console après un rechargement et testez le cas de refus en jeu.
 :::
 
-:::info Listes tolérantes
+:::info[Listes tolérantes]
 Dans `and` / `or`, les sous-règles impossibles à construire sont ignorées silencieusement : un `and` composé d'une règle valide et d'une règle cassée se comporte comme la règle valide seule. Les matériaux peuvent s'écrire `DIAMOND` ou `minecraft:diamond` (la casse n'a pas d'importance) ; les noms inconnus sont ignorés.
 :::
 
@@ -114,7 +114,7 @@ items:
 `check-item` / `check_item` et `error-item` / `error_item` sont interchangeables (les deux orthographes fonctionnent).
 :::
 
-## Types de règles {#types-de-regles}
+## Types de règles {/* #types-de-regles */}
 
 ### material
 
@@ -251,7 +251,7 @@ rule:
 
 ---
 
-### Règles d'items de plugins {#regles-ditems-de-plugins}
+### Règles d'items de plugins {/* #regles-ditems-de-plugins */}
 
 Ces règles font correspondre un item personnalisé par son identifiant de plugin. Elles supportent les jokers (wildcards) et une option `ignore-case` (défaut `true`), et nécessitent que le plugin correspondant soit installé.
 
@@ -273,7 +273,7 @@ rule:
 | `items` | Liste | La liste des identifiants d'items à comparer (jokers supportés) |
 | `ignore-case` | Booléen | Comparaison insensible à la casse (défaut : `true`) |
 
-## Combiner des règles {#combiner-des-regles}
+## Combiner des règles {/* #combiner-des-regles */}
 
 Utilisez `and` / `or` pour combiner plusieurs règles.
 

@@ -58,7 +58,7 @@ teleport-at-spawn-on-join: false
 | `respawn-at-bed` | Boolean | `true` | If `true`, a player whose respawn is at a bed keeps that location. If `false`, they are sent to the server spawn |
 | `teleport-at-spawn-on-join` | Boolean | `false` | If `true`, players are teleported to the server spawn every time they join |
 
-:::info Listener priorities are now honored
+:::info[Listener priorities are now honored]
 Before version 1.0.3.8, `respawn-listener-priority` and `spawn-join-listener-priority` were ignored and both listeners were always registered with the `NORMAL` priority. They now use the configured value, `HIGHEST` by default, which lets zEssentials have the final say over other plugins. Use `lowest` if another plugin (e.g. Multiverse) should decide instead.
 :::
 
@@ -84,7 +84,7 @@ If no server spawn is set, zEssentials does not change the respawn location.
 To always respawn players at spawn, set `respawn-at-anchor` and `respawn-at-bed` to `false`.
 :::
 
-:::note Folia
+:::note[Folia]
 On Folia, the server spawn is set as the player's respawn location when they die.
 :::
 

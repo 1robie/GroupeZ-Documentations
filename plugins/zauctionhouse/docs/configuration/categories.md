@@ -24,7 +24,7 @@ Categories organize items in the auction house, making it easier for players to 
 Category display order is defined in `inventories/categories.yml`, not in `categories.yml`. The categories file only defines the matching rules.
 :::
 
-:::tip Multiple Files
+:::tip[Multiple Files]
 You don't have to define all categories in `categories.yml`. You can create a `categories/` folder and split your categories into multiple YAML files for better organization:
 ```
 plugins/zAuctionHouse/
@@ -222,7 +222,7 @@ You can add a `banned-rules` list to any category to **exclude** specific items,
 
 Banned rules use the **same rule types** as regular rules (material, material-suffix, tag, name, lore, custom-model-data, and/or, etc.).
 
-:::info How it works
+:::info[How it works]
 1. The item is first checked against `banned-rules`
 2. If **any** banned rule matches, the item is **excluded** from the category
 3. Only then are the regular `rules` evaluated

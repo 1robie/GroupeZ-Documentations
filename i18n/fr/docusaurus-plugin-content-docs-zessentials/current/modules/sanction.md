@@ -10,7 +10,7 @@ description: Système de modération complet avec bans, mutes, kicks, freezes et
 
 Le module Sanctions est un système de modération complet qui propose les **bans**, **mutes**, **kicks**, **freezes**, un **historique des sanctions** par joueur ainsi que les commandes de recherche `/seen` et `/seenip`. Il inclut des raisons par défaut configurables, une liste de joueurs protégés, des options d'affichage pour `/seen` et des icônes de matériaux personnalisables pour l'interface d'historique des sanctions.
 
-:::danger Stockage SQL requis
+:::danger[Stockage SQL requis]
 Le module Sanctions **nécessite un stockage SQL** (`MYSQL`, `MARIADB`, `HIKARICP` ou `SQLITE`). Les sanctions, `/seen` et `/seenip` ne sont pas implémentés pour le stockage `JSON`. Une base MySQL/MariaDB est recommandée pour les serveurs en production.
 :::
 
@@ -141,7 +141,7 @@ Chaque ligne de `/seen` peut être désactivée globalement. Lorsqu'une option e
 | `seen-show-created-at` | Boolean | `true` | `essentials.seen.show.created.at` | Affiche la date de première connexion du joueur |
 | `seen-show-playtime` | Boolean | `true` | - | Affiche le temps de jeu total du joueur |
 
-:::tip Masquer les adresses IP à tout le monde
+:::tip[Masquer les adresses IP à tout le monde]
 Les opérateurs possèdent toutes les permissions, y compris `essentials.seen.show.ip` : la permission seule ne permet donc pas de leur cacher les adresses IP. Mettez `seen-show-ip: false` pour ne jamais afficher les adresses IP dans `/seen`, même aux opérateurs.
 :::
 

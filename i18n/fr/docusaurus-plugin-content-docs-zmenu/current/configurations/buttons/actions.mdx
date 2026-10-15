@@ -169,7 +169,7 @@ Envoyer une liste de lignes de chat à tous les joueurs en ligne.
 
 **Alias :** `broadcast_message` et `broadcast message`.
 
-:::info Différence avec `broadcast`
+:::info[Différence avec `broadcast`]
 `broadcast_message` résout ses placeholders **une seule fois**, pour le joueur qui l'a déclenché, puis envoie ce même résultat à tout le monde : seul `%receiver%` varie. [`broadcast`](#broadcast) les résout **à nouveau pour chaque destinataire** et accepte une liste `requirements` pour filtrer qui reçoit le message.
 
 Utilisez `broadcast` quand le texte doit différer selon le destinataire ou être filtré, et `broadcast_message` pour une simple annonce à propos du joueur qui a cliqué.
@@ -227,7 +227,7 @@ Afficher un titre et un sous-titre.
 
 Changer le titre de l'inventaire.
 
-:::warning Nécessite PacketEvents
+:::warning[Nécessite PacketEvents]
 Cette action n'est disponible que si le plugin [PacketEvents](https://github.com/retrooper/packetevents) est installé sur votre serveur. Sans lui, l'action n'est pas enregistrée.
 :::
 
@@ -271,7 +271,7 @@ Les placeholders sont résolus **une seule fois, pour le joueur qui a déclench�
 
 **Alias :** `broadcast_title` et `broadcast title`.
 
-:::warning Toujours écrire les deux lignes et les trois durées
+:::warning[Toujours écrire les deux lignes et les trois durées]
 `title` et `subtitle` n'ont pas de valeur par défaut : en omettre un envoie le texte littéral `null` à tous les joueurs. Les trois durées valent `0` par défaut, ce qui fait apparaître puis disparaître le titre immédiatement sur la plupart des clients. Renseignez-les explicitement, comme dans l'exemple ci-dessus.
 :::
 
@@ -422,7 +422,7 @@ Par défaut, toutes les commandes de la liste sont exécutées, quoi qu'aient fa
     - "lp user %player% parent add vip"
 ```
 
-:::warning Pourquoi c'est désactivé par défaut
+:::warning[Pourquoi c'est désactivé par défaut]
 Bukkit renvoie un échec aussi bien pour une commande qui n'existe pas **que** pour une commande dont l'exécuteur a renvoyé `false`, ce que beaucoup de plugins font simplement pour afficher leur aide. Activer cette option sans précaution peut donc interrompre une chaîne qui fonctionnait. Testez chaque chaîne avant de l'activer.
 :::
 
@@ -446,7 +446,7 @@ Forcer le joueur à envoyer un message dans le chat.
 
 ### random-player-command
 
-:::info zMenu+
+:::info[zMenu+]
 Cette action nécessite [zMenu+](https://minecraft-music-inventory.com/resources/zmenu.music.331).
 :::
 
@@ -477,7 +477,7 @@ Exécuter une sélection aléatoire de commandes en tant que joueur à partir d'
 
 ### random-console-command
 
-:::info zMenu+
+:::info[zMenu+]
 Cette action nécessite [zMenu+](https://minecraft-music-inventory.com/resources/zmenu.music.331).
 :::
 
@@ -1171,7 +1171,7 @@ click-requirement:
 
 Ouvrir un formulaire Bedrock natif pour les joueurs connectés via Geyser/Floodgate.
 
-:::warning Prérequis
+:::warning[Prérequis]
 Les formulaires Bedrock nécessitent **Geyser** ou **Floodgate** installé sur votre serveur.
 :::
 

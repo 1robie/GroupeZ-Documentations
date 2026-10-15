@@ -151,7 +151,7 @@ To update zJobs:
 5. Start your server
 6. Run `/jobs reload` if needed
 
-:::warning Backup First
+:::warning[Backup First]
 Always backup your `plugins/zJobs/` folder before updating.
 :::
 

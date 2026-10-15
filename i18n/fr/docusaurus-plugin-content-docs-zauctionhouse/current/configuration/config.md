@@ -437,7 +437,7 @@ item-lore:
 | `%player%` | Joueur impliqué |
 | `%target%` | Joueur cible (admin) |
 
-:::tip Performance
+:::tip[Performance]
 Seuls les placeholders réellement utilisés dans vos templates de lore sont calculés au moment du rendu. Le plugin pré-détecte les placeholders référencés par chaque section de lore au chargement de la configuration. Si votre lore `expired-item` n'utilise que `%time-remaining%`, le plugin n'utilisera pas de ressources pour calculer `%price%`, `%seller%`, etc.
 :::
 

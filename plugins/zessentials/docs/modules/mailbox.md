@@ -83,7 +83,7 @@ When items expire, they are permanently deleted and cannot be recovered. The exp
 4. If an item is not collected before its expiration date, it is removed.
 5. Administrators can inspect another player's mailbox with `/mail open <player>` and empty it with `/mail clear <player>`.
 
-:::danger SQL storage required
+:::danger[SQL storage required]
 The **item mailbox** requires a SQL storage (`SQLITE`, `MYSQL`, `MARIADB` or `HIKARICP`). It is not implemented for the `JSON` storage.
 :::
 

@@ -16,9 +16,9 @@ Le `InventoryManager` est votre interface principale pour travailler avec les in
 InventoryManager manager = menuPlugin.getInventoryManager();
 ```
 
-## Récupérer des Inventaires {#recuperer-des-inventaires}
+## Récupérer des Inventaires {/* #recuperer-des-inventaires */}
 
-### Récupérer par Nom {#recuperer-par-nom}
+### Récupérer par Nom {/* #recuperer-par-nom */}
 
 ```java
 // Retourne Optional<Inventory>
@@ -36,7 +36,7 @@ manager.getInventory("shop").ifPresent(inv -> {
 });
 ```
 
-### Récupérer Tous les Inventaires {#recuperer-tous-les-inventaires}
+### Récupérer Tous les Inventaires {/* #recuperer-tous-les-inventaires */}
 
 ```java
 // Obtenir tous les inventaires charges
@@ -55,11 +55,11 @@ Collection<Inventory> mine = manager.getInventories(myPlugin);
 Set<String> names = manager.getInventoryNames();
 ```
 
-:::note Collisions de noms
+:::note[Collisions de noms]
 `getInventory(String name)` cherche dans tous les plugins. Si plusieurs plugins enregistrent le même nom de fichier, celui qui appartient à zMenu l'emporte, sinon le premier plugin par ordre alphabétique. Utilisez `getInventory(Plugin, String)` ou `getInventory(String pluginName, String name)` pour être explicite.
 :::
 
-### Vérifier Si un Inventaire Existe {#verifier-si-un-inventaire-existe}
+### Vérifier Si un Inventaire Existe {/* #verifier-si-un-inventaire-existe */}
 
 ```java
 boolean exists = manager.getInventory("shop").isPresent();
@@ -75,7 +75,7 @@ manager.getInventory("shop").ifPresent(inv -> {
 });
 ```
 
-### Ouvrir à une Page Spécifique {#ouvrir-a-une-page-specifique}
+### Ouvrir à une Page Spécifique {/* #ouvrir-a-une-page-specifique */}
 
 ```java
 manager.getInventory("catalog").ifPresent(inv -> {
@@ -191,7 +191,7 @@ public void onDisable() {
 
 Les variantes qui prennent une `Class<? extends Inventory>` permettent de fournir votre propre implémentation de `Inventory`. `deleteInventory(String name)` / `deleteInventory(Inventory)` retirent un seul inventaire et `reloadInventory(Inventory)` le recharge depuis le disque.
 
-## Rafraîchir et mettre à jour {#rafraichir-et-mettre-a-jour}
+## Rafraîchir et mettre à jour {/* #rafraichir-et-mettre-a-jour */}
 
 ```java
 manager.updateInventory(player);              // Redessine l'inventaire zMenu ouvert
@@ -208,7 +208,7 @@ manager.updateInventory(player, myPlugin);    // Seulement si l'inventaire ouver
 player.closeInventory();
 ```
 
-### Vérifier Si un Joueur a un zMenu Ouvert {#verifier-si-un-joueur-a-un-zmenu-ouvert}
+### Vérifier Si un Joueur a un zMenu Ouvert {/* #verifier-si-un-joueur-a-un-zmenu-ouvert */}
 
 ```java
 // L'inventaire zMenu que le joueur a actuellement ouvert (vide s'il n'en a pas)
@@ -216,7 +216,7 @@ Optional<Inventory> current = manager.getCurrentPlayerInventory(player);
 boolean hasMenuOpen = current.isPresent();
 ```
 
-## Travailler avec les Inventaires Spécifiques à un Plugin {#travailler-avec-les-inventaires-specifiques-a-un-plugin}
+## Travailler avec les Inventaires Spécifiques à un Plugin {/* #travailler-avec-les-inventaires-specifiques-a-un-plugin */}
 
 Si vous travaillez avec des inventaires de différents plugins :
 
@@ -228,7 +228,7 @@ Optional<Inventory> inventory = manager.getInventory("MyPlugin", "shop");
 Optional<Inventory> own = manager.getInventory(myPlugin, "shop");
 ```
 
-## Exemple : Système de Boutique {#exemple--systeme-de-boutique}
+## Exemple : Système de Boutique {/* #exemple--systeme-de-boutique */}
 
 ```java
 public class ShopManager {
@@ -316,7 +316,7 @@ public class MenuCommand implements CommandExecutor {
 }
 ```
 
-## Exemple : Ouvrir un Menu sur un Événement {#exemple--ouvrir-un-menu-sur-un-evenement}
+## Exemple : Ouvrir un Menu sur un Événement {/* #exemple--ouvrir-un-menu-sur-un-evenement */}
 
 ```java
 public class JoinListener implements Listener {
@@ -353,7 +353,7 @@ public class JoinListener implements Listener {
 4. **Gérer les inventaires manquants** - Fournissez un retour si l'inventaire n'existe pas
 5. **Ne pas mettre en cache les inventaires** - Récupérez des références fraîches quand nécessaire
 
-## Étapes Suivantes {#etapes-suivantes}
+## Étapes Suivantes {/* #etapes-suivantes */}
 
 - Créer des [Boutons Personnalisés](./api-buttons)
 - Créer des [Actions Personnalisées](./api-actions)

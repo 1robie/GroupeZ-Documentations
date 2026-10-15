@@ -39,7 +39,7 @@ zEssentials embarque un adaptateur NMS par version de Minecraft. Les versions su
 | 1.21, 1.21.1, 1.21.3, 1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.9, 1.21.10, 1.21.11 | 21+ |
 | 26.2 | 25+ |
 
-:::info Mappings Mojang
+:::info[Mappings Mojang]
 Depuis Minecraft 26.1, Paper ne réobfusque plus les plugins vers les mappings Spigot. zEssentials est donc compilé avec les **mappings Mojang**, qui ne peuvent être chargés que par Paper **1.20.5 ou plus récent**. Minecraft **1.20.4 et les versions antérieures ne sont plus supportées**. Minecraft 26.x utilise un versionnage basé sur l'année (26.2 est la deuxième version de 2026) et nécessite **Java 25**.
 :::
 
@@ -53,7 +53,7 @@ Depuis Minecraft 26.1, Paper ne réobfusque plus les plugins vers les mappings S
 | Folia | Supporté (threading par régions) |
 | Spigot / CraftBukkit | **Non supporté** |
 
-:::danger Paper est obligatoire
+:::danger[Paper est obligatoire]
 zEssentials est un plugin **exclusivement Paper**. Le JAR contient un `paper-plugin.yml`, que Paper (et ses forks) charge en priorité.
 
 Le JAR contient aussi un `plugin.yml` minimal, utilisé uniquement par Spigot. Sur Spigot, zEssentials reste **totalement inactif** (aucune commande, aucun module, aucune API) : il affiche seulement un avertissement dans la console et, lorsqu'un joueur ayant la permission `zessentials.paper.warning` (les opérateurs par défaut) se connecte, lui indique que le serveur doit tourner sous Paper. Téléchargez Paper sur [papermc.io/downloads](https://papermc.io/downloads).
@@ -99,7 +99,7 @@ Consultez [Hooks & Intégrations](./development/hooks) pour le détail de chaque
 3. Démarrez votre serveur
 4. Le plugin génère tous les fichiers de configuration par défaut ainsi que ceux des modules
 
-:::info Téléchargement de bibliothèque au démarrage
+:::info[Téléchargement de bibliothèque au démarrage]
 Au démarrage du serveur, zEssentials demande à Paper (via son plugin loader, `ZEssentialsPluginLoader`) de fournir le **driver JDBC MariaDB** (`org.mariadb.jdbc:mariadb-java-client`), qui est téléchargé depuis Maven Central la première fois. Le serveur doit donc avoir accès à Internet lors du premier démarrage. Si votre hébergeur bloque Maven Central, vous pouvez utiliser un miroir avec la variable d'environnement `PAPER_DEFAULT_CENTRAL_REPOSITORY` ou la propriété système `org.bukkit.plugin.java.LibraryLoader.centralURL`, exactement comme pour Paper.
 :::
 
@@ -241,7 +241,7 @@ server-type: PAPER
 | `PAPER` | Mode par défaut. Toutes les données sont gérées localement, sans communication entre serveurs. |
 | `REDIS` | Mode multi-serveurs utilisant le pub/sub Redis. |
 
-:::caution Mode Redis en développement
+:::caution[Mode Redis en développement]
 Le type de serveur `REDIS` est **encore en développement** : dans la version actuelle, le serveur Redis n'est pas démarré, donc `server-type: REDIS` n'a aucun effet et le plugin se comporte comme avec `PAPER`. Pour un réseau, partagez la même base MySQL/MariaDB entre vos serveurs.
 :::
 

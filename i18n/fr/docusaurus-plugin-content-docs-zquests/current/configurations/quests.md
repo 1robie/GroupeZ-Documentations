@@ -61,7 +61,7 @@ Un identifiant unique pour la quete. Cette valeur est utilisee en interne pour s
 name: "casseur-de-pierre-1"
 ```
 
-:::warning Important
+:::warning[Important]
 Le nom de la quete doit etre **unique** dans tous les fichiers de quetes. Changer cette valeur apres que des joueurs ont commence la quete reinitialise leur progression !
 :::
 

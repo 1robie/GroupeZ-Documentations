@@ -17,7 +17,7 @@ This guide walks you through installing zShop on your Minecraft server.
 | Server Software | Paper, Purpur, or Folia |
 | zMenu | Required dependency |
 
-:::warning zMenu Required
+:::warning[zMenu Required]
 zShop requires [zMenu](https://www.spigotmc.org/resources/zmenu.110402/) to be installed. Install zMenu first before installing zShop.
 :::
 
@@ -148,7 +148,7 @@ To update zShop:
 5. Start your server
 6. Run `/zshop reload` if needed
 
-:::warning Backup First
+:::warning[Backup First]
 Always backup your `plugins/zShop/` folder before updating. Configuration formats may change between versions.
 :::
 

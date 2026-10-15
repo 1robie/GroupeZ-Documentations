@@ -6,7 +6,7 @@ description: Add powerful abilities to items with effects
 
 # Effects (Runes)
 
-:::info Terminology Update
+:::info[Terminology Update]
 In the current version of zItems, **"Runes"** are now called **"Effects"**. This documentation uses both terms interchangeably, but the configuration uses `effects`.
 :::
 
@@ -113,7 +113,7 @@ effects:
     multiplier: 1.5
 ```
 
-:::warning Incompatibilities
+:::warning[Incompatibilities]
 Some effects cannot be combined:
 - `VEIN_MINING` + `HAMMER` - Both modify block breaking
 - `AUTO_SELL` + `ABSORPTION` - Both process drops differently

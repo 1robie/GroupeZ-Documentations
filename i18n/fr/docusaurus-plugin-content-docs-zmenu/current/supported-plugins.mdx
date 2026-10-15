@@ -4,7 +4,7 @@ title: Plugins supportés
 description: Liste de tous les plugins officiellement supportés par zMenu
 ---
 
-# Plugins supportés {#plugins-supportes}
+# Plugins supportés {/* #plugins-supportes */}
 
 zMenu s'intègre avec de nombreux plugins Minecraft populaires pour étendre ses fonctionnalités. Cette page liste tous les plugins officiellement supportés et les fonctionnalités qu'ils activent.
 
@@ -33,7 +33,7 @@ item:
 
 ---
 
-## Plugins d'économie {#plugins-deconomie}
+## Plugins d'économie {/* #plugins-deconomie */}
 
 ### Vault
 
@@ -61,7 +61,7 @@ ExcellentEconomy fournit un système d'économie multi-devises avec support de m
 
 ---
 
-### Autres plugins d'économie {#autres-plugins-deconomie}
+### Autres plugins d'économie {/* #autres-plugins-deconomie */}
 
 zMenu lit les monnaies via [CurrenciesAPI](../currenciesapi/introduction) et est déclaré en dépendance optionnelle de Vault, PlayerPoints, BeastTokens, ElementalTokens, ElementalGems, zEssentials, EcoBits, CoinsEngine, ExcellentEconomy, VotingPlugin, RedisEconomy et RoyaleEconomy afin qu'ils soient chargés en premier. Choisissez le plugin avec l'option `currency` (par défaut `vault`), et une monnaie précise avec `economy` pour les plugins qui en proposent plusieurs :
 
@@ -106,7 +106,7 @@ click-requirement:
 
 ---
 
-## Plugins d'items personnalisés {#plugins-ditems-personnalises}
+## Plugins d'items personnalisés {/* #plugins-ditems-personnalises */}
 
 ### ItemsAdder
 
@@ -264,7 +264,7 @@ item:
   material: ei:item_id
 ```
 
-:::caution Préfixe correct
+:::caution[Préfixe correct]
 Le préfixe de matériau est `ei:` (insensible à la casse). L'ancien préfixe documenté `EXECUTABLE_ITEM:` est **incorrect** et ne sera pas résolu.
 :::
 
@@ -330,7 +330,7 @@ rule:
 
 ---
 
-## Plugins de têtes {#plugins-de-tetes}
+## Plugins de têtes {/* #plugins-de-tetes */}
 
 ### zHead
 
@@ -344,7 +344,7 @@ item:
   material: zhd:category:head_name
 ```
 
-:::caution Préfixe correct
+:::caution[Préfixe correct]
 Le préfixe de matériau est `zhd:` (insensible à la casse). L'ancien préfixe documenté `ZHEAD:` est **incorrect** et ne sera pas résolu.
 :::
 
@@ -372,7 +372,7 @@ Intégration MagicCosmetics pour les items cosmétiques.
 
 ---
 
-## Plugins de métiers {#plugins-de-metiers}
+## Plugins de métiers {/* #plugins-de-metiers */}
 
 ### Jobs Reborn
 
@@ -414,7 +414,7 @@ actions:
 
 ---
 
-## Compatibilité Bedrock {#compatibilite-bedrock}
+## Compatibilité Bedrock {/* #compatibilite-bedrock */}
 
 ### Geyser / Floodgate
 
@@ -456,7 +456,7 @@ PacketEvents est optionnel. Il n'est **pas** nécessaire pour les [dialogues](./
 
 ---
 
-## Détection de la version du client {#detection-de-la-version-du-client}
+## Détection de la version du client {/* #detection-de-la-version-du-client */}
 
 ### ViaVersion / ProtocolSupport
 
@@ -470,7 +470,7 @@ Quand un serveur laisse des clients plus anciens ou plus récents se connecter v
 
 ---
 
-## Loaders de matériaux intégrés {#loaders-de-materiaux-integres}
+## Loaders de matériaux intégrés {/* #loaders-de-materiaux-integres */}
 
 Ces loaders sont intégrés à zMenu et ne nécessitent aucun plugin externe.
 
@@ -494,7 +494,7 @@ item:
 
 ---
 
-## Tableau récapitulatif des plugins supportés {#tableau-recapitulatif-des-plugins-supportes}
+## Tableau récapitulatif des plugins supportés {/* #tableau-recapitulatif-des-plugins-supportes */}
 
 | Plugin | Catégorie | Préfixe material | Fonctionnalité |
 |--------|-----------|------------------|----------------|
@@ -529,7 +529,7 @@ item:
 | *(intégré)* | Material | `armor:` | Item équipé par le joueur |
 | *(intégré)* | Material | `base64:` | ItemStack encodé en Base64 |
 
-## Utilisation des matériaux personnalisés {#utilisation-des-materiaux-personnalises}
+## Utilisation des matériaux personnalisés {/* #utilisation-des-materiaux-personnalises */}
 
 Lors de l'utilisation de plugins d'items personnalisés, le format de matériau suit généralement ce modèle :
 
@@ -576,7 +576,7 @@ item:
   material: armor:HEAD
 ```
 
-## Détection des plugins {#detection-des-plugins}
+## Détection des plugins {/* #detection-des-plugins */}
 
 zMenu détecte automatiquement les plugins installés et active leurs fonctionnalités. Vous n'avez rien à configurer - installez simplement les plugins et redémarrez votre serveur.
 

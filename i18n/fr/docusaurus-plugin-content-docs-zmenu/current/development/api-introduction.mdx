@@ -8,7 +8,7 @@ description: Premiers pas avec l'API zMenu
 
 zMenu fournit une API complète permettant aux développeurs de s'intégrer et d'étendre les fonctionnalités du plugin. Ce guide vous aidera à démarrer avec l'API zMenu.
 
-## Dépôt Maven {#depot-maven}
+## Dépôt Maven {/* #depot-maven */}
 
 Ajoutez le dépôt GroupeZ à votre `pom.xml` :
 
@@ -21,7 +21,7 @@ Ajoutez le dépôt GroupeZ à votre `pom.xml` :
 </repositories>
 ```
 
-## Dépendance Maven {#dependance-maven}
+## Dépendance Maven {/* #dependance-maven */}
 
 Ajoutez l'API zMenu comme dépendance :
 
@@ -62,9 +62,9 @@ dependencies {
 }
 ```
 
-## Dépendance du Plugin {#dependance-du-plugin}
+## Dépendance du Plugin {/* #dependance-du-plugin */}
 
-:::warning zMenu nécessite Paper
+:::warning[zMenu nécessite Paper]
 zMenu embarque un `paper-plugin.yml` (`api-version: '1.20.6'`, `folia-supported: true`). Sur Spigot, le plugin se contente d'afficher un avertissement demandant d'installer Paper : l'API n'est donc utilisable que sur Paper et ses forks (Folia, Purpur, Pufferfish, ...).
 :::
 
@@ -91,7 +91,7 @@ dependencies:
 
 ## Obtenir l'API
 
-### Accéder à l'Instance du Plugin {#acceder-a-linstance-du-plugin}
+### Accéder à l'Instance du Plugin {/* #acceder-a-linstance-du-plugin */}
 
 ```java
 import fr.maxlego08.menu.api.MenuPlugin;
@@ -122,7 +122,7 @@ public class MyPlugin extends JavaPlugin {
 }
 ```
 
-### Connexion Sécurisée avec Dépendance Optionnelle {#connexion-securisee-avec-dependance-optionnelle}
+### Connexion Sécurisée avec Dépendance Optionnelle {/* #connexion-securisee-avec-dependance-optionnelle */}
 
 ```java
 import fr.maxlego08.menu.api.MenuPlugin;
@@ -220,7 +220,7 @@ ButtonManager buttons = menuPlugin.getProvider(ButtonManager.class);
 
 Services enregistrés : `InventoryManager`, `ButtonManager`, `CommandManager`, `WebsiteManager`, `DataManager`, `InventoriesPlayer`, `PatternManager`, `DupeManager`, `Enchantments`, `TitleAnimationManager`, `ClientVersionManager` et, uniquement quand ils sont disponibles, `DialogManager` et `BedrockManager`.
 
-:::note Managers optionnels
+:::note[Managers optionnels]
 `getDialogManager()` retourne `null` sauf si le serveur gère les dialogues (Paper 1.21.7+) et que `enable-mini-message-format` vaut `true` dans `config.yml`. `getBedrockManager()` retourne `null` sans Geyser ni Floodgate. `getPacketManager()` retourne un `Optional` vide sans PacketEvents. Vérifiez toujours la nullité.
 :::
 
@@ -337,7 +337,7 @@ public class MyPlugin extends JavaPlugin {
 }
 ```
 
-## Étapes Suivantes {#etapes-suivantes}
+## Étapes Suivantes {/* #etapes-suivantes */}
 
 - Apprendre à [Ouvrir des Inventaires](./api-inventory) par programmation
 - Créer des [Boutons Personnalisés](./api-buttons)

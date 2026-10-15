@@ -45,7 +45,7 @@ The auto-sell effect requires one of these plugins:
 | **EconomyShopGUI** | Free shop plugin |
 | **ZShop** | GroupeZ shop plugin |
 
-:::warning Shop Required
+:::warning[Shop Required]
 If no supported shop plugin is installed, the auto-sell effect will not function and items will drop normally.
 :::
 

@@ -68,7 +68,7 @@ Vous pouvez utiliser les données de modèle personnalisé pour afficher des tex
 | `vault-permissions[].slots` | Integer | - | Le nombre d'emplacements d'inventaire accordés par cette permission. Doit être un multiple de 9 pour un rendu correct de l'inventaire (jusqu'à 54 par page) |
 | `vault-slot-type` | String | `MAX` | Détermine comment les valeurs d'emplacements de permissions multiples sont combinées. Accepte `MAX` ou `ADDITION` |
 
-:::info Modes de Type d'Emplacements
+:::info[Modes de Type d'Emplacements]
 - **`MAX`** -- La taille du coffre du joueur est déterminée par la **plus haute** valeur de permission correspondante. Par exemple, si un joueur possède à la fois `zessentials.vault.size.player` (45 emplacements) et `zessentials.vault.size.vip` (90 emplacements), la taille de son coffre sera de **90 emplacements**.
 - **`ADDITION`** -- Toutes les valeurs d'emplacements de permissions correspondantes sont **additionnées**. En reprenant le même exemple, la taille du coffre du joueur serait de **135 emplacements** (45 + 90).
 :::

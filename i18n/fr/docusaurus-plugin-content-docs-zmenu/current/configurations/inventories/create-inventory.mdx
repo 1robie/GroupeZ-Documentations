@@ -4,11 +4,11 @@ title: Créer un inventaire
 description: Guide étape par étape pour créer votre premier inventaire zMenu
 ---
 
-# Créer un inventaire {#creer-un-inventaire}
+# Créer un inventaire {/* #creer-un-inventaire */}
 
 Ce guide vous accompagnera dans la création de votre premier inventaire zMenu à partir de zéro.
 
-## Étape 1 : Créer le fichier {#etape-1--creer-le-fichier}
+## Étape 1 : Créer le fichier {/* #etape-1--creer-le-fichier */}
 
 Créez un nouveau fichier dans le dossier `plugins/zMenu/inventories/`. Nommez-le de maniere descriptive comme `mon_premier_menu.yml`.
 
@@ -16,11 +16,11 @@ Créez un nouveau fichier dans le dossier `plugins/zMenu/inventories/`. Nommez-l
 plugins/zMenu/inventories/mon_premier_menu.yml
 ```
 
-:::tip Convention de nommage
+:::tip[Convention de nommage]
 Utilisez des lettres minuscules, des chiffres et des underscores pour les noms de fichiers. Évitez les espaces et les caractères spéciaux.
 :::
 
-## Étape 2 : Définir les propriétés de base {#etape-2--definir-les-proprietes-de-base}
+## Étape 2 : Définir les propriétés de base {/* #etape-2--definir-les-proprietes-de-base */}
 
 Commencez avec les propriétés essentielles de l'inventaire :
 
@@ -35,7 +35,7 @@ size: 27
 enable: true
 ```
 
-## Étape 3 : Ajouter un item de remplissage (Optionnel) {#etape-3--ajouter-un-item-de-remplissage-optionnel}
+## Étape 3 : Ajouter un item de remplissage (Optionnel) {/* #etape-3--ajouter-un-item-de-remplissage-optionnel */}
 
 Remplissez les emplacements vides avec un item décoratif :
 
@@ -51,7 +51,7 @@ fillItem:
 
 Cela rend votre inventaire plus propre en remplissant les espaces vides.
 
-## Étape 4 : Ajouter votre premier bouton {#etape-4--ajouter-votre-premier-bouton}
+## Étape 4 : Ajouter votre premier bouton {/* #etape-4--ajouter-votre-premier-bouton */}
 
 Maintenant ajoutons un bouton interactif. Les boutons sont définis dans la section `items` :
 
@@ -91,7 +91,7 @@ Analysons ce que fait chaque partie :
 | `lore` | Lignes de description sous le nom |
 | `actions` | Ce qui se passe au clic |
 
-## Étape 5 : Tester votre inventaire {#etape-5--tester-votre-inventaire}
+## Étape 5 : Tester votre inventaire {/* #etape-5--tester-votre-inventaire */}
 
 1. Sauvegardez le fichier
 2. Exécutez `/zm reload inventory mon_premier_menu`
@@ -99,7 +99,7 @@ Analysons ce que fait chaque partie :
 
 Vous devriez voir un inventaire de 27 emplacements avec un diamant au centre !
 
-## Étape 6 : Ajouter plus de boutons {#etape-6--ajouter-plus-de-boutons}
+## Étape 6 : Ajouter plus de boutons {/* #etape-6--ajouter-plus-de-boutons */}
 
 Étendons le menu avec plus de fonctionnalités :
 
@@ -181,7 +181,7 @@ items:
       - type: close
 ```
 
-## Étape 7 : Ajouter des effets sonores {#etape-7--ajouter-des-effets-sonores}
+## Étape 7 : Ajouter des effets sonores {/* #etape-7--ajouter-des-effets-sonores */}
 
 Rendez le menu plus interactif avec des sons :
 
@@ -213,7 +213,7 @@ actions:
       - "spawn"
 ```
 
-## Étape 8 : Ajouter des exigences (Optionnel) {#etape-8--ajouter-des-exigences-optionnel}
+## Étape 8 : Ajouter des exigences (Optionnel) {/* #etape-8--ajouter-des-exigences-optionnel */}
 
 Restreignez qui peut cliquer sur un bouton :
 
@@ -242,7 +242,7 @@ items:
             - "warp vip"
 ```
 
-## Comprendre les numéros d'emplacements {#comprendre-les-numeros-demplacements}
+## Comprendre les numéros d'emplacements {/* #comprendre-les-numeros-demplacements */}
 
 Les emplacements sont numérotés de 0 à (taille - 1), en commençant par le coin supérieur gauche :
 
@@ -425,7 +425,7 @@ items:
 6. **Utilisez des icônes claires** - Choisissez des matériaux qui représentent visuellement leur fonction
 7. **Gardez le lore concis** - Ne surchargez pas les boutons avec trop de texte
 
-## Prochaines étapes {#prochaines-etapes}
+## Prochaines étapes {/* #prochaines-etapes */}
 
 Maintenant que vous pouvez créer des inventaires basiques :
 

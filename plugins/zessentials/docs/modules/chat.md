@@ -10,7 +10,7 @@ description: Complete chat formatting, moderation, placeholders, and interactive
 
 The Chat module is one of the most feature-rich modules in zEssentials. It controls all aspects of server chat including formatting, moderation tools, anti-spam, mentions (pings), local chat, item display, clickable links and commands, custom rules, moderator action buttons, and chat history storage. The module uses a **priority-based permission system** for chat formats and MiniMessage for rich text formatting.
 
-:::info Paper only
+:::info[Paper only]
 The chat format is applied through Paper's `AsyncChatEvent`. Set `enable-chat-format: false` if you want another chat plugin to handle formatting.
 :::
 
@@ -246,7 +246,7 @@ custom-rules:
     message: "&cNo, the server is great, you’re the bad one!"
 ```
 
-:::note Removed option
+:::note[Removed option]
 The `enable-itemadders-font-regex` / `itemadders-font-regex` options were removed in 1.0.3.8: the feature was never wired and the options had no effect. You can safely delete them from your existing file.
 :::
 
@@ -286,7 +286,7 @@ The `enable-itemadders-font-regex` / `itemadders-font-regex` options were remove
 | `chat-cooldown-max` | Integer | `50` | Number of recent messages kept in memory for each player to evaluate the rules. Must be greater than or equal to the highest `messages` value |
 | `enable-same-message-cancel` | Boolean | `true` | Cancel a message identical (ignoring case) to the player's previous message. Bypass with `essentials.chat.bypass.same.message` |
 
-:::info Dynamic Cooldown
+:::info[Dynamic Cooldown]
 With the default rules, a player who sends:
 - **2** messages within **1.5 seconds**,
 - **4** messages within **12 seconds**,

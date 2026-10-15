@@ -251,7 +251,7 @@ update-interval: 1000  # Refresh every second (1000ms)
 
 Animate the inventory title with multiple frames. This creates a dynamic title that cycles through different text values.
 
-:::warning Requirements
+:::warning[Requirements]
 This feature **requires** [PacketEvents](https://github.com/retrooper/packetevents) to be installed on your server. Without PacketEvents, title animations will not work.
 :::
 
@@ -291,11 +291,11 @@ title-animation:
 - `HOURS`
 - `DAYS`
 
-:::caution Delays use the chosen time unit
+:::caution[Delays use the chosen time unit]
 `initial-delay` and `interval` are expressed in `time-unit`. Their default value of `20` therefore means 20 **seconds** with the default `SECONDS` unit. For a fast animation, set `time-unit: MILLISECONDS` (for example `interval: 500`) or lower the values.
 :::
 
-:::note Infinite animations
+:::note[Infinite animations]
 With `cycles: -1` (default) or `0`, the animation never ends. Combined with `show-items-after-animation: true`, the items would then **never** be displayed, because they are only sent once the last cycle is over: use a positive `cycles` with that option. `item-update-interval` is only used when `show-items-after-animation` is `false`: the items are resent every that many frames (`0` disables it). Titles accept placeholders.
 :::
 
@@ -564,7 +564,7 @@ Requirements that must be met to open this inventory. They are checked before op
 
 Automatically redirect Bedrock players to a native Bedrock form (or to another inventory) when they try to open this inventory. Java players will see the regular inventory as usual.
 
-:::warning Requirements
+:::warning[Requirements]
 This feature requires **Geyser** or **Floodgate** installed on your server.
 :::
 

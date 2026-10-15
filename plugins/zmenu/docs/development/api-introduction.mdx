@@ -68,7 +68,7 @@ dependencies {
 
 ## Plugin Dependency
 
-:::warning zMenu requires Paper
+:::warning[zMenu requires Paper]
 zMenu ships a `paper-plugin.yml` (`api-version: '1.20.6'`, `folia-supported: true`). On Spigot the plugin only prints a warning asking you to install Paper, so the API is only usable on Paper and its forks (Folia, Purpur, Pufferfish, ...).
 :::
 
@@ -224,7 +224,7 @@ ButtonManager buttons = menuPlugin.getProvider(ButtonManager.class);
 
 Registered services: `InventoryManager`, `ButtonManager`, `CommandManager`, `WebsiteManager`, `DataManager`, `InventoriesPlayer`, `PatternManager`, `DupeManager`, `Enchantments`, `TitleAnimationManager`, `ClientVersionManager`, and, only when available, `DialogManager` and `BedrockManager`.
 
-:::note Optional managers
+:::note[Optional managers]
 `getDialogManager()` returns `null` unless the server is dialog capable (Paper 1.21.7+) and `enable-mini-message-format` is `true` in `config.yml`. `getBedrockManager()` returns `null` unless Geyser or Floodgate is installed. `getPacketManager()` returns an `Optional` and is empty without PacketEvents. Always null-check these.
 :::
 

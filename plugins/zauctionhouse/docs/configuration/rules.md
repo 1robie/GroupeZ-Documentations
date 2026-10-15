@@ -421,11 +421,11 @@ whitelist:
 
 ## Tips
 
-:::tip Saving Items
+:::tip[Saving Items]
 You can save items in Base64 format using `/zmenu save <item name>` then reference them in your rules for exact item matching.
 :::
 
-:::info Reload
+:::info[Reload]
 After modifying rules, reload with `/ah admin reload`. Existing listings are not affected - they remain until expired or purchased.
 :::
 

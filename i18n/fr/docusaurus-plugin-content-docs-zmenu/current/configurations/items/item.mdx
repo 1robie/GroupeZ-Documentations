@@ -632,7 +632,7 @@ item:
     - "&7Une gemme precieuse"
 ```
 
-### Tête de joueur avec texture {#tete-de-joueur-avec-texture}
+### Tête de joueur avec texture {/* #tete-de-joueur-avec-texture */}
 
 ```yaml
 item:
@@ -644,7 +644,7 @@ item:
   glow: true
 ```
 
-### Outil enchanté {#outil-enchante}
+### Outil enchanté {/* #outil-enchante */}
 
 ```yaml
 item:
@@ -700,7 +700,7 @@ item:
     - HIDE_POTION_EFFECTS
 ```
 
-### Item avec modèle personnalisé {#item-avec-modele-personnalise}
+### Item avec modèle personnalisé {/* #item-avec-modele-personnalise */}
 
 ```yaml
 item:
@@ -752,7 +752,7 @@ Comportement selon la version :
 
 Seules les valeurs non par défaut sont écrites : par exemple `amount` est omis s'il vaut 1, `lore-type` s'il vaut `REPLACE`, et `model-id` s'il vaut 0. Les couleurs des potions, armures en cuir et effets de feu d'artifice sont écrites en `alpha,rouge,vert,bleu`, et les enchantements en `nom,niveau`.
 
-## Dépannage / FAQ {#depannage--faq}
+## Dépannage / FAQ {/* #depannage--faq */}
 
 | Message en console | Cause et solution |
 |--------------------|-------------------|
@@ -768,7 +768,7 @@ Seules les valeurs non par défaut sont écrites : par exemple `amount` est omis
 | `Error while applying ItemComponent 'X' for item ...` | Le component a bien été lu mais n'a pas pu être appliqué à la construction de l'item (souvent une valeur inexistante sur votre version). L'item est créé sans ce component. |
 | `Error with update display name for item ...` | Le `name` n'a pas pu être traité, souvent à cause d'un placeholder ou d'une balise MiniMessage cassée. |
 
-:::warning Échecs silencieux
+:::warning[Échecs silencieux]
 Certaines erreurs ne produisent **aucun message** :
 
 - Une erreur levée pendant le *chargement* d'un component dans `components:` n'est affichée que si `enable-debug: true` est activé dans `config.yml`. Sinon le component est ignoré silencieusement.
@@ -779,7 +779,7 @@ Certaines erreurs ne produisent **aucun message** :
 Quand un component n'apparaît pas sur l'item, activez `enable-debug`, faites `/zmenu reload` et regardez la console.
 :::
 
-:::tip Cache
+:::tip[Cache]
 `enable-cache-item-stack` (dans `config.yml`, `true` par défaut) pré-construit chaque item une fois au chargement du menu. Les items qui utilisent des placeholders PlaceholderAPI ou un matériau dynamique ne sont jamais pré-construits, et `skip-first-cache: true` exclut un item précis. Si un item paraît figé ou si le chargement signale un joueur manquant, mettez `skip-first-cache: true` sur cet item.
 :::
 
@@ -791,7 +791,7 @@ Quand un component n'apparaît pas sur l'item, activez `enable-debug`, faites `/
 4. **Utilisez des placeholders** - Rendez les items dynamiques avec PlaceholderAPI
 5. **Testez avec les packs de ressources** - Si vous utilisez customModelData, vérifiez que les modèles s'affichent correctement
 
-## Prochaines étapes {#prochaines-etapes}
+## Prochaines étapes {/* #prochaines-etapes */}
 
 - Apprenez à utiliser les items dans les [Boutons](../buttons/button)
 - Définissez des items autonomes que les joueurs peuvent tenir avec [Items personnalisés](./custom-items)

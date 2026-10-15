@@ -123,7 +123,7 @@ public void onEnable() {
 }
 ```
 
-:::tip Registration order does not matter
+:::tip[Registration order does not matter]
 When zMenu parses an inventory that uses a button type, action or requirement it does not know yet, it **keeps the file on hold** instead of failing. As soon as you call `register(...)` (or `registerAction` / `registerPermissible`), every waiting inventory that now has all its dependencies is loaded. So an inventory that uses your `type: my_custom_button` can sit in the `inventories/` folder of zMenu even though your plugin enables after zMenu.
 :::
 

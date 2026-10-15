@@ -8,7 +8,7 @@ description: Créer des popups de dialogue interactives avec des formulaires, de
 
 Les dialogues sont des fenêtres popup interactives qui apparaissent à l'écran, permettant aux joueurs d'interagir avec des formulaires, des confirmations et des boutons d'action. Ils offrent une expérience d'interface moderne allant au-delà des menus d'inventaire traditionnels.
 
-:::warning Prérequis
+:::warning[Prérequis]
 Les dialogues nécessitent **Paper 1.21.7+**.
 :::
 
@@ -711,7 +711,7 @@ duration-limit:
 
 Par défaut, un `%` saisi par le joueur dans une saisie est échappé pour que les valeurs soumises ne puissent pas injecter de placeholders. Mettez `true` pour conserver les placeholders dans les valeurs soumises. Accepte un booléen (défaut : `false`), ou une section pour l'activer par type de saisie : `text`, `boolean`, `single-option`, `number-range`.
 
-:::info Compatibilité ascendante
+:::info[Compatibilité ascendante]
 La forme imbriquée (`<key>.label`, `<key>.tooltip`, `<key>.width`, `<key>.actions`, `<key>.type`) est la nouvelle disposition canonique, mais les anciennes clés plates (`yes-text`, `notice.text`, `multi-actions.<key>.text`, ...) fonctionnent toujours, de sorte que les fichiers de dialogue existants n'ont pas besoin d'être réécrits.
 :::
 
@@ -889,7 +889,7 @@ multi-actions:
 5. **Gérez tous les cas** - Définissez des actions pour tous les choix possibles
 6. **Utilisez les types appropriés** - Choisissez le bon type de dialogue pour votre cas d'usage
 
-## Prochaines étapes {#prochaines-etapes}
+## Prochaines étapes {/* #prochaines-etapes */}
 
 - Découvrez les [Actions](./buttons/actions) pour les comportements des boutons de dialogue
 - Configurez les [Exigences](./buttons/button#exigences) pour l'accès conditionnel aux dialogues

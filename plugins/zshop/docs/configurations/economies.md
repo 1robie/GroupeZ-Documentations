@@ -65,7 +65,7 @@ economies:
 
 The `%s%` placeholder adds "s" for plural (e.g., "1 diamond", "5 diamonds").
 
-:::tip Custom Items
+:::tip[Custom Items]
 You can use any item configuration supported by zMenu, including custom model data, NBT, etc.
 :::
 

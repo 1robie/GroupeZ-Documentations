@@ -10,7 +10,7 @@ Bienvenue dans la documentation officielle de zEssentials !
 
 zEssentials est un plugin essentials complet et modulaire pour les serveurs Minecraft **Paper**, conçu avec une architecture moderne et une API étendue. Il fournit toutes les commandes et tous les systèmes de base nécessaires pour faire tourner un serveur Minecraft.
 
-:::info Paper uniquement
+:::info[Paper uniquement]
 Depuis la version **1.0.4.0**, zEssentials est un plugin Paper et nécessite **Paper (ou un fork comme Purpur, Pufferfish ou Folia) 1.20.6+**. Spigot n'est plus supporté : sur Spigot, le plugin reste inactif et affiche seulement un avertissement. Consultez [Installation](./installation) pour plus de détails.
 :::
 

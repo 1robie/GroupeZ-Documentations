@@ -1292,7 +1292,7 @@ Only non-default values are written: for example `amount` is omitted when it is 
 | `Error while applying ItemComponent 'X' for item ...` | The component was read correctly but could not be applied to the item when it was built (usually a value that does not exist on your server version). The item is still created without that component. |
 | `Error with update display name for item ...` | The `name` could not be processed, often because of a broken placeholder or MiniMessage tag. |
 
-:::warning Silent failures
+:::warning[Silent failures]
 Some mistakes produce **no message at all**:
 
 - An error thrown while *loading* a component from `components:` is only printed when `enable-debug: true` is set in `config.yml`. Without it the component is silently skipped.
@@ -1303,7 +1303,7 @@ Some mistakes produce **no message at all**:
 When a component does not appear on the item, enable `enable-debug`, run `/zmenu reload`, and check the console.
 :::
 
-:::tip Caching
+:::tip[Caching]
 `enable-cache-item-stack` (in `config.yml`, `true` by default) pre-builds each item once when the menu is loaded. Items that use PlaceholderAPI placeholders or a dynamic material are never pre-built, and `skip-first-cache: true` opts a single item out. If an item looks stale or the load logs errors about a missing player, set `skip-first-cache: true` on it.
 :::
 

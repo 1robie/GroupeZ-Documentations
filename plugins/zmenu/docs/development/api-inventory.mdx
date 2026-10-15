@@ -55,7 +55,7 @@ Collection<Inventory> mine = manager.getInventories(myPlugin);
 Set<String> names = manager.getInventoryNames();
 ```
 
-:::note Name collisions
+:::note[Name collisions]
 `getInventory(String name)` searches every plugin. If several plugins register the same file name, the one owned by zMenu wins, otherwise the first plugin in alphabetical order. Use `getInventory(Plugin, String)` or `getInventory(String pluginName, String name)` to be explicit.
 :::
 

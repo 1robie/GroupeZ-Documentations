@@ -55,7 +55,7 @@ dependencies {
 
 ## Shading the Library
 
-:::warning Important
+:::warning[Important]
 You should **relocate** (shade) the library to prevent conflicts when multiple plugins use CurrenciesAPI.
 :::
 

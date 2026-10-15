@@ -55,7 +55,7 @@ database-configuration:
 The MariaDB JDBC driver is not shaded into the JAR: it is downloaded from Maven Central by Paper when the server starts (see [Installation](./installation#3-install-the-plugin)).
 :::
 
-:::tip Recommended
+:::tip[Recommended]
 For any server expecting real players, use **HIKARICP** (or `MARIADB` if your server runs MariaDB). It handles concurrent database access efficiently and is required to share data between several servers.
 :::
 

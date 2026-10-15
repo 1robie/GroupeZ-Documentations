@@ -83,7 +83,7 @@ Les objets expirés sont définitivement supprimés et ne peuvent pas être réc
 4. Si un objet n'est pas récupéré avant sa date d'expiration, il est supprimé.
 5. Les administrateurs peuvent consulter la boîte aux lettres d'un autre joueur avec `/mail open <joueur>` et la vider avec `/mail clear <joueur>`.
 
-:::danger Stockage SQL requis
+:::danger[Stockage SQL requis]
 La **boîte aux lettres d'objets** nécessite un stockage SQL (`SQLITE`, `MYSQL`, `MARIADB` ou `HIKARICP`). Elle n'est pas implémentée pour le stockage `JSON`.
 :::
 

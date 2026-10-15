@@ -8,17 +8,17 @@ description: Complete list of all commands and permissions for zEssentials
 
 This page contains the complete list of all commands and permissions available in zEssentials. Commands are organized by category for easy reference.
 
-:::info Syntax Guide
+:::info[Syntax Guide]
 - `< >` indicates a **required** argument.
 - `[ ]` indicates an **optional** argument.
 - `|` separates multiple aliases for the same command.
 :::
 
-:::tip Permission format
+:::tip[Permission format]
 Every permission is generated from its internal name: the underscores become dots. For example `ESSENTIALS_TP_TOGGLE` becomes `essentials.tp.toggle` and `ESSENTIALS_UN_BAN` becomes `essentials.un.ban`. Always copy the permission exactly as written on this page.
 :::
 
-:::note Custom commands
+:::note[Custom commands]
 Commands created with the [Custom Commands](./modules/custom-commands) module (`modules/customcommands/config.yml`, for example `/discord` or `/map`) are not listed here. Each one uses the `permission` defined in its own configuration (an empty permission means everyone can use it).
 :::
 

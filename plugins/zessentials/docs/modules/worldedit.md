@@ -320,7 +320,7 @@ The `items` section defines the WorldEdit wands that can be given to players. Ea
 | `items.<wand>.item.name` | String | - | The display name of the wand item. Supports color codes |
 | `items.<wand>.item.lore` | List of Strings | - | Lore lines displayed on the wand item. Supports the `%uses%` placeholder for remaining uses |
 
-:::info Default Wand Definitions
+:::info[Default Wand Definitions]
 - **player-wand** -- A `WOODEN_AXE` with 50 uses and a 1.2x price multiplier. Intended for regular players who pay for their edits.
 - **admin-Wand** -- A `GOLDEN_AXE` with unlimited uses (`max-use: -1`) and a 0x price multiplier (free). Intended for staff members.
 :::

@@ -19,15 +19,15 @@ Avant d'installer zQuests, assurez-vous que votre serveur repond aux exigences s
 | Logiciel serveur | Spigot, Paper ou Folia |
 | zMenu | **Requis** |
 
-:::warning Dependance requise
+:::warning[Dependance requise]
 **zMenu est requis** pour que zQuests fonctionne. Assurez-vous d'installer [zMenu](https://modrinth.com/plugin/zmenu) avant d'installer zQuests.
 :::
 
-:::tip Configuration recommandee
+:::tip[Configuration recommandee]
 Pour la meilleure experience, nous recommandons d'utiliser **Paper** ou ses forks. Cela active le support du formatage MiniMessage et offre de meilleures performances.
 :::
 
-:::caution Serveurs moddes
+:::caution[Serveurs moddes]
 Les logiciels de serveur moddes (Forge, Fabric avec couches de compatibilite Bukkit) ne sont **pas supportes**.
 :::
 
@@ -135,7 +135,7 @@ SQLite est l'option de stockage par defaut et ne necessite aucune configuration 
 storage-type: SQLITE
 ```
 
-:::warning Limitations de SQLite
+:::warning[Limitations de SQLite]
 SQLite est recommande uniquement pour les tests et les petits serveurs. Certaines fonctionnalites peuvent avoir des fonctionnalites limitees. Pour les serveurs de production, utilisez MySQL ou HikariCP.
 :::
 
@@ -212,7 +212,7 @@ Pour mettre a jour zQuests :
 5. Demarrez votre serveur
 6. Executez `/zquests reload` si necessaire
 
-:::warning Sauvegardez d'abord
+:::warning[Sauvegardez d'abord]
 Sauvegardez toujours vos fichiers de configuration avant la mise a jour, specialement le dossier `quests/` contenant vos definitions de quetes.
 :::
 

@@ -270,11 +270,11 @@ title-animation:
 | `plugin` | String | premier disponible | Identifiant du fournisseur d'animation de titre, la casse n'a pas d'importance (celui fourni est `packet-events`). Un identifiant incorrect écrit un avertissement et aucune animation n'est jouée. |
 | `item-update-interval` | Entier | 1 | Fréquence de mise à jour des items pendant l'animation |
 
-:::caution Les délais utilisent l'unité de temps choisie
+:::caution[Les délais utilisent l'unité de temps choisie]
 `initial-delay` et `interval` sont exprimés dans `time-unit`. Leur valeur par défaut de `20` correspond donc à 20 **secondes** avec l'unité `SECONDS` par défaut. Pour une animation rapide, utilisez `time-unit: MILLISECONDS` (par exemple `interval: 500`) ou diminuez les valeurs.
 :::
 
-:::note Animations infinies
+:::note[Animations infinies]
 Avec `cycles: -1` (par défaut) ou `0`, l'animation ne se termine jamais. Combiné avec `show-items-after-animation: true`, les items ne seraient alors **jamais** affichés, car ils ne sont envoyés qu'à la fin du dernier cycle : utilisez un `cycles` positif avec cette option. `item-update-interval` n'est utilisé que lorsque `show-items-after-animation` vaut `false` : les items sont renvoyés toutes les N frames (`0` le désactive). Les titres acceptent les placeholders.
 :::
 
@@ -558,7 +558,7 @@ items:
 
 Rediriger automatiquement les joueurs Bedrock vers un formulaire Bedrock natif (ou vers un autre inventaire) lorsqu'ils tentent d'ouvrir cet inventaire. Les joueurs Java voient l'inventaire classique normalement.
 
-:::warning Prérequis
+:::warning[Prérequis]
 Cette fonctionnalité nécessite que **Geyser** ou **Floodgate** soit installé sur votre serveur.
 :::
 

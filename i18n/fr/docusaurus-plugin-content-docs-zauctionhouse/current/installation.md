@@ -20,7 +20,7 @@ zAuctionHouse est disponible sur plusieurs plateformes :
 | **Modrinth** | [modrinth.com/plugin/zauctionhouse](https://modrinth.com/plugin/zauctionhouse) | Version d'essai gratuite |
 | **GitHub** | [github.com/GroupeZ-dev/zAuctionHouse](https://github.com/GroupeZ-dev/zAuctionHouse) | Code source |
 
-:::info Support
+:::info[Support]
 Le support est inclus avec la version premium. Les utilisateurs de la version d'essai gratuite peuvent accéder au support communautaire sur notre [serveur Discord](https://discord.groupez.dev).
 :::
 
@@ -55,7 +55,7 @@ Paper et ses forks sont recommandés pour les meilleures performances et compati
 | **zMenu** | [modrinth.com/plugin/zmenu](https://modrinth.com/plugin/zmenu) |
 | **PlaceholderAPI** | [spigotmc.org/resources/6245](https://www.spigotmc.org/resources/placeholderapi.6245/) |
 
-:::tip Utilisateurs Folia
+:::tip[Utilisateurs Folia]
 Pour les serveurs Folia, utilisez ces versions forkées :
 - **PlaceholderAPI** : [Fork Folia](https://github.com/Anon8281/PlaceholderAPI/releases/tag/1.1)
 - **Vault** : [Fork Folia](https://github.com/Geolykt/Vault/releases)

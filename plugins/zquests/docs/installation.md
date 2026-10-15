@@ -19,15 +19,15 @@ Before installing zQuests, make sure your server meets the following requirement
 | Server Software | Spigot, Paper, or Folia |
 | zMenu | **Required** |
 
-:::warning Required Dependency
+:::warning[Required Dependency]
 **zMenu is required** for zQuests to work. Make sure to install [zMenu](https://modrinth.com/plugin/zmenu) before installing zQuests.
 :::
 
-:::tip Recommended Setup
+:::tip[Recommended Setup]
 For the best experience, we recommend using **Paper** or its forks. This enables MiniMessage formatting support and provides better performance.
 :::
 
-:::caution Modded Servers
+:::caution[Modded Servers]
 Modded server software (Forge, Fabric with Bukkit compatibility layers) is **not supported**.
 :::
 
@@ -147,7 +147,7 @@ SQLite is the default storage option and requires no additional configuration. I
 storage-type: SQLITE
 ```
 
-:::warning SQLite Limitations
+:::warning[SQLite Limitations]
 SQLite is recommended only for testing and small servers. Some features may have limited functionality with SQLite. For production servers, use MySQL or HikariCP.
 :::
 
@@ -233,7 +233,7 @@ To update zQuests:
 5. Start your server
 6. Run `/zquests reload` if needed
 
-:::warning Backup First
+:::warning[Backup First]
 Always backup your configuration files before updating, especially the `quests/` folder containing your quest definitions.
 :::
 

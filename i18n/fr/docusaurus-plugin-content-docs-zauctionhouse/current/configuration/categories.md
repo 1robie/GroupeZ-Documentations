@@ -229,7 +229,7 @@ Vous pouvez ajouter une liste `banned-rules` à n'importe quelle catégorie pour
 
 Les banned rules utilisent les **mêmes types de règles** que les règles normales (material, material-suffix, tag, name, lore, custom-model-data, and/or, etc.).
 
-:::info Comment ça fonctionne
+:::info[Comment ça fonctionne]
 1. L'item est d'abord vérifié contre les `banned-rules`
 2. Si **une seule** banned rule correspond, l'item est **exclu** de la catégorie
 3. Ce n'est qu'ensuite que les `rules` normales sont évaluées

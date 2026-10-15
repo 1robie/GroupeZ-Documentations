@@ -28,7 +28,7 @@ rule-type: INVENTORY  # INVENTORY or MESSAGE
 | `enable` | Boolean | `true` | Activer ou désactiver le module Règles |
 | `rule-type` | String | `INVENTORY` | Comment les règles sont affichées au joueur. Accepte `INVENTORY` ou `MESSAGE` |
 
-:::info Modes d'affichage
+:::info[Modes d'affichage]
 - **`INVENTORY`** -- Les règles sont affichées via une interface d'inventaire zMenu. Cela fournit une interface graphique riche et interactive où les joueurs peuvent parcourir les règles dans un menu paginé.
 - **`MESSAGE`** -- Les règles sont envoyées directement sous forme de messages dans le chat. C'est plus simple et fonctionne sans zMenu, mais offre moins de mise en forme visuelle.
 :::

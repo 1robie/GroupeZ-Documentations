@@ -8,7 +8,7 @@ description: Complete list of all commands and permissions for zCookieClicker
 
 This page contains the complete list of all commands and permissions available in zCookieClicker.
 
-:::info Syntax Guide
+:::info[Syntax Guide]
 - `< >` indicates a **required** argument.
 - `[ ]` indicates an **optional** argument.
 :::

@@ -16,7 +16,7 @@ La commande principale est `/zm` (alias : `/zmenu`).
 
 ## Liste des commandes
 
-### Commandes générales {#commandes-generales}
+### Commandes générales {/* #commandes-generales */}
 
 | Commande | Permission | Description |
 |----------|-----------|-------------|
@@ -56,7 +56,7 @@ Les sous-commandes imbriquées ont aussi des alias : `reload command` = `reload 
 /zm rl inv shop
 ```
 
-:::info Commandes Dialog et Bedrock
+:::info[Commandes Dialog et Bedrock]
 `/zm dialog` n'est enregistrée que si le serveur supporte les dialogues (Paper 1.21.7+), et `/zm bedrock` uniquement si le support des formulaires Bedrock est actif.
 :::
 
@@ -117,7 +117,7 @@ Les inventaires sous [hot reload](../hot-reload) n'ont pas besoin de `/zm reload
 | `/zm giveopenitem <inventaire> [joueur]` | `zmenu.give.open.item` | Donner l'item qui ouvre un inventaire (son `open-with-item`) |
 | `/zm save <nom> [yml\|base64]` | `zmenu.save` | Exporter l'item tenu dans save_items.yml |
 
-### Commandes de données joueur {#commandes-de-donnees-joueur}
+### Commandes de données joueur {/* #commandes-de-donnees-joueur */}
 
 | Commande | Permission | Description |
 |----------|-----------|-------------|
@@ -237,7 +237,7 @@ Vous venez de DeluxeMenus ? Convertissez tous vos menus en inventaires zMenu en 
 | `zmenu.give.open.item` | Donner des items ouvrant le menu | op |
 | `zmenu.save` | Sauvegarder des items tenus | op |
 
-### Permissions de données joueur {#permissions-de-donnees-joueur}
+### Permissions de données joueur {/* #permissions-de-donnees-joueur */}
 
 | Permission | Description | Par défaut |
 |------------|-------------|------------|
@@ -288,7 +288,7 @@ Vous venez de DeluxeMenus ? Convertissez tous vos menus en inventaires zMenu en 
 | `zmenu.dumplog` | Exporter les logs de debug | op |
 | `zmenu.paper.warning` | Recevoir l'avertissement "zMenu nécessite Paper" à la connexion, sur un serveur qui n'est pas Paper | op |
 
-## Permissions de commandes personnalisées {#permissions-de-commandes-personnalisees}
+## Permissions de commandes personnalisées {/* #permissions-de-commandes-personnalisees */}
 
 Lorsque vous créez des commandes personnalisées dans `commands/commands.yml`, vous pouvez définir des permissions personnalisées :
 
@@ -305,7 +305,7 @@ commands:
 
 Les joueurs auront besoin de la permission `monserveur.shop` pour utiliser `/shop`.
 
-## Permissions spécifiques aux inventaires {#permissions-specifiques-aux-inventaires}
+## Permissions spécifiques aux inventaires {/* #permissions-specifiques-aux-inventaires */}
 
 Vous pouvez exiger des permissions spécifiques pour ouvrir des inventaires en utilisant les exigences de vue :
 
@@ -358,7 +358,7 @@ zMenu fonctionne avec tous les plugins de permissions qui supportent les permiss
 - UltraPermissions
 - Et bien d'autres
 
-## Prochaines étapes {#prochaines-etapes}
+## Prochaines étapes {/* #prochaines-etapes */}
 
 - Apprenez les [Placeholders](./placeholders)
 - Créez des [Commandes personnalisées](./custom-commands)

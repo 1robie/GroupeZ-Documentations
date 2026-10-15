@@ -21,7 +21,7 @@ zMenu gère ensuite tout ce qui est commun à tous les boutons (`slot`, `slots`,
 YAML  ->  ButtonLoader#load(...)  ->  instance de Button  ->  zMenu applique slot / item / actions / conditions
 ```
 
-## Créer un Button Loader {#creer-un-button-loader}
+## Créer un Button Loader {/* #creer-un-button-loader */}
 
 ```java
 import fr.maxlego08.menu.api.button.Button;
@@ -59,7 +59,7 @@ public class MyButtonLoader extends ButtonLoader {
 - `ButtonLoader.loadSlot(List<String>)` est une méthode statique qui développe les listes de slots du type `"10-16"`.
 - Enregistrer un nom ou un alias déjà utilisé par un autre plugin lève une `ButtonAlreadyRegisterException`.
 
-## Créer un Button {#creer-un-button}
+## Créer un Button {/* #creer-un-button */}
 
 ```java
 import fr.maxlego08.menu.api.button.Button;
@@ -123,7 +123,7 @@ public void onEnable() {
 }
 ```
 
-:::tip L'ordre d'enregistrement n'a pas d'importance
+:::tip[L'ordre d'enregistrement n'a pas d'importance]
 Quand zMenu lit un inventaire qui utilise un type de bouton, une action ou une condition qu'il ne connaît pas encore, il **met le fichier en attente** au lieu d'échouer. Dès que vous appelez `register(...)` (ou `registerAction` / `registerPermissible`), chaque inventaire en attente dont toutes les dépendances sont désormais satisfaites est chargé. Un inventaire qui utilise votre `type: my_custom_button` peut donc se trouver dans le dossier `inventories/` de zMenu même si votre plugin s'active après zMenu.
 :::
 
@@ -149,7 +149,7 @@ menuPlugin.getButtonManager().unregisters(this); // tous les loaders enregistres
 
 `ButtonManager` expose aussi `getLoaders()`, `getLoaders(Plugin)` et `getLoader(String name)` pour inspecter ce qui est enregistré.
 
-## Utiliser votre bouton personnalisé {#utiliser-votre-bouton-personnalise}
+## Utiliser votre bouton personnalisé {/* #utiliser-votre-bouton-personnalise */}
 
 ```yaml
 items:
@@ -177,7 +177,7 @@ Si votre bouton n'a aucune clé YAML supplémentaire, inutile d'écrire un loade
 menuPlugin.getButtonManager().register(new NoneLoader(this, MyPaginatedButton.class, "MY_PAGINATED_BUTTON"));
 ```
 
-## Exemple complet : bouton de téléportation {#exemple-complet--bouton-de-teleportation}
+## Exemple complet : bouton de téléportation {/* #exemple-complet--bouton-de-teleportation */}
 
 ```java
 public class TeleportButtonLoader extends ButtonLoader {
@@ -280,7 +280,7 @@ items:
 
 Pour un compteur qui survit aux redémarrages, stockez la valeur avec l'[API des données joueur](./api-player-data) plutôt que dans une map.
 
-## Ajouter des clés à tous les boutons : ButtonOption {#ajouter-des-cles-a-tous-les-boutons--buttonoption}
+## Ajouter des clés à tous les boutons : ButtonOption {/* #ajouter-des-cles-a-tous-les-boutons--buttonoption */}
 
 Une `ButtonOption` permet à un plugin de lire des **clés supplémentaires sur n'importe quel bouton** (même intégré), sans définir de nouveau type. C'est utile pour des intégrations du genre "ce bouton lance aussi mon cooldown".
 
@@ -341,7 +341,7 @@ Le même mécanisme existe pour des inventaires entiers avec `InventoryOption`, 
 5. **Préférez les actions** pour les comportements qui n'ont pas besoin d'un nouveau type YAML : voir [Actions personnalisées](./api-actions)
 6. **Désenregistrez** vos loaders et options dans `onDisable`
 
-## Étapes suivantes {#etapes-suivantes}
+## Étapes suivantes {/* #etapes-suivantes */}
 
 - Construisez des items dynamiques avec [MenuItemStack](./api-menu-item-stack)
 - Créez un [Bouton paginé](./api-paginate-button)

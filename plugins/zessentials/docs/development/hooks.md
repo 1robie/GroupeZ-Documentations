@@ -8,7 +8,7 @@ description: Optional plugin integrations and hooks for zEssentials
 
 zEssentials provides optional integrations with third-party plugins to extend its functionality. These hooks are loaded automatically when the corresponding plugin is detected on the server, unless otherwise noted.
 
-:::info Load order
+:::info[Load order]
 zEssentials is a Paper plugin. All the integrations below are declared as optional server dependencies in its `paper-plugin.yml` (`load: BEFORE`, `required: false`): Vault, ProtocolLib, SuperiorSkyblock2, BentoBox, BlockTracker, WorldGuard, Votifier, NChat, MythicMobs, AxVaults and PlayerVaults. When present, they are loaded before zEssentials, and all of them except BentoBox use `join-classpath: true` so that zEssentials can access their API. zMenu and PlaceholderAPI are the only **required** dependencies.
 :::
 
@@ -31,7 +31,7 @@ When Vault is present and the economy module is active, any plugin that depends 
 
 Enables multi-server communication via Redis pub/sub, allowing zEssentials instances across multiple servers to synchronize data and actions in real time.
 
-:::caution In development
+:::caution[In development]
 The Redis integration is **currently disabled** in the plugin: the Redis server is not started, even with `server-type: REDIS`. The information below describes the planned behavior.
 :::
 

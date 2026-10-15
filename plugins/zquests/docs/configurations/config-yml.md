@@ -47,7 +47,7 @@ database-configuration:
   debug: false
 ```
 
-:::warning SQLite Limitations
+:::warning[SQLite Limitations]
 SQLite is recommended only for testing. Some features may have limited functionality. Use HIKARICP for production servers.
 :::
 

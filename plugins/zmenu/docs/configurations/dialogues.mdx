@@ -8,7 +8,7 @@ description: Create interactive dialog popups with forms, confirmations, and mul
 
 Dialogues are interactive popup windows that appear on screen, allowing players to interact with forms, confirmations, and action buttons. They provide a modern UI experience beyond traditional inventory menus.
 
-:::warning Requirements
+:::warning[Requirements]
 Dialogues require **Paper 1.21.7+**.
 :::
 
@@ -711,7 +711,7 @@ duration-limit:
 
 By default, a `%` typed by the player in an input is escaped so submitted values cannot inject placeholders. Set this to `true` to keep placeholders in submitted values. Accepts a boolean (default: `false`), or a section to toggle it per input type: `text`, `boolean`, `single-option`, `number-range`.
 
-:::info Backward compatibility
+:::info[Backward compatibility]
 The nested form (`<key>.label`, `<key>.tooltip`, `<key>.width`, `<key>.actions`, `<key>.type`) is the new canonical layout, but the old flat keys (`yes-text`, `notice.text`, `multi-actions.<key>.text`, ...) still work, so existing dialog files do not need to be rewritten.
 :::
 

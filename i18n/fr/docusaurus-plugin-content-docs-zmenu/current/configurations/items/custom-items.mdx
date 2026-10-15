@@ -136,7 +136,7 @@ buttons:
 
 Utiliser une action `console_command` signifie que la commande est exécutée depuis la console, donc le joueur qui clique n'a pas besoin de la permission `zmenu.give.item` lui-même.
 
-## Garder les items à jour {#garder-les-items-a-jour}
+## Garder les items à jour {/* #garder-les-items-a-jour */}
 
 Les items personnalisés sont marqués avec un id caché, ce qui permet à zMenu de gérer les exemplaires déjà présents dans les inventaires des joueurs. Cette vérification s'exécute **quand un joueur se connecte** et **quand vous exécutez `/zmenu reload`** (pour chaque joueur en ligne) :
 
@@ -147,14 +147,14 @@ Les items personnalisés sont marqués avec un id caché, ce qui permet à zMenu
 Modifiez un item, exécutez `/zmenu reload`, et les joueurs en ligne voient la version mise à jour sans avoir à recevoir un nouvel item.
 :::
 
-### Propriétaire & placeholders {#proprietaire--placeholders}
+### Propriétaire & placeholders {/* #proprietaire--placeholders */}
 
 Le comportement des placeholders dans le nom/lore dépend de `save-owner-in-pdc` :
 
 - **`save-owner-in-pdc: true`** (défaut) — l'item est lié au joueur à qui il a été donné. Les placeholders sont toujours résolus pour ce **propriétaire**, et les mises à jour n'ont lieu que lorsque le propriétaire est en ligne.
 - **`save-owner-in-pdc: false`** — l'item est générique. Les placeholders sont résolus pour celui qui le **tient actuellement**, et les mises à jour utilisent le porteur.
 
-## Mécaniques {#mecaniques}
+## Mécaniques {/* #mecaniques */}
 
 Un item peut recevoir des **mécaniques** — des comportements réutilisables attachés sous une section `mechanics:`. Deux sont disponibles de base : `itemjoin` (donner à la première connexion, verrouiller à un slot, empêcher la modification) et `on-click` (exécuter des actions au clic sur l'item) :
 
@@ -171,7 +171,7 @@ starter-map:
 
 Consultez la page dédiée [Mécaniques d'Item](./mechanics) pour la liste complète des mécaniques et leurs options.
 
-## Prochaines étapes {#prochaines-etapes}
+## Prochaines étapes {/* #prochaines-etapes */}
 
 - Configurez l'item lui-même avec [Configuration d'item](./item)
 - Donnez un comportement aux items avec [Mécaniques d'Item](./mechanics)

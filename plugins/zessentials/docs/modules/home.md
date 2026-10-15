@@ -118,7 +118,7 @@ Each entry in the `permissions` list defines a home limit for players with a spe
 | `permission` | String | The permission node to check on the player |
 | `amount` | Integer | The number of homes granted by this permission |
 
-:::info Home Usage Types
+:::info[Home Usage Types]
 - **MAX**: The plugin checks all permissions and uses the **highest** matching amount. A player with both `essentials.home.default` (3) and `essentials.home.vip` (5) would have a maximum of **5** homes.
 - **STACK**: The plugin **adds** all matching permission amounts together. The same player would have **8** homes (3 + 5).
 :::

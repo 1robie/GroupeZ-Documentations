@@ -17,7 +17,7 @@ hot-reload:
 
 Lancez ensuite `/zm reload config` une fois (ou `/zm reload`) pour démarrer la surveillance. À partir de là, vous n'avez plus jamais besoin de `/zm reload` pour vos inventaires.
 
-:::tip Parfait pour créer des menus
+:::tip[Parfait pour créer des menus]
 Ouvrez le menu en jeu, placez votre éditeur à côté, et concevez en direct : déplacez un bouton, changez une ligne de lore, corrigez un prérequis, enregistrez, et le menu se rouvre avec votre modification sur la même page. Combiné au [convertisseur DeluxeMenus](./convert-deluxemenus), c'est le moyen le plus rapide de peaufiner vos menus convertis.
 :::
 
@@ -61,7 +61,7 @@ Un fichier qui ne peut pas être chargé (erreur de syntaxe YAML, type de bouton
 
 Activer ou désactiver l'option prend effet après `/zm reload` ou `/zm reload config`, ou en moins de deux secondes quand elle est modifiée depuis le dialogue de configuration en jeu.
 
-:::info Ce qui est surveillé
+:::info[Ce qui est surveillé]
 Seul le dossier `inventories/` est surveillé. Les fichiers listés dans [`specify-path-menus`](./configurations/config-yml), les patterns, les commandes et les dialogues nécessitent toujours `/zm reload`.
 :::
 
@@ -77,7 +77,7 @@ Chaque détection, rechargement, déchargement et erreur est affiché dans la co
 
 Avec [`enable-debug`](./configurations/config-yml#enable-debug) à `true`, chaque événement de fichier, chaque changement trouvé par le scan et chaque fichier ignoré (inchangé) est aussi affiché.
 
-## Dépannage {#depannage}
+## Dépannage {/* #depannage */}
 
 **Rien ne se passe quand j'enregistre un fichier**
 1. Vérifiez que la ligne `Inventory hot reload enabled` apparaît au démarrage ou après `/zm reload`.
@@ -93,7 +93,7 @@ Le fichier contient probablement une erreur : cherchez-la dans la console. La ve
 - Sur un serveur de test ou de développement
 - Sur les serveurs de production où les menus sont déployés par SFTP ou git et doivent être pris en compte sans commande
 
-## Prochaines étapes {#prochaines-etapes}
+## Prochaines étapes {/* #prochaines-etapes */}
 
 - [Migrez depuis DeluxeMenus](./convert-deluxemenus) en une commande
 - [Créez votre premier inventaire](./configurations/inventories/create-inventory)
