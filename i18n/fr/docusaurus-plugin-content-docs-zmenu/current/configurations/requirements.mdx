@@ -1,0 +1,1140 @@
+---
+sidebar_position: 7
+title: Exigences
+description: Guide complet du système d'exigences dans zMenu - conditions pour les boutons et inventaires
+---
+
+# Exigences
+
+Les exigences (requirements) sont des conditions qui doivent être remplies avant qu'un bouton soit affiché, cliqué, ou qu'un inventaire soit ouvert. C'est le système central pour créer des menus dynamiques et conditionnels dans zMenu.
+
+## Comment fonctionnent les exigences
+
+Une exigence vérifie une condition (permission, valeur de placeholder, item en inventaire, etc.). Selon le résultat :
+- Si **toutes** les exigences sont remplies, les actions `success` sont exécutées
+- Si **une** exigence échoue, les actions `deny` de cette exigence sont exécutées
+
+```yaml
+click-requirement:
+  vip-requirement:
+    clicks:
+      - ALL
+    requirements:
+      - type: permission
+        permission: "server.vip"
+        deny:
+          - type: message
+            messages:
+              - "&cVous devez être VIP pour utiliser ceci !"
+    success:
+      - type: message
+        messages:
+          - "&aBienvenue, VIP !"
+```
+
+---
+
+## Où utiliser les exigences
+
+Les exigences peuvent être utilisées dans trois contextes :
+
+### view-requirement (Boutons)
+
+Contrôle si un bouton est **visible**. Si les exigences ne sont pas remplies, le bouton est entièrement masqué.
+
+```yaml
+items:
+  vip-seulement:
+    slot: 0
+    view-requirement:
+      requirements:
+        - type: permission
+          permission: "server.vip"
+    item:
+      material: DIAMOND
+      name: "&b&lItem VIP"
+```
+
+### click-requirement (Boutons)
+
+Contrôle si un bouton peut être **cliqué**. Le bouton reste visible, mais le clic est refusé si les conditions ne sont pas remplies.
+
+```yaml
+items:
+  achat:
+    slot: 0
+    click-requirement:
+      achat:
+        clicks:
+          - ALL
+        requirements:
+          - type: placeholder
+            value: "%vault_eco_balance%"
+            action: SUPERIOR_OR_EQUAL
+            number: 100
+            deny:
+              - type: message
+                messages:
+                  - "&cVous avez besoin de 100$ pour acheter ceci !"
+              - type: sound
+                sound: ENTITY_VILLAGER_NO
+      success:
+        - type: currency-withdraw
+          amount: 100
+        - type: message
+          messages:
+            - "&aAchat reussi !"
+    item:
+      material: GOLD_INGOT
+      name: "&e&lAcheter - 100$"
+```
+
+### open-requirement (Inventaires)
+
+Contrôle si un **inventaire peut être ouvert**. Appliqué au niveau de l'inventaire, pas sur les boutons individuels. `open-requirement` et `open_requirement` sont tous deux acceptés. (`view-requirement` n'est lu que sur les boutons, pas sur les inventaires.)
+
+```yaml
+# Dans votre fichier d'inventaire
+name: "&6Menu VIP"
+size: 54
+
+open-requirement:
+  requirements:
+    - type: permission
+      permission: "server.vip"
+      deny:
+        - type: message
+          messages:
+            - "&cVous devez etre VIP pour acceder a ce menu !"
+```
+
+Si l'exigence n'est pas remplie, l'inventaire ne s'ouvrira pas et les actions deny seront exécutées.
+
+---
+
+## Types d'exigences
+
+### permission
+
+Vérifie si le joueur possède une permission spécifique.
+
+```yaml
+requirements:
+  - type: permission
+    permission: "server.admin"
+```
+
+| Clé | Type | Description |
+|-----|------|-------------|
+| `permission` | String | Le nœud de permission à vérifier. Préfixez-le par `!` pour exiger que le joueur ne le possède **pas**. Les placeholders sont supportés |
+
+:::tip
+Vous pouvez utiliser n'importe quelle permission de n'importe quel plugin de permissions (LuckPerms, etc.). C'est le type d'exigence le plus simple et le plus courant.
+:::
+
+**Permission inversée** (l'exigence est remplie uniquement pour les joueurs sans la permission) et **placeholders dans le nœud** :
+
+```yaml
+requirements:
+  # Uniquement pour les joueurs non VIP, pour leur afficher un bouton promotionnel
+  - type: permission
+    permission: "!server.vip"
+
+  # Le noeud est resolu pour chaque joueur, par ex. shop.category.weapons
+  - type: permission
+    permission: "shop.category.%zmenu_argument_category%"
+```
+
+---
+
+### placeholder
+
+Compare une valeur de placeholder à une cible. C'est le type d'exigence le plus polyvalent.
+
+#### Comparaison numérique
+
+```yaml
+requirements:
+  - type: placeholder
+    placeholder: "%player_level%"
+    action: SUPERIOR_OR_EQUAL
+    value: 10
+```
+
+| Clé | Type | Description |
+|-----|------|-------------|
+| `placeholder` | String | Le placeholder à évaluer |
+| `action` | String | L'opérateur de comparaison |
+| `value` | Number/String | La valeur à comparer |
+| `target` | String | (Optionnel) Évaluer le placeholder pour ce joueur (par son nom) |
+| `math` | Booléen | (Optionnel) Évalue les expressions mathématiques dans `value` (défaut : `false`) |
+
+`placeHolder` est aussi accepté comme alias de `placeholder`.
+
+#### Comparaison de texte
+
+```yaml
+requirements:
+  - type: placeholder
+    placeholder: "%player_world%"
+    action: EQUALS_STRING
+    value: "world_nether"
+```
+
+#### Opérateurs de comparaison
+
+**Numérique :**
+
+| Alias | Description | Action |
+|-------|-------------|--------|
+| `==` | Égal à | `action: EQUAL_TO` |
+| `>` | Supérieur | `action: SUPERIOR` |
+| `>=` | Supérieur ou égal | `action: SUPERIOR_OR_EQUAL` |
+| `<` | Inférieur | `action: LOWER` |
+| `<=` | Inférieur ou égal | `action: LOWER_OR_EQUAL` |
+
+**Texte :**
+
+| Alias | Description | Action |
+|-------|-------------|--------|
+| `s=` | Correspondance exacte de texte | `action: EQUALS_STRING` |
+| `s!=` | Texte différent | `action: DIFFERENT_STRING` |
+| `s==` | Correspondance de texte insensible à la casse | `action: EQUALSIGNORECASE_STRING` |
+| `sc` | Le texte contient | `action: CONTAINS_STRING` |
+
+**Booléen :**
+
+| Alias | Description | Action |
+|-------|-------------|--------|
+| `b=` | Comparer avec un booléen | `action: BOOLEAN` |
+
+
+#### Expressions mathématiques
+
+Activez `math: true` pour évaluer des expressions mathématiques dans les valeurs de placeholder :
+
+```yaml
+requirements:
+  - type: placeholder
+    math: true
+    placeholder: "%zmenu_player_value_cookie%"
+    value: "%price%+(%price%*%zmenu_player_value_upgrades%*1.15)"
+    action: SUPERIOR_OR_EQUAL
+```
+
+L'expression mathématique est évaluée avant la comparaison. Utile pour des prix dynamiques, des coûts progressifs ou des conditions complexes.
+
+---
+
+### money
+
+Vérifie si le joueur a suffisamment d'argent sur son compte. Fonctionne avec [BeastTokens](https://www.spigotmc.org/resources/beasttokens-custom-currency.20806/), [Vault](https://www.spigotmc.org/resources/34315/), [PlayerPoints](https://www.spigotmc.org/resources/80745/), [ElementalTokens](https://builtbybit.com/resources/16707/), [ElementalGems](https://builtbybit.com/resources/14920/), [Level](https://www.minecraft.net/), [Experience](https://www.minecraft.net/), [zEssentials](https://www.spigotmc.org/resources/118014/), [EcoBits](https://www.spigotmc.org/resources/109967/), [CoinsEngine](https://www.spigotmc.org/resources/84121/) et [VotingPlugin](https://www.spigotmc.org/resources/15358/).
+
+Utilise [CurrenciesAPI](https://github.com/Traqueur-dev/CurrenciesAPI).
+
+```yaml
+requirements:
+  - type: money
+    amount: 1000
+```
+
+| Clé        | Type | Description |
+|------------|------|-------------|
+| `amount`   | Number | Le solde minimum requis |
+| `currency` | String | Le fournisseur de monnaie (défaut : `VAULT`). Valeurs : `VAULT`, `PLAYERPOINTS`, `BEASTTOKENS`, `ELEMENTALTOKENS`, `ELEMENTALGEMS`, `LEVEL`, `EXPERIENCE`, `ZESSENTIALS`, `ECOBITS`, `COINSENGINE`, `VOTINGPLUGIN`, `REDISECONOMY`, `ROYALEECONOMY`, `EXCELLENTECONOMY`, ... |
+| `economy`  | String | Le nom de l'économie dans le fournisseur (uniquement nécessaire pour zEssentials, CoinsEngine, EcoBits et les plugins multi-économies similaires) |
+
+**Exemple avec monnaie et économie spécifiques :**
+
+```yaml
+requirements:
+  - type: money
+    amount: 500
+    currency: "CoinsEngine"
+    economy: "gems"
+```
+
+:::warning
+Cette exigence vérifie uniquement le solde. Pour retirer de l'argent en cas de succès, utilisez l'action `currency-withdraw` dans le bloc `success`.
+:::
+
+---
+
+### item
+
+Vérifie si le joueur possède un item spécifique dans son inventaire.
+
+```yaml
+requirements:
+  - type: item
+    item:
+      material: DIAMOND
+    amount: 5
+    verification: SIMILAR
+```
+
+| Clé | Type | Description |
+|-----|------|-------------|
+| `item.material` | String | Le nom du matériau Minecraft |
+| `amount` | Number | La quantité minimum requise |
+| `verification` | String | (Optionnel) Type de vérification : `SIMILAR`, `MATERIAL`, `MODELID` (défaut : `SIMILAR`) |
+
+Vous pouvez aussi vérifier des items avec des propriétés spécifiques :
+
+```yaml
+requirements:
+  - type: item
+    item:
+      material: DIAMOND_SWORD
+      name: "&6Lame legendaire"
+    amount: 1
+```
+
+---
+
+### check-inventory
+
+Vérifie l'item placé dans un slot précis du menu (ou de l'inventaire du joueur). Contrairement à `item`, qui parcourt tout l'inventaire, ce requirement cible un seul slot. Il est principalement utilisé avec le bouton `item_drag` pour valider ce que le joueur a déposé dans un slot.
+
+```yaml
+requirements:
+  - type: check-inventory
+    slot: 13
+    item:
+      material: DIAMOND
+    verification: full         # Type de comparaison de l'item (defaut : full)
+    require-player-item: false # Exige que le slot contienne reellement un item du joueur
+    is-player-inventory: false # Verifie un slot de l'inventaire du joueur au lieu du menu
+    success:
+      - type: message
+        messages:
+          - "&aBon item !"
+    deny:
+      - type: message
+        messages:
+          - "&cMauvais item !"
+```
+
+| Clé | Type | Description |
+|-----|------|-------------|
+| `slot` | Number | Le slot à vérifier (requis) |
+| `item` | Item | L'item à comparer |
+| `verification` | String | Type de comparaison de l'item : `full`, `material`, `name`, `lore`, `modelId`, `itemModel`. Défaut : `full` |
+| `require-player-item` | Booléen | Si `true`, le slot doit contenir un item placé par le joueur (défaut : `false`) |
+| `is-player-inventory` | Booléen | Si `true`, vérifie un slot de l'inventaire du joueur au lieu du menu (défaut : `false`) |
+| `in-spigot-inventory` | Booléen | Si `true`, lit le vrai slot de l'inventaire Bukkit (inventaire du menu, ou inventaire du joueur combiné avec `is-player-inventory`) au lieu de l'item affiché par le bouton (défaut : `false`) |
+| `success` | Liste | Actions exécutées quand le slot correspond à l'item |
+| `deny` | Liste | Actions exécutées quand le slot ne correspond pas |
+
+---
+
+### luckperm
+
+Vérifie si le joueur appartient à un groupe LuckPerms spécifique. Nécessite [LuckPerms](https://luckperms.net/).
+
+```yaml
+requirements:
+  - type: luckperm
+    group: vip
+```
+
+| Clé | Type | Description |
+|-----|------|-------------|
+| `group` | String | Le nom du groupe LuckPerms |
+
+---
+
+### job
+
+Vérifie si le joueur a un métier spécifique. Nécessite [Jobs Reborn](https://www.spigotmc.org/resources/jobs-reborn.4216/).
+
+```yaml
+requirements:
+  - type: job
+    job: Miner
+```
+
+| Clé | Type | Description |
+|-----|------|-------------|
+| `job` | String | Le nom du métier |
+
+---
+
+### regex
+
+Vérifie si une valeur correspond à une expression régulière. Couramment utilisé avec le type de bouton `INPUT` pour valider la saisie du joueur.
+
+```yaml
+requirements:
+  - type: regex
+    input: "%input%"
+    regex: "^[1-9][0-9]?$|^64$"
+```
+
+| Clé | Type | Description |
+|-----|------|-------------|
+| `input` | String | La valeur à tester contre la regex |
+| `regex` | String | Le pattern d'expression régulière |
+
+**Exemple : valider une saisie numérique entre 1 et 64 :**
+
+```yaml
+items:
+  definir-quantite:
+    type: INPUT
+    slot: 13
+    inputType: NUMBER
+    conditions:
+      min: 1
+      max: 64
+    success-actions:
+      - type: data
+        key: "amount"
+        value: "%input%"
+      - type: refresh
+    item:
+      material: HOPPER
+      name: "&6&lDefinir la quantite"
+    click-requirement:
+      verification:
+        clicks:
+          - ALL
+        requirements:
+          - type: regex
+            input: "%input%"
+            regex: "^[1-9][0-9]?$|^64$"
+            deny:
+              - type: message
+                messages:
+                  - "&cVeuillez entrer un nombre entre 1 et 64"
+      success:
+        - type: data
+          key: "amount"
+          value: "%input%"
+        - type: refresh
+```
+
+---
+
+### playername
+
+Vérifie le nom du joueur.
+
+:::caution Orthographe de la clé de type
+La clé de type enregistrée est `playername` (sans tiret). Utiliser `type: player-name` ne fonctionnera **pas**.
+:::
+
+```yaml
+requirements:
+  - type: playername
+    player-name: "Notch"
+```
+
+| Clé | Type | Description |
+|-----|------|-------------|
+| `player-name` | String | Le nom du joueur à vérifier (supporte aussi `playerName` ou `playername`) |
+
+---
+
+### cuboid
+
+Vérifie si le joueur se trouve dans une zone cuboid. Vous devez définir le monde ainsi que les coordonnées des deux extrémités de votre cuboid.
+
+```yaml
+requirements:
+  - type: cuboid
+    cuboids:
+      - "world,0,60,0,100,120,100"
+```
+
+Le format est `<nom du monde>,<x1>,<y1>,<z1>,<x2>,<y2>,<z2>`.
+
+| Clé | Type | Description |
+|-----|------|-------------|
+| `cuboids` | Liste de Strings | Liste des zones cuboid au format `monde,x1,y1,z1,x2,y2,z2` |
+
+Vous pouvez définir plusieurs cuboids. L'exigence est validée si le joueur se trouve dans **l'un** d'entre eux :
+
+```yaml
+requirements:
+  - type: cuboid
+    cuboids:
+      - "world,0,60,0,100,120,100"
+      - "world,-50,40,-50,50,100,50"
+      - "world_nether,10,30,10,50,80,50"
+```
+
+---
+
+### item-rule
+
+Vérifie si un item du joueur (item en main, pièce d'armure ou n'importe quel item de l'inventaire, selon `item-source`) respecte une [règle d'item](./item-rules). Fait le lien entre le système d'exigences et le système de règles utilisé par le bouton `item_drag`.
+
+```yaml
+requirements:
+  - type: item-rule
+    item-source: HAND
+    amount: 1
+    rule:
+      type: material
+      materials:
+        - DIAMOND
+        - EMERALD
+    deny:
+      - type: message
+        messages:
+          - "&cSeuls les diamants ou emeraudes sont acceptes ici !"
+```
+
+| Clé | Type | Description |
+|-----|------|-------------|
+| `rule` | Objet | La règle d'item à évaluer (voir [Règles d'items](./item-rules) pour tous les types de règles) |
+| `item-source` | String | D'où provient l'item : `HAND`, `OFF_HAND`, `HELMET`, `CHESTPLATE`, `LEGGINGS`, `BOOTS` ou `INVENTORY`. Défaut : `HAND` |
+| `amount` | Number | Quantité minimum requise. Défaut : `1` |
+
+---
+
+### and
+
+:::warning zMenu+ uniquement
+Cette fonctionnalité est uniquement disponible avec [zMenu+](../zmenu-plus).
+:::
+
+Combine plusieurs exigences où **toutes** doivent être remplies. Cela vous permet de regrouper des exigences et de les imbriquer avec des blocs `or` pour une logique complexe.
+
+```yaml
+requirements:
+  - type: and
+    requirements:
+      - type: permission
+        permission: "server.vip"
+      - type: placeholder
+        placeholder: "%player_level%"
+        action: SUPERIOR_OR_EQUAL
+        value: 10
+```
+
+| Clé | Type | Description |
+|-----|------|-------------|
+| `requirements` | Liste | La liste des sous-exigences qui doivent toutes passer |
+
+---
+
+### or
+
+:::warning zMenu+ uniquement
+Cette fonctionnalité est uniquement disponible avec [zMenu+](../zmenu-plus).
+:::
+
+Combine plusieurs exigences où seulement un **minimum** doit être rempli.
+
+```yaml
+requirements:
+  - type: or
+    minimum: 1
+    random: false
+    requirements:
+      - type: permission
+        permission: "server.vip"
+      - type: permission
+        permission: "server.premium"
+```
+
+| Clé | Type | Description |
+|-----|------|-------------|
+| `minimum` | Number | Le nombre minimum d'exigences qui doivent passer |
+| `random` | Boolean | Si la liste des exigences doit être parcourue aléatoirement |
+| `requirements` | Liste | La liste des sous-exigences |
+
+---
+
+### Combiner and + or
+
+Vous pouvez combiner les exigences `and` et `or` pour créer des conditions complexes. Par exemple, le joueur doit avoir la permission A **et** B, et doit aussi avoir la permission C **ou** D :
+
+```yaml
+name: "&8Test And/Or"
+size: 54
+items:
+  test:
+    slot: 22
+    view-requirement:
+      requirements:
+        - type: and
+          requirements:
+            - type: permission
+              permission: zmenu.test
+              success:
+                - type: message
+                  messages:
+                    - "&7Test And 1 - &aOK"
+              deny:
+                - type: message
+                  messages:
+                    - "&7Test And 1 - &cKO"
+            - type: permission
+              permission: zmenu.test2
+              success:
+                - type: message
+                  messages:
+                    - "&7Test And 2 - &aOK"
+              deny:
+                - type: message
+                  messages:
+                    - "&7Test And 2 - &cKO"
+        - type: or
+          minimum: 1
+          random: true
+          requirements:
+            - type: permission
+              permission: zmenu.test3
+              success:
+                - type: message
+                  messages:
+                    - "&7Test Or 1 - &aOK"
+              deny:
+                - type: message
+                  messages:
+                    - "&7Test Or 1 - &cKO"
+            - type: permission
+              permission: zmenu.test4
+              success:
+                - type: message
+                  messages:
+                    - "&7Test Or 2 - &aOK"
+              deny:
+                - type: message
+                  messages:
+                    - "&7Test Or 2 - &cKO"
+    item:
+      material: PAPER
+      name: "&aTest And/Or"
+    else:
+      item:
+        material: PAPER
+        name: "&cTest And/Or"
+```
+
+Dans cet exemple, le joueur doit avoir `zmenu.test` **et** `zmenu.test2` (le bloc `and`), et doit aussi avoir `zmenu.test3` **ou** `zmenu.test4` (le bloc `or` avec `minimum: 1`). Chaque sous-exigence a ses propres actions `success` et `deny` pour le retour d'information.
+
+---
+
+## Actions success et deny
+
+Chaque exigence peut avoir des actions `success` et `deny`.
+
+### deny
+
+Actions exécutées quand **cette exigence spécifique** n'est pas remplie. Définies à l'intérieur de chaque exigence individuelle.
+
+```yaml
+requirements:
+  - type: permission
+    permission: "server.vip"
+    deny:
+      - type: message
+        messages:
+          - "&cVous avez besoin du rang VIP !"
+      - type: sound
+        sound: ENTITY_VILLAGER_NO
+```
+
+### success
+
+Actions exécutées quand **cette exigence spécifique** (ou le bloc d'exigences global) est remplie.
+
+```yaml
+click-requirement:
+  achat:
+    clicks:
+      - ALL
+    requirements:
+      - type: placeholder
+        placeholder: "%vault_eco_balance%"
+        action: SUPERIOR_OR_EQUAL
+        value: 500
+        deny:
+          - type: message
+            messages:
+              - "&cVous avez besoin de 500$ !"
+  success:
+    - type: currency-withdraw
+      amount: 500
+    - type: console-command
+      commands:
+        - "give %player% diamond_sword 1"
+    - type: message
+      messages:
+        - "&aAchat reussi !"
+    - type: sound
+      sound: ENTITY_PLAYER_LEVELUP
+```
+
+Tous les [types d'actions](./buttons/actions) peuvent être utilisés dans les blocs `deny` et `success`.
+
+---
+
+## Exigences multiples
+
+Vous pouvez combiner plusieurs exigences. **Toutes** les exigences doivent être remplies pour que la condition passe. Si une seule exigence échoue, ses actions `deny` sont exécutées.
+
+```yaml
+click-requirement:
+  default:
+    clicks:
+      - ALL
+    requirements:
+      - type: permission
+        permission: "server.vip"
+        deny:
+        - type: message
+          messages:
+            - "&cVous avez besoin du rang VIP !"
+      - type: placeholder
+        placeholder: "%vault_eco_balance%"
+        action: SUPERIOR_OR_EQUAL
+        value: 1000
+        deny:
+        - type: message
+          messages:
+            - "&cVous avez besoin de 1000$ !"
+      - type: item
+        item:
+        material: DIAMOND
+        amount: 5
+        deny:
+        - type: message
+          messages:
+            - "&cVous avez besoin de 5 diamants !"
+  success:
+    - type: message
+      messages:
+        - "&aToutes les conditions sont remplies !"
+```
+
+Dans cet exemple, le joueur doit avoir la permission VIP **ET** 1000$ **ET** 5 diamants. Si une condition échoue, le message deny correspondant est affiché.
+
+---
+
+## Le système else
+
+Le bloc `else` fonctionne avec `view-requirement` pour afficher un bouton alternatif quand l'exigence n'est pas remplie. Au lieu de masquer complètement le bouton, vous pouvez afficher un item différent.
+
+### else basique
+
+```yaml
+items:
+  bouton-vip:
+    slot: 0
+    view-requirement:
+      requirements:
+        - type: permission
+          permission: "vip.access"
+    item:
+      material: DIAMOND_BLOCK
+      name: "&b&lContenu VIP"
+    else:
+      item:
+        material: COAL_BLOCK
+        name: "&7&lVerrouille"
+        lore:
+          - "&cNecessite le rang VIP"
+```
+
+Si le joueur a `vip.access`, il voit un bloc de diamant. Sinon, il voit un bloc de charbon avec un message « verrouillé ».
+
+### Chaînes else imbriquées
+
+Vous pouvez enchaîner plusieurs blocs `else` pour créer une machine à états avec plusieurs états visuels. Chaque `else` peut avoir son propre `view-requirement` :
+
+```yaml
+items:
+  recompense:
+    slot: 0
+
+    # Etat 1 : Deja reclame
+    view-requirement:
+      requirements:
+        - type: placeholder
+          placeholder: "%zmenu_player_value_claimed%"
+          value: "true"
+          action: EQUAL_TO
+    item:
+      material: MINECART
+      name: "&a&lRecompense reclamee"
+      lore:
+        - "&7Vous avez deja reclame cette recompense"
+
+    else:
+      # Etat 2 : Niveau insuffisant
+      view-requirement:
+        requirements:
+          - type: placeholder
+            placeholder: "%player_level%"
+            value: "10"
+            action: LOWER
+      item:
+        material: BARRIER
+        name: "&c&lVerrouille"
+        lore:
+          - "&7Necessite le niveau 10"
+
+      else:
+        # Etat 3 : Pret a reclamer
+        item:
+          material: CHEST
+          name: "&e&lReclamer la recompense"
+          lore:
+            - "&7Cliquez pour reclamer !"
+        click-requirement:
+          recuperer:
+            clicks:
+              - ALL
+            requirements:
+              - type: placeholder
+                placeholder: "%player_level%"
+                value: "10"
+                action: SUPERIOR_OR_EQUAL
+          success:
+            - type: data
+              action: SET
+              key: "claimed"
+              value: "true"
+            - type: console-command
+              commands:
+                - "give %player% diamond 10"
+            - type: sound
+              sound: ENTITY_PLAYER_LEVELUP
+```
+
+Le système évalue chaque `view-requirement` de haut en bas :
+1. Si la première exigence correspond, cet état du bouton est affiché
+2. Sinon, il passe au bloc `else` et vérifie son exigence
+3. Cela continue à travers la chaîne
+4. Le dernier `else` sans `view-requirement` sert de valeur par défaut
+
+---
+
+## Exigences de clic nommées
+
+À l'intérieur de `click-requirement`, vous pouvez définir des **groupes d'exigences nommés** avec des types de clics spécifiques. Cela permet différentes conditions pour différentes actions de clic.
+
+```yaml
+click-requirement:
+  achat:
+    clicks:
+      - ALL
+    requirements:
+      - type: placeholder
+        placeholder: "%vault_eco_balance%"
+        action: SUPERIOR_OR_EQUAL
+        value: 100
+        deny:
+          - type: message
+            messages:
+              - "&cIl vous faut 100$ pour continuer cet achat."
+          - type: sound
+            sound: ENTITY_VILLAGER_NO
+    success:
+      - type: currency-withdraw
+        amount: 100
+      - type: console-command
+        commands:
+          - "give %player% emerald 1"
+      - type: message
+        messages:
+          - "&aFelicitation ! Vous avez achete une emeraude."
+      - type: sound
+        sound: ENTITY_EXPERIENCE_ORB_PICKUP
+```
+
+| Clé | Description |
+|-----|-------------|
+| `clicks` | Liste des types de clics auxquels ce groupe répond |
+| `requirements` | Les conditions à vérifier |
+| `success` | Actions si toutes les exigences passent |
+
+**Types de clics disponibles :** `ALL`, `LEFT`, `RIGHT`, `SHIFT_LEFT`, `SHIFT_RIGHT`, `MIDDLE`, `DROP`, `CONTROL_DROP`
+
+**Exemple avec différentes actions par clic :**
+
+```yaml
+click-requirement:
+  acheter-un:
+    clicks:
+      - LEFT
+    requirements:
+      - type: placeholder
+        placeholder: "%vault_eco_balance%"
+        action: SUPERIOR_OR_EQUAL
+        value: 100
+        deny:
+          - type: message
+            messages:
+              - "&cVous avez besoin de 100$ !"
+    success:
+      - type: currency-withdraw
+        amount: 100
+      - type: console-command
+        commands:
+          - "give %player% diamond 1"
+  acheter-stack:
+    clicks:
+      - RIGHT
+    requirements:
+      - type: placeholder
+        placeholder: "%vault_eco_balance%"
+        action: SUPERIOR_OR_EQUAL
+        value: 6400
+        deny:
+          - type: message
+            messages:
+              - "&cVous avez besoin de 6400$ !"
+    success:
+      - type: currency-withdraw
+        amount: 6400
+      - type: console-command
+        commands:
+          - "give %player% diamond 64"
+```
+
+---
+
+## Exemples complets
+
+### Item de boutique avec vérification de prix
+
+Un bouton qui vend un item seulement si le joueur peut se le permettre :
+
+```yaml
+items:
+  boutique-epee:
+    slot: 13
+    type: NONE
+    item:
+      material: DIAMOND_SWORD
+      name: "&6&lEpee en diamant"
+      lore:
+        - "&8&m─────────────────"
+        - ""
+        - "&7Prix : &a500$"
+        - "&7Votre solde : &e$%vault_eco_balance%"
+        - ""
+        - "&8&m─────────────────"
+        - ""
+        - "&e▸ Cliquez pour acheter"
+      glow: true
+    click-requirement:
+      achat:
+        clicks:
+          - ALL
+        requirements:
+          - type: placeholder
+            placeholder: "%vault_eco_balance%"
+            action: SUPERIOR_OR_EQUAL
+            value: 500
+            deny:
+              - type: message
+                messages:
+                  - "&cVous avez besoin de 500$ pour acheter ceci !"
+              - type: sound
+                sound: ENTITY_VILLAGER_NO
+      success:
+        - type: currency-withdraw
+          amount: 500
+        - type: console-command
+          commands:
+            - "give %player% diamond_sword 1"
+        - type: message
+          messages:
+            - "&aAchat reussi !"
+        - type: sound
+          sound: ENTITY_PLAYER_LEVELUP
+        - type: close
+```
+
+### Récompense quotidienne avec cooldown
+
+Un bouton qui ne peut être cliqué qu'une fois toutes les 24 heures en utilisant les données joueur et les horodatages :
+
+```yaml
+items:
+  recompense-quotidienne:
+    slot: 22
+    item:
+      material: CHEST
+      name: "&e&lRecompense quotidienne"
+      lore:
+        - "&7Reclamez votre recompense quotidienne !"
+    click-requirement:
+      recuperer:
+        clicks:
+          - ALL
+        requirements:
+          - type: placeholder
+            placeholder: "%zmenu_math_{zmenu_time_unix_timestamp}-{zmenu_player_value_last_daily}%"
+            action: SUPERIOR_OR_EQUAL
+            value: 86400
+            deny:
+              - type: message
+                messages:
+                  - "&cVous avez deja reclame la recompense du jour !"
+      success:
+        - type: data
+          action: SET
+          key: "last_daily"
+          value: "%zmenu_time_unix_timestamp%"
+        - type: console-command
+          commands:
+            - "give %player% diamond 5"
+        - type: data
+          action: ADD
+          key: "daily_streak"
+          value: "1"
+        - type: message
+          messages:
+            - "&aRecompense quotidienne reclamee !"
+            - "&7Serie : &e%zmenu_player_value_daily_streak%"
+        - type: sound
+          sound: ENTITY_PLAYER_LEVELUP
+```
+
+### Menu réservé aux VIP
+
+Un inventaire que seuls les joueurs VIP peuvent ouvrir :
+
+```yaml
+name: "&6&lSalon VIP"
+size: 54
+
+view-requirement:
+  requirements:
+    - type: permission
+      permission: "server.vip"
+      deny:
+        - type: message
+          messages:
+            - "&cCe menu est reserve aux membres VIP !"
+        - type: sound
+          sound: ENTITY_VILLAGER_NO
+
+open-actions:
+  - type: sound
+    sound: BLOCK_CHEST_OPEN
+  - type: message
+    messages:
+      - "&aBienvenue dans le salon VIP !"
+
+items:
+  # ... vos boutons reserves aux VIP
+```
+
+### Bouton basé sur le rang avec chaîne else
+
+Un bouton qui affiche un contenu différent selon le rang du joueur :
+
+```yaml
+items:
+  affichage-rang:
+    slot: 4
+
+    # Rang Diamant
+    view-requirement:
+      requirements:
+        - type: luckperm
+          group: diamond
+    item:
+      material: DIAMOND_BLOCK
+      name: "&b&lRang Diamant"
+      lore:
+        - "&7Votre rang : &bDiamant"
+
+    else:
+      # Rang Or
+      view-requirement:
+        requirements:
+          - type: luckperm
+            group: gold
+      item:
+        material: GOLD_BLOCK
+        name: "&6&lRang Or"
+        lore:
+          - "&7Votre rang : &6Or"
+
+      else:
+        # Par defaut (aucun rang)
+        item:
+          material: STONE
+          name: "&7&lAucun rang"
+          lore:
+            - "&7Vous n'avez pas de rang"
+            - "&eVisitez notre boutique pour en obtenir un !"
+```
+
+### Système de dépense de données joueur
+
+Un bouton qui vérifie une monnaie personnalisée stockée dans les données joueur :
+
+```yaml
+items:
+  depenser-pieces:
+    slot: 15
+    item:
+      material: DIAMOND
+      name: "&b&lAcheter un diamant"
+      lore:
+        - "&7Cout : &e50 pieces"
+        - "&7Vos pieces : &f%zmenu_player_value_coins%"
+    click-requirement:
+      achat:
+        clicks:
+          - ALL
+        requirements:
+          - type: placeholder
+            placeholder: "%zmenu_player_value_coins%"
+            action: SUPERIOR_OR_EQUAL
+            value: 50
+            deny:
+              - type: message
+                messages:
+                  - "&cVous avez besoin de 50 pieces !"
+      success:
+        - type: data
+          action: SUBTRACT
+          key: "coins"
+          value: "50"
+        - type: console-command
+          commands:
+            - "give %player% diamond 1"
+        - type: refresh
+```
+
+### Initialiser des valeurs par défaut
+
+Utilisez un bouton invisible avec `view-requirement` pour définir des données joueur par défaut lors de la première visite :
+
+```yaml
+items:
+  initialiser:
+    slot: 0
+    view-requirement:
+      requirements:
+        - type: placeholder
+          placeholder: "%zmenu_player_value_initialized%"
+          action: DIFFERENT
+          value: "true"
+    item:
+      material: AIR
+    actions:
+      - type: data
+        action: SET
+        key: "coins"
+        value: "0"
+      - type: data
+        action: SET
+        key: "initialized"
+        value: "true"
+      - type: refresh
+```
+
+Ce bouton invisible vérifie si le joueur a été initialisé. Si ce n'est pas le cas, il définit les valeurs par défaut et rafraîchit l'inventaire.

@@ -1,0 +1,350 @@
+---
+sidebar_position: 2
+title: Menus d'exemple
+description: Découvrez les menus, commandes et patterns d'exemple créés par zMenu au premier démarrage
+---
+
+# Menus d'exemple
+
+Au premier démarrage, zMenu copie un ensemble de fichiers d'exemple dans `plugins/zMenu/`. Ce sont des **recettes qui fonctionnent** : ouvrez-les en jeu, lisez le YAML, copiez ce dont vous avez besoin. Cette page explique ce que chacun démontre.
+
+Les fichiers ne sont créés que s'ils sont absents : vous pouvez les modifier ou les supprimer librement.
+
+| Fichier | Ce qu'il montre | Pour l'ouvrir |
+|---------|-----------------|---------------|
+| `inventories/basic_inventory.yml`, `advanced_inventory.yml`, `pro_inventory.yml` | Exemples progressifs de titres, boutons, conditions et actions | `/basic_command`, `/advanced_command`, `/pro_command` |
+| `inventories/examples/cookies.yml` + `patterns/pattern_cookies.yml` | Un jeu de clicker : données joueur, maths, patterns | `/zm open cookies` |
+| `inventories/examples/playtimes.yml` + `patterns/playtime_reward.yml` | Récompenses débloquées par le temps de jeu, boutons `else` enchaînés | `/zm open playtimes` |
+| `inventories/examples/switch.yml` | Un bouton `SWITCH` qui parcourt plusieurs états | `/zm open switch` |
+| `inventories/examples/item_drag.yml` | Un emplacement de glisser-déposer (station de réparation) | `/zm open item_drag` |
+| `inventories/animated_title_inventory.yml` | Un titre animé | `/zm open animated_title_inventory` |
+| `inventories/example_punish.yml` + `commands/punish/punish.yml` | Une commande avec arguments qui alimente un menu | `/punish <joueur> <raison>` |
+| `commands/commands.yml` | Des commandes liées à des menus, et une commande qui ouvre un livre | voir plus bas |
+| `default_values.yml` | Valeurs par défaut des placeholders de [données joueur](./player-data) | - |
+| `actions_patterns/default-actions.yml` | Un [pattern d'actions](./inventories/inventory#action-patterns) | - |
+| `items/default-items.yml` | La définition d'un [item personnalisé](./items/custom-items) | - |
+| `dialogs/*.yml` | Un exemple par type de dialogue (voir [Dialogues](./dialogues)) | `/zm dialog open <nom>` |
+| `bedrock/*.yml` | Formulaires Bedrock simple, modal et custom (voir [Bedrock](./bedrock)) | `/zm bedrock open <nom>` |
+
+:::note
+Les fichiers de dialogues ne sont copiés que sur un serveur compatible (Paper 1.21.7+ avec `enable-mini-message-format: true`), et ceux de Bedrock uniquement si Geyser ou Floodgate est installé. Le dépôt contient aussi `dialogs/dynamic-dialog-example.yml`, `dialogs/dialog_list-dialog.yml`, `bedrock/dynamic-bedrock-example.yml` et `bedrock/dynamic-simple-bedrock-example.yml` ; les exemples Bedrock dynamiques ne sont pas copiés automatiquement, créez-les à partir de la documentation [Bedrock](./bedrock#boutons-dynamiques) si vous les voulez.
+:::
+
+## Cookie Clicker : données joueur, maths et patterns
+
+`inventories/examples/cookies.yml` est un petit jeu incrémental. Il combine trois fonctionnalités :
+
+- Les **données joueur** stockent le score et le niveau de chaque amélioration (`cookie`, `grandma`, `factory`, `mine`).
+- Les **maths** (`math: true`) calculent le gain par clic et le prix d'une amélioration.
+- Un **pattern** (`patterns/pattern_cookies.yml`) est réutilisé pour les trois boutons d'amélioration, chacun fournissant ses propres `slot`, `material`, `name`, `key` et `price`.
+
+Le bouton central ajoute au compteur, puis se redessine :
+
+```yaml
+cookie:
+  slot: 13
+  item:
+    material: COOKIE
+    name: "#77ff77Cookies#353535: &f%zmenu_player_value_cookie%"
+    lore:
+      - "&fCookie per click&8: &b%zmenu_formatted_math_1+({zmenu_player_value_grandma}*2)+({zmenu_player_value_factory}*5)+({zmenu_player_value_mine}*10)%"
+  actions:
+    - type: data
+      action: ADD
+      key: cookie
+      value: "1+(%zmenu_player_value_grandma%*2)+(%zmenu_player_value_factory%*5)+(%zmenu_player_value_mine%*10)"
+      math: true
+    - type: refresh
+```
+
+`default_values.yml` donne une valeur de départ à chaque clé, afin que `%zmenu_player_value_cookie%` affiche `0` au lieu d'un texte d'erreur pour un nouveau joueur :
+
+```yaml
+values:
+  playtime_level: 0
+  grandma: 0
+  factory: 0
+  mine: 0
+  cookie: 0
+```
+
+Le pattern construit chaque bouton d'amélioration : une `click-requirement` avec une condition `placeholder` et `math: true` vérifie que le joueur peut payer, `success` soustrait le prix et monte l'amélioration d'un niveau, `deny` prévient le joueur qu'il n'a pas assez. Voir [Patterns](./patterns) et [Données joueur](./player-data) pour l'action `data`.
+
+## Temps de jeu : boutons `else` enchaînés
+
+`inventories/examples/playtimes.yml` montre sept paliers de récompense construits à partir d'un seul pattern. Chaque palier affiche un item différent selon l'état du joueur, grâce à des blocs `else` imbriqués :
+
+1. `view-requirement` : la récompense est déjà récupérée (`%zmenu_player_value_playtime_level%` >= palier) ;
+2. `else` + `view-requirement` : pas assez de temps de jeu (`%zmenu_statistic_hours_played%` inférieur aux heures requises) ;
+3. `else` + `view-requirement` : le palier précédent n'a pas encore été récupéré ;
+4. dernier `else` : récupérable, avec une `click-requirement` qui exécute les commandes de récompense et enregistre le nouveau niveau.
+
+D'autres détails utiles à copier dans ce fichier :
+
+```yaml
+updateInterval: 1000        # redessine le menu chaque seconde (millisecondes)
+
+items:
+  decoration:
+    isPermanent: true       # affiche sur toutes les pages
+    slots:
+      - 0-26                # une plage de slots
+    item:
+      material: GRAY_STAINED_GLASS_PANE
+      name: ""
+
+  informations:
+    isPermanent: true
+    slot: 22
+    update: true            # cet item est rafraichi a chaque tick de mise a jour
+    item:
+      playerHead: "%player%"   # la tete du joueur qui regarde
+```
+
+Les boutons de récompense utilisent `item.url` (une texture de tête en Base64), `updateOnClick`, et l'action `console_command` avec une variable de pattern `%commands%` qui reçoit la liste de commandes définie dans le fichier d'inventaire.
+
+## Switch : un bouton à plusieurs états
+
+`inventories/examples/switch.yml` est un tutoriel de trois pages dans un seul slot. Un bouton [`SWITCH`](./buttons/types/switch) évalue le placeholder de `key` et affiche le sous-bouton dont le nom correspond au résultat ; un clic enregistre la valeur suivante et redessine.
+
+```yaml
+name: "&8Test"
+size: 9
+
+items:
+  switch:
+    type: SWITCH
+    slot: 4
+    key: "%zmenu_player_value_switch_value%"
+
+    # Etat par defaut : utilise tant que la valeur ne correspond a aucune cle ci-dessous
+    item:
+      material: PAPER
+      name: "&fTuto &7#1"
+      lore:
+        - "&7Click for the next page"
+    actions:
+      - type: data
+        action: SET
+        key: switch_value
+        value: 2
+      - type: refresh inventory
+
+    buttons:
+      "2":
+        slot: 4
+        item:
+          material: PAPER
+          name: "&fTuto &7#2"
+        actions:
+          - type: data
+            action: SET
+            key: switch_value
+            value: 3
+          - type: refresh inventory
+
+      "3":
+        slot: 4
+        item:
+          material: PAPER
+          name: "&fTuto &7#3"
+        actions:
+          - type: data
+            action: SET
+            key: switch_value
+            value: 1        # "1" ne correspond a rien : l'etat par defaut revient
+          - type: refresh inventory
+```
+
+Fonctionnement :
+
+- L'état est une valeur de [données joueur](./player-data) : il est donc mémorisé par joueur (et conservé après un redémarrage).
+- Une action `data` avec `action: SET` passe à l'état suivant, `refresh inventory` redessine tout le menu pour que le `SWITCH` soit évalué de nouveau (`refresh` ne redessine que le bouton cliqué).
+- Le premier état est celui **par défaut** : tant que le joueur n'a jamais cliqué, `%zmenu_player_value_switch_value%` n'a pas de valeur et ne correspond à aucun sous-bouton. Ajouter `switch_value: 1` dans `default_values.yml` n'y change rien, car `"1"` n'est pas une clé de `buttons`.
+- Chaque sous-bouton hérite des propriétés qu'il ne redéfinit pas (ici seuls l'item et les actions changent).
+
+Le même schéma permet de créer des interrupteurs (`"true"` / `"false"`), des onglets, des sélecteurs de langue, des modes de tri...
+
+## Glisser-déposer : une station de réparation
+
+`inventories/examples/item_drag.yml` permet au joueur de déposer un item dans le menu pour le réparer. Il utilise trois boutons :
+
+```yaml
+items:
+  itemDrag:
+    type: ITEM_DRAG            # le slot qui accepte un item glisse
+    slot: 22
+    item:                      # affiche tant que le slot est vide
+      material: ANVIL
+      name: "You can drag a item here"
+    check-item:
+      type: MATERIAL           # comment comparer : full, material, name, lore, modelId, itemModel
+      item:
+        material: STONE_PICKAXE   # seule une pioche en pierre est acceptee
+    error-item:                # affiche brievement quand un item refuse est depose
+      duration: 30             # ticks
+      item:
+        material: BARRIER
+        name: "&cError"
+
+  repair:
+    slot: 14
+    refreshOnDrag: true        # redessine ce bouton quand un item entre ou sort du slot
+    view_requirement:
+      requirements:
+        - type: placeholder
+          placeholder: "%zmenu_item_inventory:22_is_player_item%"
+          value: true
+          action: BOOLEAN
+    item:
+      material: ANVIL
+      name: "You can repair your item"
+      lore:
+        - "Dura repair: %zmenu_item_inventory:22_max_dura%"
+    actions:
+      - type: item_edit
+        slot: "inventory:22"   # l'item actuellement dans le slot de depot
+        item:
+          durability: 0
+    else:                      # affiche tant que le slot de depot est vide
+      item:
+        material: BARRIER
+        name: "You need to drag a item"
+```
+
+- `check-item.type` choisit une comparaison d'items (voir [Règles d'items](./item-rules#le-bouton-item_drag) pour une validation par règles, plus souple que `check-item`).
+- `%zmenu_item_inventory:22_is_player_item%` fait partie des [placeholders d'inspection d'item](./placeholders#placeholders-dinspection-ditem) : il vaut `true` quand le slot 22 contient un vrai item (et non un item décoratif de zMenu).
+- `item_edit` avec `slot: "inventory:22"` modifie l'item déposé **sur place** : seules les clés écrites sous `item` changent, la pioche réparée garde donc son nom et ses enchantements.
+- `refreshOnDrag: true` permet au bouton `repair` de passer de son item normal à son item `else` dès que le joueur dépose ou retire l'item.
+- Le troisième bouton du fichier (`itemGive`) utilise l'action `item_give` pour donner au joueur une pioche abîmée afin de tester.
+- Le fichier écrit les clés `view_requirement`, `refreshOnDrag` et `check-item` dans des styles différents ; zMenu accepte les écritures camelCase / underscore et kebab-case de ces clés.
+
+## Titre animé
+
+`inventories/animated_title_inventory.yml` montre la section `title-animation` :
+
+```yaml
+size: 27
+name: "&bAnimated &6Inventory"      # titre statique de secours
+
+title-animation:
+  titles:
+    - "&bWelcome to &aMenu!"
+    - "&eEnjoy &four &9Features!"
+    - "&cRotating &6Animated &2Title!"
+  cycles: 5              # -1 = infini
+  initial-delay: 1       # avant la premiere frame
+  interval: 2            # entre deux frames
+  time-unit: SECONDS     # NANOSECONDS ... DAYS
+  show-items-after-animation: true   # les items apparaissent a la fin de l'animation
+  item-update-interval: 1
+```
+
+Il nécessite [PacketEvents](https://github.com/retrooper/packetevents) ; sans lui, le menu garde simplement son `name` statique. Voir [`title-animation`](./inventories/inventory#title-animation) pour toutes les options.
+
+:::tip
+`initial-delay` et `interval` sont exprimés dans `time-unit`. Avec l'unité `SECONDS` par défaut, un `interval` de `2` vaut deux secondes ; utilisez `time-unit: MILLISECONDS` et `interval: 500` pour une animation rapide.
+:::
+
+## Commandes : arguments et livres
+
+### Une commande qui ouvre un menu avec des arguments
+
+`commands/punish/punish.yml` enregistre `/punish` (alias `/sanction`). Les arguments sont typés, peuvent avoir de l'auto-complétion et exécuter leurs propres actions, et leur valeur est disponible dans le menu sous la forme `%zmenu_argument_<nom>%` :
+
+```yaml
+commands:
+  punish:
+    command: punish
+    permission: "admin.punish"
+    aliases:
+      - sanction
+    inventory: example_punish
+    arguments:
+      - name: target
+        type: online-player        # valide et auto-complete
+      - name: reason
+        auto-completion:           # suggestions
+          - cheat
+          - chat
+          - skin
+          - other
+        actions:                   # executees quand la commande est saisie
+          - type: message
+            messages:
+              - "&7You will put a punishment to the player &f&n%target%&r &7with the reason&8: &f%reason%"
+```
+
+`inventories/example_punish.yml` lit les arguments pour construire la sanction. Chaque bouton de durée ferme le menu et exécute la commande de bannissement :
+
+```yaml
+'10':
+  slot: 10
+  closeInventory: true
+  commands:
+    - "tempban %zmenu_argument_target% 1d %zmenu_argument_reason%"
+  item:
+    material: CLOCK
+    name: "#db3214Ban &f&n%zmenu_argument_target%"
+    lore:
+      - " &f• %zmenu_argument_reason%"
+```
+
+Voir [Commandes personnalisées](./custom-commands) pour toutes les options d'arguments.
+
+### Commandes liées à des menus, et commande qui ouvre un livre
+
+`commands/commands.yml` lie `/basic_command`, `/advanced_command` (alias `/zai`) et `/pro_command` aux trois inventaires d'exemple, chacun avec sa permission, et définit `/openbook`, une commande sans inventaire dont les `actions` ouvrent un livre :
+
+```yaml
+commands:
+  basic_command:
+    command: basic_command
+    inventory: basic_inventory
+    permission: "zmenu.basic"
+
+  openbook:
+    command: openbook
+    permission: "zmenu.open.book"
+    actions:
+      - type: book
+        author: "Maxlego08"
+        title: "&cTest"
+        lines:
+          1:                       # page 1
+            - '     #34ebe8zMenu'
+            - ''
+            - '<hover:show_text:"#34eba8Open an url !"><click:open_url:"https://minecraft-inventory-builder.com/">#f0af24Open URL<reset>'
+```
+
+Toute [action](./buttons/actions) peut être utilisée dans les `actions` d'une commande ; les balises MiniMessage (`<hover>`, `<click>`) fonctionnent dans les lignes d'un livre.
+
+## Patterns d'actions
+
+`actions_patterns/default-actions.yml` définit des actions que zMenu ajoute automatiquement aux boutons :
+
+```yaml
+name: default-actions
+actions:                    # ajoutees apres les `actions` d'un bouton
+  - type: sound
+    sound: ENTITY_VILLAGER_YES
+deny-actions:               # ajoutees apres les actions `deny` de ses conditions
+  - type: sound
+    sound: ENTITY_VILLAGER_NO
+```
+
+Activez-le dans un inventaire avec `action-patterns: [default-actions]`, voir [`action-patterns`](./inventories/inventory#action-patterns). Les actions du pattern ne sont ajoutées qu'aux boutons qui définissent déjà au moins une action, sauf si le bouton utilise `stop-on-empty: false`, et une action dont le `type` est déjà utilisé par le bouton n'est pas dupliquée.
+
+## Items réutilisables
+
+`items/default-items.yml` déclare un item personnalisé autonome, un vrai item que zMenu sait reconnaître et garder à jour :
+
+```yaml
+first-item:
+  name: "&aFirst Item"
+  lore:
+    - "&7This is the first item"
+    - "&7in the default items file."
+```
+
+Voir [Items personnalisés](./items/custom-items) pour savoir comment les donner et leur attacher des mécaniques.

@@ -1,0 +1,112 @@
+---
+sidebar_position: 4
+title: Mécaniques d'item
+description: Donnez un comportement aux items personnalisés avec des mécaniques comme itemjoin et on-click
+---
+
+# Mécaniques d'item
+
+Les [items personnalisés](./custom-items) définis dans le dossier `plugins/zMenu/items/` peuvent recevoir des **mécaniques** — des comportements réutilisables attachés à l'item. Chaque item est identifié par un id (sa clé YAML), que zMenu stocke sur l'item afin que la mécanique puisse le reconnaître plus tard.
+
+## Structure du fichier d'item
+
+```yaml
+# plugins/zMenu/items/default-items.yml
+<item-id>:
+  name: "&aMy Item"          # standard zMenu item format (see Item Configuration)
+  lore:
+    - "&7A special item"
+  mechanics:
+    <mechanic-id>:
+      # options depend on the mechanic
+```
+
+## itemjoin
+
+La mécanique `itemjoin` contrôle **quand l'item est donné** et **comment il est protégé** dans l'inventaire du joueur. Elle est enregistrée par défaut, donc elle fonctionne immédiatement.
+
+```yaml
+server-guide:
+  material: FILLED_MAP
+  name: "&eServer Guide"
+  lore:
+    - "&7Tout ce qu'il faut pour bien commencer."
+  mechanics:
+    itemjoin:
+      give-first-join: true
+      fixed-slot: 8
+      prevent-inventory-modification: true
+```
+
+### Options
+
+| Option                           | Type    | Défaut  | Description                                                                                                    |
+|----------------------------------|---------|---------|----------------------------------------------------------------------------------------------------------------|
+| `give-first-join`                | Boolean | `false` | Donne l'item automatiquement la **première fois** qu'un joueur se connecte au serveur.                          |
+| `give-first-world-join`          | String / Liste | — | Donne l'item la première fois qu'un joueur entre dans l'un des mondes listés (un nom de monde ou une liste de noms). |
+| `fixed-slot`                     | Integer | `-1`    | Force l'item dans ce slot d'inventaire lorsqu'il est donné, et l'y verrouille. `-1` le désactive ; plage valide `0`–`36`. |
+| `prevent-inventory-modification` | Boolean | `true`  | Empêche l'item d'être jeté, déplacé, glissé, échangé en main secondaire ou placé dans un cadre d'item.          |
+
+:::info
+`prevent-inventory-modification` ne prend effet que lorsqu'un `fixed-slot` est défini — la protection est liée au slot verrouillé. Sans `fixed-slot`, l'item peut être déplacé librement même si cette option est `true`.
+:::
+
+:::tip
+Utilisez `give-first-join` avec un `fixed-slot` pour donner à chaque nouveau joueur un item guide/menu qui reste épinglé à sa barre d'action.
+:::
+
+## on-click
+
+La mécanique `on-click` exécute des actions zMenu lorsque le joueur fait un clic gauche ou droit en tenant l'item dans sa **main principale**.
+
+```yaml
+magic-wand:
+  name: "&dMagic Wand"
+  material: BLAZE_ROD
+  mechanics:
+    on-click:
+      cooldown: 3
+      cancel-event: true
+      click-target: both
+      click-types:
+        - RIGHT
+        - SHIFT_RIGHT
+      click-requirements:
+        1:
+          requirements:
+            - type: permission
+              permission: "server.wand"
+              deny:
+                - type: message
+                  messages:
+                    - "&cYou can't use this wand."
+      actions:
+        - type: message
+          messages:
+            - "&dPoof! ✨"
+        - type: player-command
+          commands:
+            - "spawn"
+```
+
+### Options
+
+| Option               | Type    | Défaut   | Description                                                                                          |
+|----------------------|---------|----------|-----------------------------------------------------------------------------------------------------|
+| `cooldown`           | Integer | `0`      | Secondes entre chaque activation, par joueur (`0` = aucun temps de recharge)                        |
+| `cancel-event`       | Boolean | `false`  | Annule l'interaction (par ex. pour empêcher le placement de bloc / l'utilisation de l'item)         |
+| `click-target`       | String  | `both`   | Où le clic doit se produire : `air`, `block`, ou `both`                                              |
+| `click-types`        | List    | —        | Quels clics le déclenchent : `LEFT`, `RIGHT`, `SHIFT_LEFT`, `SHIFT_RIGHT` (l'accroupissement utilise les variantes SHIFT) |
+| `click-requirements` | Section | —        | [Conditions](../requirements) standards de zMenu vérifiées lors du clic                             |
+| `actions`            | List    | —        | [Actions](../buttons/actions) standards de zMenu exécutées lors du clic                             |
+
+:::info
+`on-click` se déclenche depuis un `PlayerInteractEvent` sur l'item de la main principale. Comme aucun inventaire n'est ouvert, les placeholders spécifiques aux inventaires ne sont pas disponibles dans les conditions/actions.
+:::
+
+## Prochaines étapes
+
+- Découvrez comment les items sont définis et donnés dans [Items personnalisés](./custom-items)
+- Configurez l'item lui-même avec [Configuration d'item](./item)
+- Découvrez les [Actions](../buttons/actions) que vous pouvez exécuter
+- Mettez en place des [Conditions](../requirements) pour un comportement conditionnel

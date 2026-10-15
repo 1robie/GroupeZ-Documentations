@@ -1,0 +1,844 @@
+---
+sidebar_position: 11
+title: Config.yml
+description: Référence du fichier de configuration principal
+---
+
+# Config.yml
+
+Le fichier `config.yml` est le fichier de configuration principal de zMenu. Il contrôle les paramètres globaux du plugin, la configuration de la base de données, les options de performance et plus encore.
+
+## Emplacement du fichier
+
+`plugins/zMenu/config.yml`
+
+## Référence complète de la configuration
+
+```yaml
+#######################################
+#       Parametres de debug           #
+#######################################
+
+# Activer les messages de debug dans la console
+enable-debug: false
+
+# Activer les informations de timing de debug
+enable-debug-time: false
+
+#######################################
+#      Parametres de stockage         #
+#######################################
+
+# Type de stockage pour les donnees joueur
+# Options : SQLITE, MYSQL, MARIADB, NONE
+storage-type: SQLITE
+
+# Configuration de la base de donnees (pour MySQL/MariaDB)
+database-configuration:
+  table-prefix: "zmenu_"
+  host: "localhost"
+  port: 3306
+  user: "username"
+  password: "password"
+  database: "zmenu"
+
+#######################################
+#     Parametres de formatage         #
+#######################################
+
+# Activer le format MiniMessage (Paper/Purpur uniquement)
+# Cela permet le formatage moderne comme <gradient:red:blue>
+enable-mini-message-format: true
+
+#######################################
+#    Parametres de performance        #
+#######################################
+
+# Mettre en cache les item stacks pour de meilleures performances
+enable-cache-item-stack: true
+
+# Activer le cache PlaceholderAPI
+enable-cache-placeholder-api: false
+
+# Duree du cache PlaceholderAPI (ticks, 20 = 1 seconde)
+cache-placeholder-api: 20
+
+# Mettre en cache les donnees des joueurs hors ligne (secondes)
+cache-offline-player: 300
+
+#######################################
+#        Parametres de clic           #
+#######################################
+
+# Activer le cooldown de clic pour prevenir le spam de clics
+enable-cooldown-click: true
+
+# Duree du cooldown (millisecondes)
+cooldown-click-milliseconds: 250
+
+#######################################
+#      Parametres de securite         #
+#######################################
+
+# Activer la protection anti-duplication
+enable-anti-dupe: true
+
+# Logger quand les joueurs ouvrent des inventaires
+enable-player-open-inventory-logs: true
+
+#######################################
+#        Parametres de menu           #
+#######################################
+
+# Nom de l'inventaire du menu principal par defaut
+main-menu: "example"
+
+# Utiliser la touche d'echange de main secondaire (F) pour ouvrir le menu principal
+use-swap-item-off-hand-key-to-open-main-menu: false
+
+# Recharger automatiquement un inventaire quand son fichier est modifie, ajoute ou supprime
+hot-reload:
+  enable: false
+  delay-milliseconds: 500
+
+# Nombre de dialogues dialog_list pouvant etre imbriques les uns dans les autres
+dialog-list-max-depth: 4
+```
+
+## Options de configuration expliquées
+
+### Paramètres de debug
+
+#### enable-debug
+
+Active les messages de debug détaillés dans la console. Utile pour résoudre les problèmes.
+
+```yaml
+enable-debug: false
+```
+
+**Quand activer :**
+- Résolution de problèmes de chargement d'inventaire
+- Debug de problèmes de placeholder
+- Signalement de bugs au développeur
+
+---
+
+#### enable-debug-time
+
+Affiche les informations de timing pour les opérations.
+
+```yaml
+enable-debug-time: false
+```
+
+---
+
+### Paramètres de stockage
+
+#### storage-type
+
+Détermine comment les données joueur sont stockées.
+
+| Type | Description |
+|------|-------------|
+| `SQLITE` | Base de données locale basée sur fichier (par défaut) |
+| `MYSQL` | Serveur MySQL |
+| `MARIADB` | Serveur MariaDB |
+| `NONE` | Pas de stockage persistant |
+
+```yaml
+storage-type: SQLITE
+```
+
+**Recommandations :**
+- **Serveur unique** : utilisez `SQLITE`
+- **Réseau/BungeeCord** : utilisez `MYSQL` ou `MARIADB`
+- **Pas de données joueur nécessaires** : utilisez `NONE`
+
+---
+
+#### database-configuration
+
+Paramètres de connexion MySQL/MariaDB.
+
+```yaml
+database-configuration:
+  table-prefix: "zmenu_"
+  host: "localhost"
+  port: 3306
+  user: "minecraft"
+  password: "mot_de_passe_securise"
+  database: "minecraft_db"
+```
+
+| Option | Description |
+|--------|-------------|
+| `table-prefix` | Préfixe pour les tables de la base de données |
+| `host` | Adresse du serveur de base de données |
+| `port` | Port de la base de données (défaut : 3306) |
+| `user` | Nom d'utilisateur de la base de données |
+| `password` | Mot de passe de la base de données |
+| `database` | Nom de la base de données |
+| `debug` | Active les logs SQL de debug |
+
+---
+
+#### flush-storage-on-quit
+
+Quand `true`, les données en mémoire d'un joueur sont écrites en base dès sa déconnexion au lieu d'attendre le prochain cycle de `batch-task`. Cela limite ce qu'un crash peut faire perdre. Défaut : `true`.
+
+```yaml
+flush-storage-on-quit: true
+```
+
+---
+
+#### enable-toast
+
+Active les notifications toast envoyées par zMenu (par exemple via l'action `toast`). Défaut : `true`.
+
+```yaml
+enable-toast: true
+```
+
+---
+
+#### enable-website-auto-connect
+
+Rouvre automatiquement le lien de synchronisation live de l'Inventory Builder quelques secondes après le démarrage, si le serveur est déjà lié à un compte. Mettez `false` pour l'ouvrir à la main avec `/zmenu website connect`. Défaut : `true`.
+
+```yaml
+enable-website-auto-connect: true
+```
+
+---
+
+#### allowed-downloadable-website
+
+Liste des sites depuis lesquels `/zm website download` est autorisé à télécharger. Défaut : `minecraft-inventory-builder.com`.
+
+```yaml
+allowed-downloadable-website:
+  - "minecraft-inventory-builder.com"
+```
+
+---
+
+#### api-url
+
+URL de l'API du site [Minecraft Inventory Builder](https://minecraft-inventory-builder.com). **Ne modifiez pas cette valeur.**
+
+```yaml
+api-url: "https://minecraft-inventory-builder.com/api/v2/"
+```
+
+---
+
+### Paramètres de formatage
+
+#### enable-mini-message-format
+
+Active le formatage MiniMessage pour le texte. **Fonctionne uniquement sur Paper/Purpur/Pufferfish**.
+
+```yaml
+enable-mini-message-format: true
+```
+
+Quand cette option est activée, vous pouvez utiliser :
+```yaml
+name: "<gradient:red:blue>Texte en degrade</gradient>"
+lore:
+  - "<rainbow>Arc-en-ciel !</rainbow>"
+  - "<bold><gold>Or en gras</gold></bold>"
+```
+
+---
+
+### Paramètres de performance
+
+#### enable-cache-item-stack
+
+Met en cache les ItemStacks créés pour améliorer les performances.
+
+```yaml
+enable-cache-item-stack: true
+```
+
+**Recommandation :** gardez-la activée sauf si vous rencontrez des problèmes.
+
+---
+
+#### enable-cache-placeholder-api
+
+Met en cache les résultats de PlaceholderAPI pour réduire la charge d'analyse.
+
+```yaml
+enable-cache-placeholder-api: false
+```
+
+:::warning
+Activer ceci signifie que les placeholders ne se mettront pas à jour instantanément. Utilisez avec précaution.
+:::
+
+---
+
+#### cache-placeholder-api
+
+Durée de mise en cache des résultats de placeholder (en ticks).
+
+```yaml
+cache-placeholder-api: 20  # 1 seconde
+```
+
+---
+
+#### cache-offline-player
+
+Combien de temps mettre en cache les données des joueurs hors ligne (secondes).
+
+```yaml
+cache-offline-player: 300  # 5 minutes
+```
+
+---
+
+#### enable-fast-event
+
+Remplace certains événements Bukkit par une alternative plus rapide.
+
+```yaml
+enable-fast-event: false
+```
+
+Une fois activée, `ButtonLoadEvent`, `InventoryLoadEvent` et `PlayerOpenInventoryEvent` ne sont plus déclenchés comme événements Bukkit : seuls les plugins ayant enregistré un `FastEvent` sont notifiés. Laissez `false` sauf si tous les plugins qui se branchent sur zMenu le supportent. Voir [FastEvent](../development/api-events#fastevent-alternative-haute-performance).
+
+---
+
+### Paramètres de clic
+
+#### enable-cooldown-click
+
+Empêche le spam de clics en ajoutant un cooldown entre les clics.
+
+```yaml
+enable-cooldown-click: true
+```
+
+---
+
+#### cooldown-click-milliseconds
+
+La durée du cooldown entre les clics.
+
+```yaml
+cooldown-click-milliseconds: 250  # 0.25 secondes (defaut)
+```
+
+**Ajustez selon vos besoins :**
+- Plus bas = plus réactif, risque de double-clics accidentels
+- Plus haut = plus sûr, peut sembler lent
+
+---
+
+#### enable-packet-event-click-limiter
+
+Limite les paquets de clic reçus des joueurs (nécessite le plugin [PacketEvents](https://github.com/retrooper/packetevents)).
+
+```yaml
+enable-packet-event-click-limiter: false
+packet-event-click-limiter-milliseconds: 150
+```
+
+---
+
+#### enforce-click-types
+
+N'exécute un bouton que pour un type de clic listé dans `all-clicks-type`, ou nommé explicitement par un `click-requirement` du bouton. **Gardez cette option activée** : désactivée, les types de clic exotiques (touche de lâcher, touches numériques...) atteignent le bouton alors que toutes les exigences limitées à un type de clic normal sont ignorées.
+
+```yaml
+enforce-click-types: true
+all-clicks-type:
+  - MIDDLE
+  - RIGHT
+  - LEFT
+  - SHIFT_RIGHT
+  - SHIFT_LEFT
+```
+
+---
+
+#### click-error-log-cooldown-seconds
+
+Durée (en secondes) avant de logger à nouveau le même bouton en erreur. Un bouton dont les actions lèvent une erreur est loggé une fois avec la stack trace complète, puis ignoré pendant cette durée. Mettez `0` pour tout logger.
+
+```yaml
+click-error-log-cooldown-seconds: 30
+```
+
+---
+
+#### component-cache
+
+Borne le cache des composants de texte analysés. Mettez `max-size` et `expire-minutes` à `0` pour retrouver l'ancien comportement non borné.
+
+```yaml
+component-cache:
+  max-size: 10000
+  expire-minutes: 10
+  fix-key-collisions: true
+```
+
+| Clé | Défaut | Description |
+|-----|--------|-------------|
+| `max-size` | `10000` | Nombre maximum de composants en cache |
+| `expire-minutes` | `10` | Minutes avant l'expiration d'un composant |
+| `fix-key-collisions` | `true` | Sépare les clés de cache pour qu'un nom d'item et un message de même texte ne partagent plus la même entrée |
+
+---
+
+### Paramètres de sécurité
+
+#### close-on-move
+
+Ferme le menu quand le joueur s'éloigne de l'endroit où il a été ouvert. Protège contre l'abus du "ghost GUI" (un client modifié qui masque l'écran d'inventaire sans envoyer de paquet de fermeture).
+
+```yaml
+close-on-move: true
+max-move-distance: 2.0   # Blocs, utilise uniquement si close-on-move est true
+```
+
+---
+
+#### close-on-damage
+
+Ferme le menu dès que le joueur subit ou inflige des dégâts.
+
+```yaml
+close-on-damage: true
+```
+
+---
+
+#### enable-anti-dupe
+
+Active le système anti-duplication d'items.
+
+```yaml
+enable-anti-dupe: true
+```
+
+Cela détecte et empêche les exploits courants de duplication d'items impliquant les GUIs d'inventaire.
+
+---
+
+#### enable-player-open-inventory-logs
+
+Enregistre quand les joueurs ouvrent des inventaires zMenu.
+
+```yaml
+enable-player-open-inventory-logs: true
+```
+
+Utile pour :
+- Surveiller l'activité des joueurs
+- Débugger les problèmes
+- Audit de sécurité
+
+---
+
+### Paramètres de menu
+
+#### main-menu
+
+L'inventaire par défaut ouvert par le type de bouton `MAINMENU` et le raccourci touche F.
+
+```yaml
+main-menu: "example"
+```
+
+Cela doit correspondre à un nom de fichier d'inventaire (sans `.yml`) dans votre dossier `inventories/`.
+
+---
+
+#### use-swap-item-off-hand-key-to-open-main-menu
+
+Permet aux joueurs d'appuyer sur F (touche d'échange de main secondaire) pour ouvrir le menu principal.
+
+```yaml
+use-swap-item-off-hand-key-to-open-main-menu: false
+```
+
+**Quand activer :**
+- Vous voulez un accès facile au menu sans commandes
+- Votre serveur a un menu hub principal
+
+**Quand garder désactivé :**
+- Les joueurs ont besoin de la touche F pour l'échange d'items réel
+- Vous utilisez des packs de ressources personnalisés avec des raccourcis touche F
+
+---
+
+#### hot-reload
+
+:::tip
+Le hot reload a sa propre page avec tous les détails : [Hot Reload](../hot-reload).
+:::
+
+Surveille le dossier `inventories/` (et tous ses sous-dossiers) et applique vos modifications sans aucune commande :
+
+- **Fichier modifié** : l'inventaire est rechargé.
+- **Nouveau fichier** : l'inventaire est chargé.
+- **Fichier supprimé** (ou dossier supprimé) : l'inventaire est déchargé.
+
+```yaml
+hot-reload:
+  enable: false
+  delay-milliseconds: 500
+```
+
+| Option | Description |
+|--------|-------------|
+| `enable` | Active le rechargement à chaud. Désactivé par défaut. |
+| `delay-milliseconds` | Temps d'attente après la dernière modification d'un fichier avant de le recharger. Les éditeurs de texte enregistrent souvent un fichier en plusieurs étapes, cela évite de le recharger plusieurs fois. |
+
+**Bon à savoir :**
+- Les joueurs qui regardent un inventaire au moment où il est rechargé voient la nouvelle version s'ouvrir instantanément, sur la même page et avec les mêmes inventaires précédents (un bouton retour ouvre aussi la nouvelle version). Si l'inventaire est déchargé (fichier supprimé, `enable: false`), il est fermé.
+- Un fichier qui ne peut pas être chargé (erreur de syntaxe YAML, type de bouton inconnu, taille invalide...) n'est pas appliqué : la version précédente reste chargée et l'erreur est affichée dans la console jusqu'à ce que vous corrigiez le fichier.
+- Seul le dossier `inventories/` est surveillé. Les fichiers de `specify-path-menus`, les patterns et les commandes nécessitent toujours `/zm reload`.
+- L'activation ou la désactivation de l'option prend effet après `/zm reload` ou `/zm reload config` (ou en deux secondes depuis le dialogue de configuration en jeu).
+- En plus des événements du système de fichiers, le dossier est scanné toutes les deux secondes. Les modifications sont donc détectées même là où le système de fichiers n'envoie aucun événement : conteneurs Docker (Pterodactyl, bind mounts), WSL, partages réseau, fichiers envoyés en SFTP.
+- Un fichier est rechargé quand son contenu ou sa date de modification change. Enregistrer à nouveau un fichier sans modification le recharge quand même, mais une même version n'est jamais rechargée deux fois.
+
+**Logs console :**
+
+Chaque action est affichée dans la console avec le préfixe `[HotReload]` :
+
+```
+[zMenu] [HotReload] Inventory hot reload enabled, watching .../plugins/zMenu/inventories (native recursive watch, 12 file(s), 12 loaded inventory(ies), scan every 2000ms, delay 500ms).
+[zMenu] [HotReload] Change detected on example.yml, reloading the inventory...
+[zMenu] [HotReload] Inventory example.yml reloaded in 14ms, reopened for 1 player(s).
+```
+
+Vous verrez aussi les erreurs YAML, les fichiers qui n'ont pas pu être chargés, les inventaires déchargés après une suppression, et les fichiers désactivés (`enable: false`) ou en attente d'un prérequis de chargement. Avec [`enable-debug`](#enable-debug) à `true`, chaque événement de fichier, chaque changement trouvé par le scan et chaque fichier ignoré (inchangé) est aussi affiché.
+
+**Dépannage :** si rien ne se passe quand vous enregistrez un fichier, vérifiez d'abord que la ligne `Inventory hot reload enabled` apparaît au démarrage ou après `/zm reload`. Activez ensuite `enable-debug` pour voir si les modifications sont détectées.
+
+**Quand activer :**
+- Pendant la création ou la modification de menus, pour voir vos changements instantanément
+- Sur un serveur de test/développement
+
+---
+
+#### dialog-list-max-depth
+
+Nombre de dialogues [`dialog_list`](./dialogues#liste-de-dialogues) pouvant être imbriqués les uns dans les autres (une liste dans une liste dans une liste...). Par défaut : `4`.
+
+```yaml
+dialog-list-max-depth: 4
+```
+
+Cela ne limite pas le nombre de dialogues qu'une liste contient. Une liste envoie tous les dialogues qu'elle contient, y compris le contenu des listes imbriquées, dans le paquet qui l'ouvre : une imbrication profonde rend ce paquet plus gros et peut déconnecter le joueur. Les listes imbriquées au-delà de cette valeur sont ignorées.
+
+---
+
+### Autres paramètres
+
+#### enable-information-message
+
+Affiche dans la console des messages d'information lorsqu'un inventaire ou une commande est chargé avec succès.
+
+```yaml
+enable-information-message: true
+```
+
+---
+
+#### skip-update-check
+
+Ignore la vérification automatique des mises à jour au démarrage.
+
+```yaml
+skip-update-check: false
+```
+
+---
+
+#### enable-performance-debug
+
+Enregistre le temps d'exécution de chaque opération lors de l'ouverture d'un inventaire (construction des boutons, rendu des items, etc.).
+
+```yaml
+enable-performance-debug: false
+
+performance-debug:
+  threshold-ms: 10   # Affiche uniquement les operations plus lentes
+  filter:
+    mode: DISABLED   # DISABLED | WHITELIST | BLACKLIST
+    operations: []   # Supporte les jokers : "buildButton.*"
+```
+
+---
+
+#### enable-log-storage-file
+
+Affiche des messages dans la console lorsque des fichiers de configuration sont sauvegardés ou chargés.
+
+```yaml
+enable-log-storage-file: false
+```
+
+---
+
+#### enable-open-message
+
+Valeur par défaut de l'argument `display-message` de `/zm open` et `/zm openMainMenu`. Si `true`, l'expéditeur de la commande reçoit le message "inventaire ouvert" (un message différent quand l'inventaire est ouvert pour un autre joueur) ; passer `true` ou `false` dans la commande remplace cette valeur par défaut.
+
+```yaml
+enable-open-message: true
+```
+
+---
+
+#### enable-player-command-in-chat
+
+Force les commandes de joueur à passer par le chat plutôt que par le dispatch de commandes. Utile pour des commandes "factices" non enregistrées dans Paper/Spigot.
+
+```yaml
+enable-player-command-in-chat: false
+```
+
+---
+
+#### enable-player-commands-as-op-action
+
+Permet aux boutons d'exécuter des commandes avec des permissions de niveau OP.
+
+```yaml
+enable-player-commands-as-op-action: false
+```
+
+:::danger Avertissement de sécurité
+N'activez ceci que si vous comprenez parfaitement les implications. Une mauvaise utilisation peut donner des permissions élevées aux joueurs.
+:::
+
+---
+
+#### op-grant-method
+
+Méthode utilisée pour accorder temporairement des permissions élevées (uniquement avec `enable-player-commands-as-op-action: true`).
+
+| Méthode | Description |
+|---------|-------------|
+| `ATTACHMENT` | Accorde temporairement la permission `*` (recommandé, plus sûr) |
+| `SET_OP` | Met temporairement le joueur OP |
+| `BOTH` | Combine les deux méthodes (compatibilité maximale) |
+
+```yaml
+op-grant-method: ATTACHMENT
+```
+
+---
+
+#### skip-close-actions-on-inventory-switch
+
+Liste les types d'actions ignorés lorsqu'un joueur ouvre un autre inventaire zMenu. Évite que des actions comme `back` ou `inventory` rouvrent d'anciens menus lors d'un changement d'inventaire.
+
+```yaml
+skip-close-actions-on-inventory-switch:
+  - inventory
+  - inv
+  - back
+```
+
+---
+
+#### disable-double-click-event
+
+Empêche le déclenchement d'interactions par double-clic.
+
+```yaml
+disable-double-click-event: true
+```
+
+---
+
+#### use-swap-item-off-hand-key-to-open-main-menu-needs-shift
+
+Combinée avec `use-swap-item-off-hand-key-to-open-main-menu: true`, cette option oblige le joueur à maintenir aussi **Shift** pour ouvrir le menu.
+
+```yaml
+use-swap-item-off-hand-key-to-open-main-menu-needs-shift: false
+```
+
+---
+
+#### generate-default-file
+
+Si activée, crée les fichiers de configuration par défaut lorsqu'ils n'existent pas.
+
+```yaml
+generate-default-file: true
+```
+
+---
+
+#### seconds-save-player-data
+
+Fréquence (en secondes) de la sauvegarde automatique des données joueur.
+
+```yaml
+seconds-save-player-data: 600  # 10 minutes
+```
+
+---
+
+#### seconds-save-player-inventories
+
+Fréquence (en secondes) de la sauvegarde automatique des données d'inventaire des joueurs.
+
+```yaml
+seconds-save-player-inventories: 600  # 10 minutes
+```
+
+---
+
+#### Anti-duplication : notifications Discord
+
+```yaml
+enable-anti-dupe-discord-notification: false
+anti-dupe-discord-webhook-url: "https://discord.com/api/webhooks/..."
+anti-dupe-message: "**%player%** used %amount% %itemname% from zMenu. It has been removed!"
+```
+
+Placeholders supportés dans `anti-dupe-message` : `%player%`, `%amount%`, `%itemname%`.
+
+---
+
+#### enable-download-command
+
+Active la commande `/zm website download <link> [force]` qui télécharge des inventaires depuis une URL.
+
+```yaml
+enable-download-command: false
+```
+
+---
+
+## Exemples de configurations
+
+### Serveur basique (SQLite)
+
+```yaml
+enable-debug: false
+storage-type: SQLITE
+enable-mini-message-format: true
+enable-cache-item-stack: true
+enable-anti-dupe: true
+enable-cooldown-click: true
+cooldown-click-milliseconds: 250
+main-menu: "main"
+```
+
+### Serveur réseau (MySQL)
+
+```yaml
+enable-debug: false
+storage-type: MYSQL
+database-configuration:
+  table-prefix: "zmenu_"
+  host: "mysql.monreseau.com"
+  port: 3306
+  user: "zmenu_user"
+  password: "mot_de_passe_securise_ici"
+  database: "minecraft_network"
+enable-mini-message-format: true
+enable-cache-item-stack: true
+enable-cache-placeholder-api: true
+cache-placeholder-api: 40
+enable-anti-dupe: true
+main-menu: "hub_menu"
+```
+
+### Axé sur les performances
+
+```yaml
+enable-debug: false
+storage-type: SQLITE
+enable-cache-item-stack: true
+enable-cache-placeholder-api: true
+cache-placeholder-api: 60
+cache-offline-player: 600
+enable-cooldown-click: true
+cooldown-click-milliseconds: 150
+```
+
+### Développement/Test
+
+```yaml
+enable-debug: true
+enable-debug-time: true
+hot-reload:
+  enable: true
+storage-type: SQLITE
+enable-cache-item-stack: false
+enable-cache-placeholder-api: false
+enable-cooldown-click: false
+enable-player-open-inventory-logs: true
+```
+
+## Recharger la configuration
+
+Après avoir effectué des modifications :
+
+```
+/zm reload config
+```
+
+Ou rechargez tout :
+
+```
+/zm reload
+```
+
+:::note
+Les changements de configuration de base de données nécessitent un redémarrage du serveur pour prendre effet.
+:::
+
+## Bonnes pratiques
+
+1. **Commencez avec les valeurs par défaut** : changez uniquement ce dont vous avez besoin
+2. **Activez le cache sur les gros serveurs** : cela améliore les performances
+3. **Utilisez MySQL pour les réseaux** : cela permet le partage de données entre serveurs
+4. **Gardez l'anti-dupe activé** : cela protège votre économie
+5. **Testez le mode debug** : utile lors de la configuration, désactivez-le en production
+6. **Définissez un cooldown de clic approprié** : équilibrez réactivité et sécurité
+
+## Dépannage
+
+### Échec de connexion à la base de données
+
+1. Vérifiez que les identifiants sont corrects
+2. Vérifiez que le serveur de base de données fonctionne
+3. Assurez-vous que la base de données existe
+4. Vérifiez que le pare-feu autorise les connexions
+5. Vérifiez que l'utilisateur a les permissions appropriées
+
+### Les placeholders ne se mettent pas à jour
+
+1. Désactivez temporairement le cache des placeholders
+2. Vérifiez que PlaceholderAPI est installé
+3. Vérifiez que l'expansion est téléchargée
+
+### Problèmes de performance
+
+1. Activez le cache d'item stack
+2. Activez le cache de placeholder
+3. Augmentez le cooldown de clic
+4. Vérifiez les boucles d'inventaire (A ouvre B ouvre A)
+
+## Prochaines étapes
+
+- Configurez les [Commandes personnalisées](./custom-commands)
+- Configurez le stockage des [Données joueur](./player-data)
+- Apprenez l'[API de développement](../development/api-introduction)

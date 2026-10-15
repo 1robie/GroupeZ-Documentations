@@ -1,0 +1,368 @@
+---
+sidebar_position: 2
+title: Commands & Permissions
+description: All zMenu commands and permissions
+---
+
+# Commands & Permissions
+
+This page lists all available commands and permissions in zMenu.
+
+## Main Command
+
+The main command is `/zm` (alias: `/zmenu`).
+
+**Base Permission**: `zmenu.use`
+
+## Command List
+
+### General Commands
+
+| Command                                                    | Permission            | Description                                |
+|------------------------------------------------------------|-----------------------|--------------------------------------------|
+| `/zm`                                                      | `zmenu.use`           | Display the help menu                      |
+| `/zm version`                                              | `zmenu.version`       | Display plugin version information         |
+| `/zm list`                                                 | `zmenu.list`          | List all loaded inventories                |
+| `/zm documentation`                                        | `zmenu.documentation` | View documentation links                   |
+| `/zm addons`                                               | `zmenu.addons`        | List official addons                       |
+| `/zm contributors`                                         | `zmenu.contributors`  | Show plugin contributors                   |
+| `/zm website`                                              | `zmenu.website`       | List the Inventory Builder sync commands (see [Live Sync Commands](#live-sync-commands)) |
+| `/zm create <file-name> <inventory-size> <inventory-name>` | `zmenu.create`        | Create a new inventory file                |
+| `/zm editor`                                               | `zmenu.editor`        | Send a link to the online inventory editor |
+
+`<inventory-size>` must be between `9` and `54` (tab completion suggests the multiples of 9). `<inventory-name>` is the rest of the line, so it can contain spaces and color codes.
+
+```
+/zm create shop 54 &6&lServer Shop
+```
+
+### Command aliases
+
+Every sub-command has a short alias you can use instead of its full name:
+
+| Command | Alias | Command | Alias |
+|---------|-------|---------|-------|
+| `open` | `o` | `players` | `p` |
+| `list` | `l` | `reload` | `rl` |
+| `version` | `v`, `ver` | `giveopenitem` | `goi` |
+| `documentation` | `doc` | `openMainMenu` | `omm` |
+| `contributors` | `contrib` | `website` | `w` |
+| `dialog` | `dialogs`, `d` | `bedrock` | `b` |
+
+Nested sub-commands have aliases too: `reload command` = `reload cmd`, `reload inventory` = `reload inv`, `reload config` = `reload cfg`, `players subtract` = `players sub`, `players remove` = `players r`, `players clearall` = `players ca`, `players convert` = `players c`, `website connect` = `website sync`, `website download` = `website dl`, `website unlink` = `website ul`, `dialog reload` / `bedrock reload` = `rl`, `dialog open` / `bedrock open` = `o`.
+
+```
+/zm o shop Notch
+/zm rl inv shop
+```
+
+:::info Dialog and Bedrock commands
+`/zm dialog` is only registered when the server supports dialogs (Paper 1.21.7+), and `/zm bedrock` only when Bedrock form support is active.
+:::
+
+
+### Inventory Commands
+
+| Command                                           | Permission              | Description                              |
+|---------------------------------------------------|-------------------------|------------------------------------------|
+| `/zm open <inventory> [player]`                   | `zmenu.open`            | Open an inventory for yourself or another player |
+| `/zm open <inventory> [player] [display-message] [args...]` | `zmenu.open` | Choose whether the "inventory opened" message is shown and pass arguments |
+| `/zm openMainMenu [player] [display-message]`     | `zmenu.open.main.menu`  | Open the [`main-menu`](./config-yml#main-menu) inventory |
+
+- `[player]` accepts a player name or a selector such as `@p`. From the console it is required.
+- `[display-message]` is `true` or `false`. When omitted, the value of [`enable-open-message`](./config-yml#enable-open-message) is used.
+- `[args...]` is the rest of the line. Use quotes for a value containing spaces. Each argument is either `name:value` (read with `%zmenu_argument_<name>%`) or a bare value, stored under its position (`0`, `1`, ...), so the first bare value is `%zmenu_argument_0%`. The special argument `page:<number>` additionally opens the inventory directly on that page.
+
+**Examples:**
+```
+/zm open shop
+/zm open shop Notch
+/zm open shop Notch false
+/zm open shop Notch true category:weapons page:2
+/zm open shop Notch true "Iron Sword" 5
+```
+
+In the last example, `%zmenu_argument_0%` is `Iron Sword` and `%zmenu_argument_1%` is `5`. See [Placeholders](./placeholders#command-argument-placeholders).
+
+`/zm giveopenitem` gives the item configured in the inventory's [`open-with-item`](./inventories/inventory) section; see [Item Commands](#item-commands).
+
+### Reload Commands
+
+| Command                       | Permission              | Description                         |
+|-------------------------------|-------------------------|-------------------------------------|
+| `/zm reload`                  | `zmenu.reload`          | Reload all configurations           |
+| `/zm reload config`           | `zmenu.reload.config`   | Reload config.yml and messages only |
+| `/zm reload inventory`        | `zmenu.reload.inventory`| Reload all inventories              |
+| `/zm reload inventory <name>` | `zmenu.reload.inventory`| Reload a specific inventory         |
+| `/zm reload command`          | `zmenu.reload.command`  | Reload all commands                 |
+| `/zm reload command <name>`   | `zmenu.reload.command`  | Reload a specific command           |
+
+`/zm reload` is the full reload: it reloads `config.yml`, the messages, the [global placeholders](./global-placeholders), the [patterns](./patterns) and action patterns, every inventory, every custom command, the [custom items](./items/custom-items) (the copies in online players' inventories are refreshed), and the default [player data](./player-data) values. Dialogs and Bedrock forms have their own reload commands: `/zm dialog reload` and `/zm bedrock reload`.
+
+:::note
+Inventories under [hot reload](../hot-reload) do not need `/zm reload inventory`: they are reloaded as soon as the file is saved.
+:::
+
+**Examples:**
+```
+/zm reload
+/zm reload inventory shop
+/zm reload command warp
+```
+
+### Item Commands
+
+| Command                                 | Permission             | Description                      |
+|-----------------------------------------|------------------------|----------------------------------|
+| `/zm giveitem <item-id> [player]`       | `zmenu.give.item`      | Give a [custom item](./items/custom-items) to a player (yourself by default) |
+| `/zm giveopenitem <inventory> [player]` | `zmenu.give.open.item` | Give the item that opens an inventory (its `open-with-item`) |
+| `/zm save <name> [yml\|base64]`         | `zmenu.save`           | Export held item to save_items.yml |
+
+### Player Data Commands
+
+| Command                                        | Permission                    | Description                            |
+|------------------------------------------------|-------------------------------|----------------------------------------|
+| `/zm players add <player> <key> <number>`      | `zmenu.players.add`           | Add a number to a player data value (created if missing) |
+| `/zm players set <player> <key> <expire-after> <value>` | `zmenu.players.set`  | Set a player data value; `<expire-after>` is in seconds, `0` = never expires |
+| `/zm players get <player> <key>`               | `zmenu.players.get`           | Get a player data value                |
+| `/zm players subtract <player> <key> <number>` | `zmenu.players.subtract`      | Subtract a number from a player data value |
+| `/zm players remove <player> <key>`            | `zmenu.players.remove`        | Remove a player data key               |
+| `/zm players removeall <key>`                  | `zmenu.players.remove.all`    | Remove key from all players            |
+| `/zm players clear <player>`                   | `zmenu.players.clear.player`  | Clear all data for one player          |
+| `/zm players clearall`                         | `zmenu.players.clear.all`     | Clear all data for all players         |
+| `/zm players keys <player>`                    | `zmenu.players.keys`          | List all keys for a player             |
+| `/zm players convert [player]`                 | `zmenu.players.convert`       | Convert the old JSON data to the SQL storage (asks for a second run within 30 seconds to confirm) |
+
+`<player>` accepts offline players. The `set` value is the rest of the line, so it can contain spaces.
+
+**Examples:**
+```
+/zm players set Notch coins 0 100
+/zm players set Notch daily-reward 86400 claimed
+/zm players add Notch coins 50
+/zm players subtract Notch coins 10
+/zm players get Notch coins
+/zm players keys Notch
+/zm players clear Notch
+```
+
+### Dialog Commands
+
+| Command                                        | Permission                  | Description                              |
+|------------------------------------------------|-----------------------------|------------------------------------------|
+| `/zm dialog open <dialog> [player] [display-message]` | `zmenu.open.dialog`  | Open a dialog for yourself or a player   |
+| `/zm dialog config <plugin-name> [player]`     | `zmenu.open.dialog.config`  | Open the in-game configuration dialog of a plugin registered with zMenu (for example `zMenu`) |
+| `/zm dialog reload`                            | `zmenu.reload.dialog`       | Reload all dialog files                  |
+
+```
+/zm dialog open default-dialog
+/zm dialog open confirmation-dialog Notch false
+/zm dialog config zMenu
+```
+
+### Bedrock Commands
+
+| Command                                                     | Permission             | Description                    |
+|-------------------------------------------------------------|------------------------|--------------------------------|
+| `/zm bedrock open <name> [player] [display-message]`        | `zmenu.open.bedrock`   | Open a Bedrock form (`display-message` is `true` or `false`) |
+| `/zm bedrock reload`                                        | `zmenu.reload.bedrock` | Reload all Bedrock form files  |
+
+### Live Sync Commands
+
+These commands connect your server to the [Minecraft Inventory Builder](https://minecraft-inventory-builder.com) website for instant hot-reload of inventories.
+
+All of them are sub-commands of `/zm website` (alias `/zm w`). Running `/zm website` alone lists them.
+
+| Command                        | Permission           | Description                                                  |
+|--------------------------------|----------------------|--------------------------------------------------------------|
+| `/zm website login`            | `zmenu.login`        | Start the device-authorization flow to link the server to your website account |
+| `/zm website connect`          | `zmenu.connect`      | Open the live sync connection (alias `sync`)                 |
+| `/zm website unlink`           | `zmenu.unlink`       | Force-detach the server from the website and clear credentials |
+| `/zm website download <link> [force]` | `zmenu.download` | Download an inventory from a link (requires [`enable-download-command: true`](./config-yml#enable-download-command)) |
+
+**Live sync workflow:**
+```
+/zm website login     # Approve the code shown on the website
+/zm website connect   # Open the live link
+# Now "Sync to Server" on the web builder reloads the inventory live
+```
+
+When the server is already linked, the connection is reopened automatically at startup unless [`enable-website-auto-connect`](./config-yml#enable-website-auto-connect) is `false`.
+
+`/zm website download` only accepts links on the hosts listed in [`allowed-downloadable-website`](./config-yml#allowed-downloadable-website). `[force]` (`true`/`false`, default `false`) overwrites an existing file.
+
+### Utility Commands
+
+| Command        | Permission      | Description                               |
+|----------------|-----------------|-------------------------------------------|
+| `/zm testdupe <inventory\|item>` | `zmenu.test.dupe` | Give yourself a protected stone block, either in your inventory or dropped on the ground, to test the [anti-dupe system](./config-yml#enable-anti-dupe) (player only) |
+| `/zm dumplog`  | `zmenu.dumplog` | Upload `logs/latest.log` to [mclo.gs](https://mclo.gs) and print the link |
+
+### Conversion Commands
+
+Migrating from DeluxeMenus? Convert all your menus into zMenu inventories in one command. See [Migrate from DeluxeMenus](../convert-deluxemenus) for everything that is converted.
+
+| Command                          | Permission      | Description                                                                     |
+|----------------------------------|-----------------|---------------------------------------------------------------------------------|
+| `/zm convert deluxemenus`        | `zmenu.convert` | Convert every menu of `plugins/DeluxeMenus/gui_menus/` into a zMenu inventory   |
+| `/zm convert deluxemenus <menu>` | `zmenu.convert` | Convert a single DeluxeMenus menu (file name, with or without `.yml`)           |
+| `/zm convert dm [menu]`          | `zmenu.convert` | Alias of `/zm convert deluxemenus`                                              |
+
+## Permission List
+
+### Core Permissions
+
+| Permission              | Description                        | Default |
+|-------------------------|------------------------------------|---------|
+| `zmenu.use`             | Access to basic commands           | true    |
+| `zmenu.open`            | Open inventories                   | op      |
+| `zmenu.open.main.menu`  | Open the main menu                 | op      |
+| `zmenu.reload`          | Reload configurations              | op      |
+| `zmenu.reload.config`   | Reload config.yml and messages     | op      |
+| `zmenu.reload.inventory`| Reload inventories                 | op      |
+| `zmenu.reload.command`  | Reload custom commands             | op      |
+| `zmenu.reload.dialog`   | Reload dialog files (`/zm dialog reload`) | op |
+| `zmenu.create`          | Create new inventories             | op      |
+| `zmenu.editor`          | Access inventory editor            | op      |
+| `zmenu.list`            | List all loaded inventories        | op      |
+| `zmenu.version`         | Display plugin version information | op      |
+| `zmenu.addons`          | List official addons               | op      |
+| `zmenu.contributors`    | Show plugin contributors           | op      |
+| `zmenu.website`         | Base `/zm website` command         | op      |
+
+### Item Permissions
+
+| Permission             | Description               | Default |
+|------------------------|---------------------------|---------|
+| `zmenu.give.item`      | Give clickable items      | op      |
+| `zmenu.give.open.item` | Give menu-opening items   | op      |
+| `zmenu.save`           | Save items as inventories | op      |
+
+### Player Data Permissions
+
+Each player data sub-command has its own permission node (split in 1.1.1.6):
+
+| Permission                   | Description                        | Default |
+|------------------------------|------------------------------------|---------|
+| `zmenu.players`              | Base `/zm players` command         | op      |
+| `zmenu.players.add`          | Add to player data value           | op      |
+| `zmenu.players.set`          | Set player data value              | op      |
+| `zmenu.players.get`          | Get player data value              | op      |
+| `zmenu.players.subtract`     | Subtract from player data value    | op      |
+| `zmenu.players.remove`       | Remove a player data key           | op      |
+| `zmenu.players.remove.all`   | Remove a key from all players      | op      |
+| `zmenu.players.clear.player` | Clear all data for one player      | op      |
+| `zmenu.players.clear.all`    | Clear all data for all players     | op      |
+| `zmenu.players.keys`         | List all keys for a player         | op      |
+| `zmenu.players.convert`      | Convert JSON data to SQL           | op      |
+
+### Dialog Permissions
+
+| Permission                  | Description                              | Default |
+|-----------------------------|------------------------------------------|---------|
+| `zmenu.dialog`              | Base `/zm dialog` command                | op      |
+| `zmenu.open.dialog`         | Open dialogs                             | op      |
+| `zmenu.open.dialog.config`  | Open dialog in config/debug mode         | op      |
+
+### Bedrock Permissions
+
+| Permission              | Description               | Default |
+|-------------------------|---------------------------|---------|
+| `zmenu.bedrock`         | Base `/zm bedrock` command | op     |
+| `zmenu.open.bedrock`    | Open Bedrock forms        | op      |
+| `zmenu.reload.bedrock`  | Reload Bedrock form files | op      |
+
+### Live Sync Permissions
+
+| Permission          | Description                                  | Default |
+|---------------------|----------------------------------------------|---------|
+| `zmenu.login`       | Link server to the Inventory Builder website | op      |
+| `zmenu.connect`     | Open live sync connection                    | op      |
+| `zmenu.unlink`      | Force-detach server from website             | op      |
+| `zmenu.download`    | Download inventory from a URL                | op      |
+
+### Utility Permissions
+
+| Permission            | Description                | Default |
+|-----------------------|----------------------------|---------|
+| `zmenu.convert`       | Convert DeluxeMenus menus  | op      |
+| `zmenu.test.dupe`     | Test anti-dupe system      | op      |
+| `zmenu.documentation` | View documentation         | op      |
+| `zmenu.dumplog`       | Export debug logs          | op      |
+| `zmenu.paper.warning` | Receive the "zMenu requires Paper" warning on join, on a server that is not Paper | op      |
+
+## Custom Command Permissions
+
+When you create custom commands in `commands/commands.yml`, you can define custom permissions:
+
+```yaml
+commands:
+  shop:
+    command: shop
+    inventory: shop_menu
+    permission: myserver.shop
+    aliases:
+      - store
+      - market
+```
+
+Players will need the `myserver.shop` permission to use `/shop`.
+
+## Inventory-Specific Permissions
+
+You can require specific permissions to open inventories using view requirements:
+
+```yaml
+# In your inventory file
+view-requirement:
+  requirements:
+    - type: permission
+      permission: "myserver.vip.menu"
+      deny:
+        - type: message
+          messages:
+            - "&cYou need VIP to access this menu!"
+```
+
+## Admin Permission
+
+For server administrators, you can grant all zMenu permissions with:
+
+```
+zmenu.*
+```
+
+This grants access to all zMenu commands.
+
+## LuckPerms Examples
+
+Grant basic usage:
+```
+/lp user <player> permission set zmenu.use true
+```
+
+Grant all admin permissions:
+```
+/lp group admin permission set zmenu.* true
+```
+
+Grant specific inventory access:
+```
+/lp group vip permission set myserver.vip.menu true
+```
+
+## Permission Plugins
+
+zMenu works with any permission plugin that supports Bukkit permissions:
+
+- LuckPerms (Recommended)
+- PermissionsEx
+- GroupManager
+- UltraPermissions
+- And many more
+
+## Next Steps
+
+- Learn about [Placeholders](./placeholders)
+- Create [Custom Commands](./custom-commands)
+- Set up [Player Data](./player-data) for persistent storage

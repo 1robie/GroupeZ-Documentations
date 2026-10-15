@@ -13,6 +13,7 @@ const sidebars = {
       collapsed: false,
       items: [
         'configurations/informations',
+        'configurations/example-menus',
         'configurations/commands-permissions',
         'configurations/placeholders',
         {
@@ -85,8 +86,11 @@ const sidebars = {
         'development/api-paginate-button',
         'development/api-menu-item-stack',
         'development/api-actions',
+        'development/api-requirements',
         'development/api-player-data',
         'development/api-events',
+        'development/api-extensions',
+        'development/api-services',
       ],
     },
   ],

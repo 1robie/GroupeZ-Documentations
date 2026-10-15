@@ -1,0 +1,359 @@
+---
+sidebar_position: 1
+title: API Introduction
+description: Getting started with the zMenu API
+---
+
+# API Introduction
+
+zMenu provides a comprehensive API for developers to integrate with and extend the plugin's functionality. This guide will help you get started with the zMenu API.
+
+## Javadoc
+
+The complete API documentation is available at: [https://repo.groupez.dev/javadoc/releases/fr/maxlego08/menu/zmenu-api/1.1.0.6](https://repo.groupez.dev/javadoc/releases/fr/maxlego08/menu/zmenu-api/1.1.0.6)
+
+## Maven Repository
+
+Add the GroupeZ repository to your `pom.xml`:
+
+```xml
+<repositories>
+    <repository>
+        <id>groupez</id>
+        <url>https://repo.groupez.dev/releases</url>
+    </repository>
+</repositories>
+```
+
+## Maven Dependency
+
+Add the zMenu API as a dependency:
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>fr.maxlego08.menu</groupId>
+        <artifactId>zmenu-api</artifactId>
+        <version>1.1.2.0</version>
+        <scope>provided</scope>
+    </dependency>
+</dependencies>
+```
+
+## Gradle
+
+For Gradle users:
+
+```groovy
+repositories {
+    maven { url 'https://repo.groupez.dev/releases' }
+}
+
+dependencies {
+    compileOnly 'fr.maxlego08.menu:zmenu-api:1.1.2.0'
+}
+```
+
+### Kotlin DSL
+
+```kotlin
+repositories {
+    maven("https://repo.groupez.dev/releases")
+}
+
+dependencies {
+    compileOnly("fr.maxlego08.menu:zmenu-api:1.1.2.0")
+}
+```
+
+## Plugin Dependency
+
+:::warning zMenu requires Paper
+zMenu ships a `paper-plugin.yml` (`api-version: '1.20.6'`, `folia-supported: true`). On Spigot the plugin only prints a warning asking you to install Paper, so the API is only usable on Paper and its forks (Folia, Purpur, Pufferfish, ...).
+:::
+
+Add zMenu as a dependency in your `plugin.yml` (or `paper-plugin.yml`):
+
+```yaml
+# Hard dependency (plugin won't load without zMenu)
+depend: [zMenu]
+
+# Soft dependency (plugin will load even without zMenu)
+softdepend: [zMenu]
+```
+
+In a `paper-plugin.yml`, declare it under `dependencies.server` and keep `load: BEFORE` so zMenu is enabled first:
+
+```yaml
+dependencies:
+  server:
+    zMenu:
+      load: BEFORE
+      required: true
+      join-classpath: true
+```
+
+## Getting the API
+
+### Access the Plugin Instance
+
+```java
+import fr.maxlego08.menu.api.MenuPlugin;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public class MyPlugin extends JavaPlugin {
+
+    private MenuPlugin menuPlugin;
+
+    @Override
+    public void onEnable() {
+        // Get zMenu instance
+        this.menuPlugin = (MenuPlugin) Bukkit.getPluginManager().getPlugin("zMenu");
+
+        if (this.menuPlugin == null) {
+            getLogger().severe("zMenu not found! Disabling plugin...");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
+
+        getLogger().info("Successfully hooked into zMenu!");
+    }
+
+    public MenuPlugin getMenuPlugin() {
+        return this.menuPlugin;
+    }
+}
+```
+
+### Safe Hook with Soft Dependency
+
+```java
+import fr.maxlego08.menu.api.MenuPlugin;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public class MyPlugin extends JavaPlugin {
+
+    private MenuPlugin menuPlugin;
+    private boolean zMenuEnabled = false;
+
+    @Override
+    public void onEnable() {
+        // Try to hook into zMenu
+        hookZMenu();
+
+        if (zMenuEnabled) {
+            getLogger().info("zMenu integration enabled!");
+            // Register zMenu-specific features
+        } else {
+            getLogger().info("zMenu not found, running without integration.");
+        }
+    }
+
+    private void hookZMenu() {
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("zMenu");
+        if (plugin != null && plugin.isEnabled()) {
+            this.menuPlugin = (MenuPlugin) plugin;
+            this.zMenuEnabled = true;
+        }
+    }
+
+    public boolean isZMenuEnabled() {
+        return this.zMenuEnabled;
+    }
+
+    public MenuPlugin getMenuPlugin() {
+        return this.menuPlugin;
+    }
+}
+```
+
+## Core Interfaces
+
+The zMenu API provides several core interfaces:
+
+### MenuPlugin
+
+The main plugin interface providing access to all managers:
+
+```java
+MenuPlugin menuPlugin = ...;
+
+// Inventory management
+InventoryManager inventoryManager = menuPlugin.getInventoryManager();
+
+// Button type registration
+ButtonManager buttonManager = menuPlugin.getButtonManager();
+
+// Command management
+CommandManager commandManager = menuPlugin.getCommandManager();
+
+// Player data management
+DataManager dataManager = menuPlugin.getDataManager();
+```
+
+### Key Managers
+
+| Manager | Obtained with | Purpose |
+|---------|---------------|---------|
+| `InventoryManager` | `getInventoryManager()` | Load, manage, and open inventories; register material loaders, item similarity checks, button/inventory options |
+| `ButtonManager` | `getButtonManager()` | Register button, action and permissible (requirement) loaders |
+| `CommandManager` | `getCommandManager()` | Register commands and command argument validators, per-player command arguments |
+| `DataManager` | `getDataManager()` | Read and write [player data](./api-player-data) |
+| `PatternManager` | `getPatternManager()` | Patterns and action patterns |
+| `ComponentsManager` | `getComponentsManager()` | Register item component loaders |
+| `ItemManager` | `getItemManager()` | Custom items and mechanics |
+| `DialogManager` | `getDialogManager()` | Paper dialogs (can be `null`, see below) |
+| `BedrockManager` | `getBedrockManager()` | Bedrock forms (can be `null`, see below) |
+| `TitleAnimationManager` | `getTitleAnimationManager()` | Register title animation providers |
+| `StorageManager` | `getStorageManager()` | Database access used by player data |
+
+See [Extension points](./api-extensions) for the full list of things a plugin can register.
+
+### Services
+
+zMenu also registers its managers in Bukkit's `ServicesManager` (priority `Highest`), so you can retrieve them without casting the plugin:
+
+```java
+InventoryManager inventories = Bukkit.getServicesManager().load(InventoryManager.class);
+// or, through zMenu, which logs a message and returns null when the service is missing:
+ButtonManager buttons = menuPlugin.getProvider(ButtonManager.class);
+```
+
+Registered services: `InventoryManager`, `ButtonManager`, `CommandManager`, `WebsiteManager`, `DataManager`, `InventoriesPlayer`, `PatternManager`, `DupeManager`, `Enchantments`, `TitleAnimationManager`, `ClientVersionManager`, and, only when available, `DialogManager` and `BedrockManager`.
+
+:::note Optional managers
+`getDialogManager()` returns `null` unless the server is dialog capable (Paper 1.21.7+) and `enable-mini-message-format` is `true` in `config.yml`. `getBedrockManager()` returns `null` unless Geyser or Floodgate is installed. `getPacketManager()` returns an `Optional` and is empty without PacketEvents. Always null-check these.
+:::
+
+## API Structure
+
+```
+fr.maxlego08.menu.api
+├── MenuPlugin              # Main plugin interface (extends Bukkit Plugin)
+├── InventoryManager        # Inventory operations, loaders, options
+├── ButtonManager           # Button / action / permissible registration
+├── ComponentsManager       # Item component loaders
+├── DialogManager           # Paper dialogs (nullable)
+├── BedrockManager          # Bedrock forms (nullable)
+├── ItemManager             # Custom items and mechanics
+├── TitleAnimationManager   # Title animation providers
+├── Inventory               # A loaded inventory file
+├── MenuItemStack           # An item configured in YAML
+├── InventoryOption         # Extra per-inventory YAML keys
+├── InventoryListener       # Inventory open/close/click hooks
+├── command/
+│   ├── CommandManager
+│   └── CommandArgumentValidator
+├── button/
+│   ├── Button              # Abstract base class of every button
+│   ├── ButtonOption        # Extra per-button YAML keys
+│   ├── PaginateButton      # Base class for paginated buttons
+│   └── GenericPaginationButton
+├── loader/
+│   ├── ButtonLoader        # Abstract: YAML -> Button
+│   ├── ActionLoader        # Abstract: YAML -> Action
+│   ├── PermissibleLoader   # Abstract: YAML -> Permissible (requirement type)
+│   ├── MaterialLoader      # Abstract: "prefix:value" -> ItemStack
+│   ├── ItemComponentLoader # Abstract: YAML -> item component
+│   └── NoneLoader          # Ready-made loader for no-config buttons
+├── requirement/
+│   ├── Action              # Abstract base class of every action
+│   ├── Permissible         # Abstract base class of every requirement
+│   └── Requirement         # A group of permissibles with success/deny actions
+├── rules/                  # Item rules (Rule, RuleLoader)
+├── players/                # DataManager, PlayerData, Data
+├── placeholder/            # LocalPlaceholder (zmenu_ placeholders)
+├── itemstack/              # ItemStackSimilar, ItemComponent
+├── mechanic/               # Custom item mechanics
+├── annotations/            # @Auto* annotations (internal auto-registration)
+└── event/
+    ├── FastEvent
+    └── events/
+        ├── ButtonLoadEvent
+        ├── ButtonLoaderRegisterEvent
+        ├── InventoryLoadEvent
+        ├── PlayerOpenInventoryEvent
+        └── ZMenuItemsLoad
+```
+
+## Best Practices
+
+1. **Always check for null** when getting the zMenu plugin instance and the optional managers
+2. **Use soft dependencies** if your plugin can function without zMenu
+3. **Register your loaders in `onEnable`** (or through `ButtonLoaderRegisterEvent` from `onLoad`): the order does not matter, zMenu keeps inventories that use a not-yet-registered element on hold
+4. **Unregister on disable** with `unregisters(plugin)`, `unregisterOptions(plugin)`, `unregisterListener(plugin)`
+5. **Handle exceptions** gracefully when working with inventories (`InventoryException`)
+6. **Use `menuPlugin.getScheduler()`** (FoliaLib) instead of the Bukkit scheduler so your code also runs on Folia
+7. **Test thoroughly** with different zMenu versions
+
+## Complete Example Plugin
+
+```java
+package com.example.myplugin;
+
+import fr.maxlego08.menu.api.MenuPlugin;
+import fr.maxlego08.menu.api.InventoryManager;
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public class MyPlugin extends JavaPlugin {
+
+    private MenuPlugin menuPlugin;
+
+    @Override
+    public void onEnable() {
+        // Hook into zMenu
+        this.menuPlugin = (MenuPlugin) Bukkit.getPluginManager().getPlugin("zMenu");
+
+        if (this.menuPlugin == null) {
+            getLogger().severe("zMenu is required!");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
+
+        getLogger().info("MyPlugin enabled with zMenu integration!");
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command,
+                            String label, String[] args) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage("Players only!");
+            return true;
+        }
+
+        Player player = (Player) sender;
+        InventoryManager manager = menuPlugin.getInventoryManager();
+
+        // Open a zMenu inventory
+        manager.getInventory("my-menu").ifPresent(inv -> {
+            manager.openInventory(player, inv);
+        });
+
+        return true;
+    }
+}
+```
+
+## Next Steps
+
+- Learn how to [Open Inventories](./api-inventory) programmatically
+- Create [Custom Buttons](./api-buttons)
+- Create [Custom Actions](./api-actions)
+- Create [Custom Requirements](./api-requirements)
+- Work with [Player Data](./api-player-data)
+- Listen to [Events](./api-events)
+- Use the other [Services & Managers](./api-services) (anti-dupe, title animations, website)
+- Browse every [Extension point](./api-extensions) (loaders, options, validators, placeholders, ...)
+
+## Support
+
+For API support:
+- **Discord**: [https://discord.groupez.dev](https://discord.groupez.dev)
+- **GitHub Issues**: [https://github.com/Maxlego08/zMenu/issues](https://github.com/Maxlego08/zMenu/issues)

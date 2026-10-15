@@ -1,0 +1,578 @@
+---
+sidebar_position: 6
+title: Événements
+description: Écouter les événements zMenu dans votre plugin
+---
+
+# Événements {#evenements}
+
+zMenu déclenche divers événements que vous pouvez écouter dans votre plugin. Cela vous permet de réagir aux actions d'inventaire, aux chargements de boutons, et plus encore.
+
+## Événements disponibles {#evenements-disponibles}
+
+| Événement | Description |
+|-----------|-------------|
+| `ButtonLoadEvent` | Déclenché quand un bouton est chargé depuis la configuration |
+| `InventoryLoadEvent` | Déclenché quand un inventaire est chargé |
+| `PlayerOpenInventoryEvent` | Déclenché quand un joueur ouvre un inventaire, un dialogue ou un formulaire Bedrock zMenu (annulable) |
+| `ButtonLoaderRegisterEvent` | Déclenché une fois au démarrage pour que les plugins enregistrent leurs button loaders |
+| `ZMenuItemsLoad` | Déclenché quand les items personnalisés sont chargés ou rechargés |
+
+Tous se trouvent dans `fr.maxlego08.menu.api.event.events`. `ButtonLoadEvent`, `InventoryLoadEvent`, `PlayerOpenInventoryEvent` et `ButtonLoaderRegisterEvent` étendent `MenuEvent` (un `Event` Bukkit classique avec une méthode utilitaire `call()`) ; `PlayerOpenInventoryEvent` étend `CancelledMenuEvent`, qui ajoute `Cancellable`.
+
+## ButtonLoadEvent
+
+Déclenché quand un bouton est chargé depuis un fichier de configuration.
+
+```java
+import fr.maxlego08.menu.api.event.events.ButtonLoadEvent;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+
+public class ButtonListener implements Listener {
+
+    @EventHandler
+    public void onButtonLoad(ButtonLoadEvent event) {
+        Button button = event.getButton();
+        String buttonName = button.getName();
+
+        // Le YAML dont le bouton a ete lu, et son chemin dans le fichier
+        YamlConfiguration configuration = event.getConfiguration();
+        String path = event.getPath();                 // se termine par un point, ex. "items.my-button."
+        ButtonLoader loader = event.getButtonLoader(); // le loader qui l'a construit
+
+        getLogger().info("Bouton charge : " + buttonName + " (" + loader.getName() + ")");
+
+        // Vous pouvez modifier le bouton ou ajouter une logique personnalisee
+    }
+}
+```
+
+L'événement est déclenché une fois par bouton, après que zMenu a appliqué toutes les clés communes (et les `ButtonOption`) : `button.getItemStack()`, `getActions()`... sont donc renseignés.
+
+### Cas d'utilisation
+- Journaliser tous les boutons chargés
+- Valider les configurations de boutons
+- Ajouter un traitement personnalisé aux boutons
+
+## InventoryLoadEvent
+
+Déclenché quand un inventaire est chargé depuis un fichier de configuration.
+
+```java
+import fr.maxlego08.menu.api.event.events.InventoryLoadEvent;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+
+public class InventoryListener implements Listener {
+
+    @EventHandler
+    public void onInventoryLoad(InventoryLoadEvent event) {
+        Inventory inventory = event.getInventory();
+        String name = inventory.getName();
+        String fileName = inventory.getFileName();
+        File file = event.getFile();
+        Plugin owner = event.getPlugin();
+
+        getLogger().info("Inventaire charge : " + fileName + " (" + owner.getName() + ", " + file.getName() + ")");
+        getLogger().info("  Nom : " + name);
+        getLogger().info("  Boutons : " + inventory.getButtons().size());
+    }
+}
+```
+
+### Cas d'utilisation
+- Suivre les inventaires chargés
+- Valider les configurations d'inventaires
+- Ajouter un post-traitement aux inventaires
+
+## PlayerOpenInventoryEvent
+
+Déclenché quand un joueur ouvre un inventaire zMenu. Cet événement est annulable.
+
+```java
+import fr.maxlego08.menu.api.event.events.PlayerOpenInventoryEvent;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+
+public class OpenInventoryListener implements Listener {
+
+    @EventHandler
+    public void onPlayerOpenInventory(PlayerOpenInventoryEvent event) {
+        Player player = event.getPlayer();
+        Inventory inventory = event.getInventory();
+
+        getLogger().info(player.getName() + " a ouvert l'inventaire : " + inventory.getFileName());
+
+        // Annuler l'ouverture pour des conditions specifiques
+        if (!player.hasPermission("myplugin.use.menus")) {
+            event.setCancelled(true);
+            player.sendMessage("Vous n'avez pas la permission d'utiliser les menus !");
+        }
+    }
+}
+```
+
+### Cas d'utilisation
+- Journaliser l'accès aux menus des joueurs
+- Restreindre l'accès aux inventaires
+- Suivre l'activité des joueurs
+- Ajouter des vérifications personnalisées avant l'ouverture
+
+### Changer la page ou l'historique
+
+En plus de `getPlayer()` et `getInventory()`, l'événement permet de modifier la façon dont l'inventaire s'ouvre :
+
+```java
+event.getPage();                       // page sur le point d'etre affichee (commence a 1)
+event.setPage(2);                      // ouvrir sur une autre page
+event.getOldInventories();             // inventaires vers lesquels le bouton BACK reviendra
+event.setOldInventories(newHistory);   // List<Inventory>
+```
+
+L'événement est aussi déclenché pour les [dialogues](../configurations/dialogues) et les formulaires Bedrock : `getInventory()` est alors un `DialogInventory` / `BedrockInventory` (tous deux étendent `Inventory`).
+
+### Annuler l'événement {#annuler-levenement}
+
+```java
+@EventHandler
+public void onPlayerOpenInventory(PlayerOpenInventoryEvent event) {
+    Player player = event.getPlayer();
+    Inventory inventory = event.getInventory();
+
+    // Bloquer les inventaires specifiques pour les non-VIP
+    if (inventory.getFileName().startsWith("vip-") &&
+        !player.hasPermission("server.vip")) {
+        event.setCancelled(true);
+        player.sendMessage(ChatColor.RED + "Ce menu est reserve aux VIP !");
+    }
+}
+```
+
+## ButtonLoaderRegisterEvent
+
+Déclenché **une seule fois**, pendant le démarrage de zMenu, après l'enregistrement de tous les button loaders intégrés et avant le chargement des premiers inventaires. C'est un hook d'enregistrement, pas une notification pour chaque loader : il vous donne les managers et un raccourci `register(ButtonLoader)`. Il n'est **pas** redéclenché par `/zm reload`.
+
+```java
+import fr.maxlego08.menu.api.event.events.ButtonLoaderRegisterEvent;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+
+public class LoaderListener implements Listener {
+
+    @EventHandler
+    public void onButtonLoaderRegister(ButtonLoaderRegisterEvent event) {
+        event.register(new MyButtonLoader(plugin));
+
+        // Autres elements disponibles depuis l'evenement
+        ButtonManager buttons = event.getButtonManager();
+        InventoryManager inventories = event.getInventoryManager();
+        PatternManager patterns = event.getPatternManager();
+    }
+}
+```
+
+Comme zMenu s'active avant les plugins qui en dépendent, votre listener ne reçoit cet événement que s'il est enregistré dans le `onLoad()` de votre plugin. Dans `onEnable()`, appelez simplement `buttonManager.register(...)` directement, voir [Boutons personnalisés](./api-buttons#enregistrer-votre-bouton).
+
+### Cas d'utilisation
+- Enregistrer des button loaders depuis un plugin qui se charge avant zMenu
+- Enregistrer des patterns avec `getPatternManager()`
+
+## ZMenuItemsLoad
+
+Déclenché quand zMenu (re)charge ses items personnalisés (`items/*.yml`, voir [Items personnalisés](../configurations/items/custom-items)). C'est un `Event` Bukkit simple (il n'étend pas `MenuEvent`).
+
+```java
+import fr.maxlego08.menu.api.event.events.ZMenuItemsLoad;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+
+public class ItemsLoadListener implements Listener {
+
+    @EventHandler
+    public void onItemsLoad(ZMenuItemsLoad event) {
+        Set<String> ids = event.getLoadedItemIds(); // ids de tous les items personnalises charges
+        boolean reload = event.isReload();          // false au demarrage, true avec /zm reload
+
+        getLogger().info((reload ? "Recharges : " : "Charges : ") + ids.size() + " items zMenu");
+    }
+}
+```
+
+## FastEvent (alternative haute performance)
+
+Les événements Bukkit passent par tout le plugin manager à chaque appel. Quand [`enable-fast-event`](../configurations/config-yml#enable-fast-event) vaut `true` dans `config.yml`, zMenu ne déclenche plus `ButtonLoadEvent`, `InventoryLoadEvent` et `PlayerOpenInventoryEvent` comme événements Bukkit et appelle à la place les listeners `FastEvent` enregistrés avec `InventoryManager#registerFastEvent`. `ButtonLoaderRegisterEvent` et `ZMenuItemsLoad` ne sont pas concernés et restent des événements Bukkit.
+
+:::warning Un seul système par serveur
+Avec `enable-fast-event: true`, un `@EventHandler` classique pour ces trois événements n'est **jamais appelé**. Les plugins qui utilisent uniquement des listeners Bukkit ne les reçoivent plus : n'activez l'option que si tous les plugins qui se branchent sur zMenu utilisent `FastEvent`. Quand l'option vaut `false` (par défaut), les listeners `FastEvent` ne sont jamais appelés.
+:::
+
+Étendez `FastEvent` et surchargez uniquement les méthodes dont vous avez besoin (elles ne font rien par défaut) :
+
+```java
+import fr.maxlego08.menu.api.event.FastEvent;
+import fr.maxlego08.menu.api.event.events.ButtonLoadEvent;
+import fr.maxlego08.menu.api.event.events.InventoryLoadEvent;
+import fr.maxlego08.menu.api.event.events.PlayerOpenInventoryEvent;
+import org.jetbrains.annotations.NotNull;
+
+public class MyFastEvent extends FastEvent {
+
+    @Override
+    public void onPlayerOpenInventory(@NotNull PlayerOpenInventoryEvent event) {
+        if (event.getInventory().getFileName().equals("vip")
+                && !event.getPlayer().hasPermission("monserveur.vip")) {
+            event.setCancelled(true); // l'annulation fonctionne comme avec l'evenement Bukkit
+        }
+    }
+
+    @Override
+    public void onInventoryLoad(@NotNull InventoryLoadEvent event) {
+        // l'inventaire vient d'etre charge depuis event.getFile()
+    }
+
+    @Override
+    public void onButtonLoad(@NotNull ButtonLoadEvent event) {
+        // un bouton vient d'etre charge
+    }
+}
+```
+
+Enregistrez-le une fois, par exemple dans `onEnable`, et désenregistrez-le à l'arrêt de votre plugin :
+
+```java
+InventoryManager inventoryManager = menuPlugin.getInventoryManager();
+
+inventoryManager.registerFastEvent(this, new MyFastEvent());   // un FastEvent par plugin
+inventoryManager.unregisterListener(this);                      // dans onDisable
+```
+
+Enregistrer un second `FastEvent` pour le même plugin remplace le premier. Les listeners sont appelés directement, sans ordre garanti, sur le thread qui charge ou ouvre l'inventaire, et il n'y a pas de priorité d'événement.
+
+## Listeners d'inventaire
+
+`InventoryListener` se branche sur le *cycle de rendu* de chaque inventaire zMenu (ouverture, fermeture, clic, passage d'un inventaire à un autre), que les événements Bukkit n'exposent pas. Toutes les méthodes ont une implémentation vide par défaut :
+
+```java
+import fr.maxlego08.menu.api.InventoryListener;
+import fr.maxlego08.menu.api.engine.BaseInventory;
+import fr.maxlego08.menu.api.engine.InventoryEngine;
+import fr.maxlego08.menu.api.engine.ItemButton;
+
+public class MyInventoryListener implements InventoryListener {
+
+    @Override
+    public void onInventoryPreOpen(Player player, BaseInventory inventory, int page, Object... objects) { }
+
+    @Override
+    public void onInventoryPostOpen(Player player, BaseInventory inventory) { }
+
+    @Override
+    public void onInventoryClose(Player player, BaseInventory inventory) { }
+
+    @Override
+    public void onButtonClick(Player player, ItemButton button) { }
+
+    @Override
+    public void onInventorySwitch(Player player, InventoryEngine oldEngine, InventoryEngine newEngine) { }
+
+    /** Retournez true pour prendre en charge le placement d'un item (par exemple pour appliquer votre propre marquage anti-dupe). */
+    @Override
+    public boolean addItem(BaseInventory inventory, boolean inPlayerInventory, ItemButton itemButton, boolean enableAntiDupe) {
+        return false;
+    }
+}
+```
+
+```java
+manager.registerInventoryListener(listener);
+manager.unregisterInventoryListener(listener);
+List<InventoryListener> all = manager.getInventoryListeners();
+```
+
+## Enregistrer les écouteurs d'événements {#enregistrer-les-ecouteurs-devenements}
+
+Enregistrez vos écouteurs dans le `onEnable` de votre plugin :
+
+```java
+@Override
+public void onEnable() {
+    // Enregistrer les ecouteurs d'evenements
+    getServer().getPluginManager().registerEvents(new ButtonListener(), this);
+    getServer().getPluginManager().registerEvents(new InventoryListener(), this);
+    getServer().getPluginManager().registerEvents(new OpenInventoryListener(), this);
+}
+```
+
+## Exemple complet : analytique des menus
+
+Suivre l'utilisation des menus pour l'analytique :
+
+```java
+package com.example.analytics;
+
+import fr.maxlego08.menu.api.Inventory;
+import fr.maxlego08.menu.api.event.events.PlayerOpenInventoryEvent;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class MenuAnalytics implements Listener {
+
+    private final JavaPlugin plugin;
+    private final Map<String, Integer> menuOpenCounts = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> lastMenuOpen = new ConcurrentHashMap<>();
+
+    public MenuAnalytics(JavaPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler
+    public void onMenuOpen(PlayerOpenInventoryEvent event) {
+        Player player = event.getPlayer();
+        Inventory inventory = event.getInventory();
+        String menuName = inventory.getFileName();
+
+        // Compter les ouvertures
+        menuOpenCounts.merge(menuName, 1, Integer::sum);
+
+        // Suivre l'heure de la derniere ouverture
+        lastMenuOpen.put(player.getUniqueId(), System.currentTimeMillis());
+
+        // Journaliser pour le debogage
+        plugin.getLogger().info(String.format(
+            "[Analytique] %s a ouvert %s (total ouvertures : %d)",
+            player.getName(),
+            menuName,
+            menuOpenCounts.get(menuName)
+        ));
+    }
+
+    public int getOpenCount(String menuName) {
+        return menuOpenCounts.getOrDefault(menuName, 0);
+    }
+
+    public Map<String, Integer> getAllStats() {
+        return new HashMap<>(menuOpenCounts);
+    }
+
+    public void printStats() {
+        plugin.getLogger().info("=== Analytique des Menus ===");
+        menuOpenCounts.entrySet().stream()
+            .sorted((a, b) -> b.getValue().compareTo(a.getValue()))
+            .forEach(entry -> {
+                plugin.getLogger().info(entry.getKey() + " : " + entry.getValue() + " ouvertures");
+            });
+    }
+}
+```
+
+## Exemple complet : contrôle d'accès aux menus {#exemple-complet--controle-dacces-aux-menus}
+
+Contrôler l'accès aux menus en fonction de conditions personnalisées :
+
+```java
+package com.example.access;
+
+import fr.maxlego08.menu.api.Inventory;
+import fr.maxlego08.menu.api.event.events.PlayerOpenInventoryEvent;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+public class MenuAccessController implements Listener {
+
+    // Menus qui necessitent le VIP
+    private final Set<String> vipMenus = new HashSet<>();
+
+    // Menus avec temps de recharge
+    private final Map<String, Long> menuCooldowns = new HashMap<>();
+    private final Map<UUID, Map<String, Long>> playerCooldowns = new HashMap<>();
+
+    public MenuAccessController() {
+        // Configurer les menus VIP
+        vipMenus.add("vip-shop");
+        vipMenus.add("vip-rewards");
+        vipMenus.add("premium-features");
+
+        // Configurer les temps de recharge (en millisecondes)
+        menuCooldowns.put("daily-rewards", 60000L); // 1 minute
+        menuCooldowns.put("spin-wheel", 300000L);   // 5 minutes
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onMenuOpen(PlayerOpenInventoryEvent event) {
+        if (event.isCancelled()) return;
+
+        Player player = event.getPlayer();
+        Inventory inventory = event.getInventory();
+        String menuName = inventory.getFileName();
+
+        // Verifier l'exigence VIP
+        if (vipMenus.contains(menuName) && !player.hasPermission("server.vip")) {
+            event.setCancelled(true);
+            player.sendMessage(ChatColor.RED + "Ce menu necessite le rang VIP !");
+            return;
+        }
+
+        // Verifier le temps de recharge
+        if (menuCooldowns.containsKey(menuName)) {
+            long cooldown = menuCooldowns.get(menuName);
+            long lastOpen = getLastOpen(player.getUniqueId(), menuName);
+            long now = System.currentTimeMillis();
+
+            if (now - lastOpen < cooldown) {
+                event.setCancelled(true);
+                long remaining = (cooldown - (now - lastOpen)) / 1000;
+                player.sendMessage(ChatColor.RED + "Veuillez attendre " + remaining +
+                    " secondes avant d'ouvrir ce menu a nouveau !");
+                return;
+            }
+
+            // Mettre a jour l'heure de la derniere ouverture
+            setLastOpen(player.getUniqueId(), menuName, now);
+        }
+    }
+
+    private long getLastOpen(UUID uuid, String menu) {
+        return playerCooldowns
+            .getOrDefault(uuid, new HashMap<>())
+            .getOrDefault(menu, 0L);
+    }
+
+    private void setLastOpen(UUID uuid, String menu, long time) {
+        playerCooldowns
+            .computeIfAbsent(uuid, k -> new HashMap<>())
+            .put(menu, time);
+    }
+
+    public void addVipMenu(String menuName) {
+        vipMenus.add(menuName);
+    }
+
+    public void setMenuCooldown(String menuName, long milliseconds) {
+        menuCooldowns.put(menuName, milliseconds);
+    }
+}
+```
+
+## Exemple complet : journalisation des menus
+
+Journaliser toutes les interactions avec les menus pour l'audit :
+
+```java
+package com.example.logging;
+
+import fr.maxlego08.menu.api.event.events.InventoryLoadEvent;
+import fr.maxlego08.menu.api.event.events.PlayerOpenInventoryEvent;
+import fr.maxlego08.menu.api.event.events.ButtonLoadEvent;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class MenuLogger implements Listener {
+
+    private final JavaPlugin plugin;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private final File logFile;
+
+    public MenuLogger(JavaPlugin plugin) {
+        this.plugin = plugin;
+        this.logFile = new File(plugin.getDataFolder(), "menu-log.txt");
+    }
+
+    @EventHandler
+    public void onInventoryLoad(InventoryLoadEvent event) {
+        log("INVENTORY_LOAD", "Inventaire charge : " + event.getInventory().getFileName());
+    }
+
+    @EventHandler
+    public void onButtonLoad(ButtonLoadEvent event) {
+        log("BUTTON_LOAD", "Bouton charge : " + event.getButton().getName());
+    }
+
+    @EventHandler
+    public void onMenuOpen(PlayerOpenInventoryEvent event) {
+        String message = String.format("Le joueur %s a ouvert le menu %s",
+            event.getPlayer().getName(),
+            event.getInventory().getFileName());
+        log("MENU_OPEN", message);
+    }
+
+    private void log(String type, String message) {
+        String timestamp = dateFormat.format(new Date());
+        String logLine = String.format("[%s] [%s] %s", timestamp, type, message);
+
+        // Journaliser dans la console
+        plugin.getLogger().info(logLine);
+
+        // Journaliser dans le fichier
+        try (PrintWriter writer = new PrintWriter(new FileWriter(logFile, true))) {
+            writer.println(logLine);
+        } catch (IOException e) {
+            plugin.getLogger().severe("Echec de l'ecriture dans le fichier de log : " + e.getMessage());
+        }
+    }
+}
+```
+
+## Priorités des événements {#priorites-des-evenements}
+
+Utilisez les priorités d'événements pour contrôler quand votre écouteur s'exécute :
+
+```java
+// S'executer en premier (avant les autres plugins)
+@EventHandler(priority = EventPriority.LOWEST)
+public void onMenuOpenFirst(PlayerOpenInventoryEvent event) {
+    // ...
+}
+
+// S'executer en dernier (apres les autres plugins)
+@EventHandler(priority = EventPriority.HIGHEST)
+public void onMenuOpenLast(PlayerOpenInventoryEvent event) {
+    // ...
+}
+
+// S'executer meme si annule
+@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
+public void onMenuOpenMonitor(PlayerOpenInventoryEvent event) {
+    // Juste observer, ne pas modifier
+}
+```
+
+## Bonnes pratiques
+
+1. **Ne pas bloquer les événements inutilement** - N'annuler que lorsque nécessaire
+2. **Utiliser les priorités appropriées** - LOWEST pour les modifications, MONITOR pour la journalisation
+3. **Gérer les exceptions** - Ne pas laisser les erreurs planter la gestion des événements
+4. **Garder les écouteurs légers** - Éviter les opérations lourdes dans les gestionnaires d'événements
+5. **Enregistrer correctement les écouteurs** - Utiliser le gestionnaire de plugins
+
+## Étapes suivantes {#etapes-suivantes}
+
+- Créer des [Boutons personnalisés](./api-buttons)
+- Créer des [Actions personnalisées](./api-actions)
+- Travailler avec les [Données joueur](./api-player-data)
+- Revoir l'[Introduction à l'API](./api-introduction)

@@ -1,0 +1,316 @@
+---
+sidebar_position: 8
+title: Règles d'items
+description: Système flexible de correspondance d'items utilisé pour valider les items déposés dans un menu
+---
+
+# Règles d'items {#regles-ditems}
+
+Les règles d'items sont un **système flexible de correspondance d'items**. Au lieu de comparer un item à un seul item fixe, une règle décrit un ensemble de conditions qu'un item doit respecter (son matériau, son nom, son lore, une plage de custom-model-data, l'identifiant d'un item de plugin, etc.).
+
+Les règles sont principalement utilisées par le bouton [`item_drag`](#le-bouton-item_drag) pour décider si un joueur a le droit de déposer un item dans un slot.
+
+## Définir une règle {#definir-une-regle}
+
+Une règle se définit avec une section `rule`. Chaque règle possède un `type` et ses propres options :
+
+```yaml
+rule:
+  type: material
+  materials:
+    - DIAMOND
+    - EMERALD
+```
+
+Vous pouvez combiner plusieurs règles avec les types composites `and` / `or` (voir [Combiner des règles](#combiner-des-regles)).
+
+## Où utiliser les règles {#ou-utiliser-les-regles}
+
+Les règles sont acceptées à deux endroits seulement :
+
+| Endroit | Clé | Rôle |
+|---------|-----|------|
+| [Bouton `item_drag`](#le-bouton-item_drag) | `rule` | Décide quels items un joueur peut déposer dans le slot |
+| [Requirement `item-rule`](./requirements#item-rule) | `rule` | Vérifie un item que le joueur tient, porte ou transporte (main, seconde main, pièce d'armure ou n'importe quel slot de l'inventaire) |
+
+Une règle ne fait que **tester** un item : elle ne le retire ni ne le modifie jamais. Pour vérifier *et* retirer des items, combinez un requirement `item-rule` avec une action [`take_item`](./buttons/actions#take_item), ou utilisez le requirement [`item`](./requirements#item).
+
+Exemple : un bouton cliquable uniquement avec une pioche en main, avec un message de refus personnalisé :
+
+```yaml
+items:
+  repair-station:
+    slot: 22
+    item:
+      material: ANVIL
+      name: "&eReparez votre pioche"
+    click-requirement:
+      holding-pickaxe:
+        clicks:
+          - ALL
+        requirements:
+          - type: item-rule
+            item-source: HAND          # HAND (defaut), OFF_HAND, HELMET, CHESTPLATE, LEGGINGS, BOOTS ou INVENTORY
+            amount: 1                  # Quantite minimale, 1 par defaut
+            rule:
+              type: material-suffix
+              suffixes:
+                - "_PICKAXE"
+            deny:
+              - type: message
+                messages:
+                  - "&cTenez une pioche dans votre main principale."
+```
+
+Avec `item-source: INVENTORY`, les quantités de tous les stacks correspondants de l'inventaire du joueur sont additionnées puis comparées à `amount`. Avec toute autre source, un seul stack doit correspondre et contenir au moins `amount` items.
+
+:::warning Une règle cassée n'est pas une erreur
+Si une règle ne peut pas être construite (`type` inconnu, liste vide, uniquement des matériaux ou tags inconnus, plugin d'une règle de plugin non installé), zMenu écrit `Unknown rule type` dans la console quand le type est inconnu. Sur un bouton `item_drag`, une règle cassée fait **refuser tous les items** au bouton et affiche un avertissement. Sur un requirement `item-rule`, le requirement est supprimé. Vérifiez la console après un rechargement et testez le cas de refus en jeu.
+:::
+
+:::info Listes tolérantes
+Dans `and` / `or`, les sous-règles impossibles à construire sont ignorées silencieusement : un `and` composé d'une règle valide et d'une règle cassée se comporte comme la règle valide seule. Les matériaux peuvent s'écrire `DIAMOND` ou `minecraft:diamond` (la casse n'a pas d'importance) ; les noms inconnus sont ignorés.
+:::
+
+## Le bouton item_drag
+
+Le bouton `item_drag` permet à un joueur de placer (déposer) un item dans un slot. Vous pouvez valider l'item déposé avec une `rule`, afficher un item indicatif `check-item` et afficher un `error-item` lorsque l'item est refusé.
+
+```yaml
+items:
+  deposer-ici:
+    slot: 13
+    type: item_drag
+
+    # Optionnel : item affiche dans le slot quand il est vide
+    check-item:
+      type: full
+      item:
+        material: LIGHT_GRAY_STAINED_GLASS_PANE
+        name: "&7Deposez un diamant ici"
+
+    # Optionnel : item affiche brievement quand l'item depose est refuse
+    error-item:
+      duration: 20      # En ticks (defaut : 20)
+      use-cache: true   # Defaut : true (use_cache accepte aussi)
+      item:
+        material: RED_STAINED_GLASS_PANE
+        name: "&cItem invalide !"
+
+    # Seuls les items correspondant a cette regle sont acceptes
+    rule:
+      type: material
+      materials:
+        - DIAMOND
+```
+
+| Option       | Type   | Description                                                              |
+|--------------|--------|--------------------------------------------------------------------------|
+| `check-item` | Item   | Item affiché dans le slot (avec un `type` de comparaison, défaut `full`) |
+| `error-item` | Item   | Item affiché quand un item refusé est déposé (`duration`, `use-cache`)   |
+| `rule`       | Rule   | La règle que l'item déposé doit respecter pour être accepté              |
+
+:::tip
+`check-item` / `check_item` et `error-item` / `error_item` sont interchangeables (les deux orthographes fonctionnent).
+:::
+
+## Types de règles {#types-de-regles}
+
+### material
+
+Correspond à un matériau exact.
+
+```yaml
+rule:
+  type: material
+  materials:
+    - DIAMOND
+    - EMERALD_BLOCK
+```
+
+| Clé | Type | Description |
+|-----|------|-------------|
+| `materials` | Liste | La liste des matériaux acceptés |
+
+---
+
+### material-contains / material-prefix / material-suffix
+
+Correspondance sur le **nom** du matériau par sous-chaîne, préfixe ou suffixe. Utile pour accepter des familles entières de matériaux (toutes les laines, tous les rondins, etc.).
+
+```yaml
+rule:
+  type: material-contains
+  patterns:
+    - "WOOL"        # correspond a WHITE_WOOL, RED_WOOL, ...
+```
+
+```yaml
+rule:
+  type: material-prefix
+  prefixes:
+    - "DIAMOND_"    # correspond a DIAMOND_SWORD, DIAMOND_PICKAXE, ...
+```
+
+```yaml
+rule:
+  type: material-suffix
+  suffixes:
+    - "_LOG"        # correspond a OAK_LOG, BIRCH_LOG, ...
+```
+
+| Type | Clé | Description |
+|------|-----|-------------|
+| `material-contains` | `patterns` | Sous-chaînes que le nom du matériau doit contenir |
+| `material-prefix` | `prefixes` | Préfixes par lesquels le nom du matériau doit commencer |
+| `material-suffix` | `suffixes` | Suffixes par lesquels le nom du matériau doit finir |
+
+---
+
+### name
+
+Correspondance sur le nom d'affichage de l'item.
+
+```yaml
+rule:
+  type: name
+  match-type: CONTAINS   # EXACT (defaut), PREFIX, SUFFIX ou CONTAINS
+  ignore-case: true      # Defaut : true
+  names:
+    - "Legendaire"
+```
+
+| Clé | Type | Description |
+|-----|------|-------------|
+| `names` | Liste | La liste des noms à comparer |
+| `match-type` | String | `EXACT` (défaut), `PREFIX`, `SUFFIX` ou `CONTAINS` |
+| `ignore-case` | Booléen | Comparaison insensible à la casse (défaut : `true`) |
+
+---
+
+### lore
+
+Correspondance sur le lore de l'item.
+
+```yaml
+rule:
+  type: lore
+  match-type: CONTAINS   # CONTAINS (defaut) ou EQUALS
+  ignore-case: true      # Defaut : true
+  values:
+    - "Lie a l'ame"
+```
+
+| Clé | Type | Description |
+|-----|------|-------------|
+| `values` | Liste | Les lignes à rechercher dans le lore |
+| `match-type` | String | `CONTAINS` (défaut) ou `EQUALS` |
+| `ignore-case` | Booléen | Comparaison insensible à la casse (défaut : `true`) |
+
+---
+
+### tag
+
+Correspondance sur un tag de matériau vanilla Minecraft (par exemple `minecraft:planks`, `minecraft:wool`).
+
+```yaml
+rule:
+  type: tag
+  tags:
+    - "planks"
+    - "wool"
+```
+
+| Clé | Type | Description |
+|-----|------|-------------|
+| `tags` | Liste | La liste des tags de matériaux à comparer |
+
+<Aliases keys={['tag', 'material-tag', 'material_tag', 'tags']} />
+
+---
+
+### custom-model-data
+
+Correspondance sur le custom model data de l'item, par valeur exacte ou par plage.
+
+```yaml
+rule:
+  type: custom-model-data
+  values:
+    - 1001
+    - 1002
+  ranges:
+    - min: 2000
+      max: 2999
+```
+
+| Clé | Type | Description |
+|-----|------|-------------|
+| `values` | Liste | Les valeurs de custom-model-data acceptées |
+| `ranges` | Liste | Les plages acceptées, chacune avec `min` et `max` |
+
+---
+
+### Règles d'items de plugins {#regles-ditems-de-plugins}
+
+Ces règles font correspondre un item personnalisé par son identifiant de plugin. Elles supportent les jokers (wildcards) et une option `ignore-case` (défaut `true`), et nécessitent que le plugin correspondant soit installé.
+
+```yaml
+rule:
+  type: itemsadder
+  ignore-case: true
+  items:
+    - "myitems:ruby"
+    - "myitems:*"      # joker
+```
+
+**Types de règles de plugins disponibles :** `craftengine`, `denizen`, `eco`, `executableblocks`, `executableitems`, `headdatabase`, `itemsadder`, `mmoitems`, `nexo`, `nextgens`, `nova`, `oraxen`, `slimefun`.
+
+**Alias :** `craftengine` (`craft-engine`, `craft_engine`, `ce`), `executableblocks` (`executable-blocks`, `executable_blocks`, `eb`), `executableitems` (`executable-items`, `executable_items`, `ei`), `headdatabase` (`head-database`, `head_database`, `hdb`), `mmoitems` (`mmo-items`, `mmo_items`), `slimefun` (`slime-fun`, `slime_fun`, `sf`).
+
+| Clé | Type | Description |
+|-----|------|-------------|
+| `items` | Liste | La liste des identifiants d'items à comparer (jokers supportés) |
+| `ignore-case` | Booléen | Comparaison insensible à la casse (défaut : `true`) |
+
+## Combiner des règles {#combiner-des-regles}
+
+Utilisez `and` / `or` pour combiner plusieurs règles.
+
+**and** — l'item doit correspondre à **toutes** les sous-règles :
+
+```yaml
+rule:
+  type: and
+  rules:
+    - type: material
+      materials:
+        - DIAMOND_SWORD
+    - type: name
+      match-type: CONTAINS
+      names:
+        - "Legendaire"
+```
+
+**or** — l'item doit correspondre à **au moins une** sous-règle :
+
+```yaml
+rule:
+  type: or
+  rules:
+    - type: material
+      materials:
+        - DIAMOND
+    - type: material
+      materials:
+        - EMERALD
+```
+
+| Clé | Type | Description |
+|-----|------|-------------|
+| `rules` | Liste | La liste des sous-règles à combiner |
+
+## Voir aussi
+
+- [Validation `item_drag` avec `check-inventory`](./requirements#check-inventory)
+- [Plugins supportes](../supported-plugins)

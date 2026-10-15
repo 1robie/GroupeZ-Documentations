@@ -1,0 +1,364 @@
+---
+sidebar_position: 9
+title: Extension Points
+description: Every way a plugin can extend zMenu - loaders, requirements, materials, placeholders, options, dialogs and more
+---
+
+# Extension Points
+
+This page lists everything a plugin can register in zMenu, with the exact API and a short example. Buttons, actions, player data and events have their own pages: [Custom Buttons](./api-buttons), [Custom Actions](./api-actions), [Player Data](./api-player-data), [Events](./api-events).
+
+All examples assume:
+
+```java
+MenuPlugin menuPlugin = (MenuPlugin) Bukkit.getPluginManager().getPlugin("zMenu");
+```
+
+## Overview
+
+| What | Class to extend / implement | Register with | YAML where it is used |
+|------|-----------------------------|---------------|-----------------------|
+| Button type | `ButtonLoader` + `Button` | `ButtonManager#register` | `type: <name>` on a button |
+| Action | `ActionLoader` + `Action` | `ButtonManager#registerAction` | `- type: <key>` in any action list |
+| Requirement | `PermissibleLoader` + `Permissible` | `ButtonManager#registerPermissible` | `- type: <key>` in `requirements:` |
+| Material prefix | `MaterialLoader` | `InventoryManager#registerMaterialLoader` | `material: "<key>:<value>"` |
+| Item comparison | `ItemStackSimilar` | `InventoryManager#registerItemStackVerification` | `check-item.type: <name>` |
+| Command argument type | `CommandArgumentValidator` | `CommandManager#registerArgumentValidator` | `type: <name>` in command `arguments:` |
+| Item component | `ItemComponentLoader` + `ItemComponent` | `ComponentsManager#registerComponent` | `components:` of an item |
+| Extra button keys | `ButtonOption` | `InventoryManager#registerOption` | any button |
+| Extra inventory keys | `InventoryOption` | `InventoryManager#registerInventoryOption` | root of an inventory file |
+| Placeholder | `ReturnBiConsumer` | `MenuPlugin#registerPlaceholder` | `%zmenu_<prefix>...%` |
+| Inventory lifecycle hook | `InventoryListener` | `InventoryManager#registerInventoryListener` | - |
+| Fast events | `FastEvent` | `InventoryManager#registerFastEvent` | - |
+| Title animation provider | `TitleAnimationLoader` | `TitleAnimationManager#registerLoader` | `title-animation.plugin` |
+| Item mechanic | `MechanicFactory` + `Mechanic` | `ItemManager#registerMechanicFactory` | `mechanics:` of a custom item |
+| Patterns | `Pattern` / `ActionPattern` | `PatternManager#registerPattern` | `pattern:` |
+| Commands | `Command` | `CommandManager#registerCommand` | - |
+| Inventories | `Inventory` files | `InventoryManager#loadInventory...` | - |
+| Dialogs / Bedrock forms | `DialogInventory` / `BedrockInventory` files | `DialogManager` / `BedrockManager` | - |
+
+:::info Registration order
+For buttons, actions and requirements, an inventory that uses an element zMenu does not know yet is kept on hold and loaded the moment the element gets registered (`ButtonManager#register`, `registerAction`, `registerPermissible`; the same applies to pattern files loaded with `PatternManager#loadPattern`). Your plugin can therefore enable after zMenu.
+:::
+
+## Auto-Registration Annotations (zMenu internals)
+
+zMenu's own loaders are discovered with annotations instead of manual calls. On start-up it scans the package `fr.maxlego08.menu` of its **own** jar and registers every class carrying one of these annotations:
+
+| Annotation | Registers a... |
+|------------|----------------|
+| `@AutoButtonLoader` | `ButtonLoader` |
+| `@AutoActionLoader` | `ActionLoader` |
+| `@AutoPermissibleLoader` | `PermissibleLoader` |
+| `@AutoMaterialLoader` | `MaterialLoader` |
+| `@AutoComponentLoader` | `ItemComponentLoader` |
+| `@AutoItemStackSimilar` | `ItemStackSimilar` |
+| `@AutoCommandArgumentValidator` | `CommandArgumentValidator` |
+| `@AutoRuleLoader` | item `RuleLoader` |
+| `@AutoFontImage` | `FontImage` |
+| `@AutoListener` | Bukkit `Listener` |
+
+The scan is limited to the `fr.maxlego08.menu` package, so **an external plugin cannot use these annotations**: register your objects manually as shown on this page. They matter if you contribute to zMenu itself. The constructor of an annotated class can take the `MenuPlugin` (most types), the `ButtonManager` (permissibles) or the `Plugin` (buttons, validators), or no argument.
+
+They can be combined with conditions that decide whether the class is registered: `@RequiresPlugin("name")` (with optional `version`, `type` and `checkMode`), `@SinceVersion("1.20.5")`, `@UntilVersion`, `@PaperOnly`, `@SpigotOnly` and `@RequireSupport(...)`.
+
+## Requirements (Permissibles)
+
+A *requirement* is one entry of a `requirements:` list (`type: permission`, `type: placeholder`, ...). To add a new `type`, extend `PermissibleLoader` and `Permissible` and call `ButtonManager#registerPermissible`. See [Custom Requirements](./api-requirements) for a complete example.
+
+## Material Loaders
+
+A `MaterialLoader` makes `material: "<key>:<value>"` resolve to an `ItemStack` produced by your plugin (this is how `itemsadder:`, `oraxen:`, `hdb:` and the other [supported plugin](../supported-plugins) prefixes work).
+
+```java
+public class MyItemsLoader extends MaterialLoader {
+
+    public MyItemsLoader() {
+        super("myitems");   // the prefix, matched case-insensitively
+    }
+
+    @Override
+    public ItemStack load(@NotNull Player player, @Nullable YamlConfiguration configuration,
+                          @NotNull String path, @NotNull String materialString) {
+        // materialString is what follows the prefix: "ruby_sword" for "myitems:ruby_sword"
+        return MyItemsApi.createItem(materialString);   // return null if unknown
+    }
+}
+```
+
+```java
+boolean registered = menuPlugin.getInventoryManager().registerMaterialLoader(new MyItemsLoader()); // false if the key already exists
+```
+
+```yaml
+item:
+  material: "myitems:ruby_sword"
+```
+
+`configuration` is `null` when the material comes from an action (not from an inventory file), so do not rely on it. `getMaterialLoader()` returns every registered loader.
+
+## Item Comparison (ItemStackSimilar)
+
+`ItemStackSimilar` defines how two items are compared. It is selected by name in the `type:` of `check-item` on an [`item_drag`](../configurations/item-rules) button (built-in names: `full`, `material`, `name`, `lore`, `modelId`, `itemModel`).
+
+```java
+public class OwnerSimilar implements ItemStackSimilar {
+
+    @Override
+    public @NotNull String getName() {
+        return "myplugin_owner";    // stored lowercase, so the YAML value is case-insensitive
+    }
+
+    @Override
+    public boolean isSimilar(@NotNull ItemStack itemStackA, @NotNull ItemStack itemStackB) {
+        return MyPlugin.getOwner(itemStackA).equals(MyPlugin.getOwner(itemStackB));
+    }
+}
+```
+
+```java
+menuPlugin.getInventoryManager().registerItemStackVerification(new OwnerSimilar());
+```
+
+An unknown `type` silently falls back to `full`.
+
+## Command Argument Types
+
+Custom commands declare typed arguments (`type: online-player`, `type: integer`, ...). Register your own type with a `CommandArgumentValidator`:
+
+```java
+public class WorldArgumentValidator implements CommandArgumentValidator {
+
+    @Override
+    public boolean isValid(String value) {
+        return Bukkit.getWorld(value) != null;
+    }
+
+    @Override
+    public Message getErrorMessage() {
+        // The message sent to the player when `isValid` is false.
+        // It must be a value of zMenu's Message enum; reuse the closest existing one.
+        return Message.COMMAND_ARGUMENT_STRING;
+    }
+
+    @Override
+    public String getType() {
+        return "world";
+    }
+}
+```
+
+```java
+menuPlugin.getCommandManager().registerArgumentValidator(new WorldArgumentValidator());
+```
+
+```yaml
+commands:
+  warp:
+    command: warp
+    inventory: warps
+    arguments:
+      - name: world
+        type: world
+```
+
+`CommandManager` also lets you register whole commands from code (`registerCommand(Command)`, `unregisterCommands(Plugin)`), load a command file (`loadCommand(Plugin, File)`) and read the arguments typed by players (`getPlayerArgument(Player, String)`). See [Inventory API](./api-inventory#open-with-arguments).
+
+## Item Components
+
+Item components (`components:` of an item, see [Components](../configurations/items/components)) are read by `ItemComponentLoader`s. A plugin can add its own components, named `<pluginname>:<component>`:
+
+```java
+public class SoulboundComponentLoader extends ItemComponentLoader {
+
+    public SoulboundComponentLoader(Plugin plugin) {
+        super("soulbound", plugin);   // usable as `myplugin:soulbound` in YAML
+    }
+
+    @Override
+    public ItemComponent load(@NotNull MenuItemStackContext context, @NotNull File file, @NotNull YamlConfiguration configuration,
+                              @NotNull String path, @Nullable ConfigurationSection componentSection) {
+        boolean enabled = componentSection != null && componentSection.getBoolean("enabled", true);
+        return new SoulboundComponent(enabled);
+    }
+}
+
+public class SoulboundComponent extends ItemComponent {
+
+    private final boolean enabled;
+
+    public SoulboundComponent(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    @Override
+    public void apply(@NotNull BuildContext context, @NotNull ItemStack itemStack, @Nullable Player player) {
+        // Modify the built ItemStack (PDC, meta, ...)
+    }
+}
+```
+
+```java
+try {
+    menuPlugin.getComponentsManager().registerComponent(new SoulboundComponentLoader(this));
+} catch (ItemComponentAlreadyRegisterException exception) {
+    getLogger().warning(exception.getMessage());
+}
+```
+
+The `ItemComponentLoader(String name)` constructor (without a plugin) declares a *vanilla* component under the `minecraft:` namespace; use it only for real Minecraft data components. `ItemComponentLoader` provides many `asResolvable*` helpers to read values that may contain placeholders.
+
+## Inventory Options
+
+An `InventoryOption` reads extra keys from the root of **every inventory file**, the same way a `ButtonOption` does for buttons (see [Custom Buttons](./api-buttons#adding-keys-to-every-button-buttonoption)).
+
+```java
+public class MyInventoryOption implements InventoryOption {
+
+    @Override
+    public String getName() {
+        return "myplugin";
+    }
+
+    @Override
+    public void loadInventory(Inventory inventory, File file, YamlConfiguration configuration,
+                              InventoryManager inventoryManager, ButtonManager buttonManager) {
+        if (configuration.getBoolean("myplugin-tracked", false)) {
+            MyPlugin.track(inventory.getFileName());
+        }
+    }
+}
+```
+
+```java
+InventoryManager manager = menuPlugin.getInventoryManager();
+manager.registerInventoryOption(this, MyInventoryOption.class);
+// on disable
+manager.unregisterInventoryOptions(this);
+```
+
+The class needs a public constructor taking your `Plugin`, or a no-argument one. `getInventoryOptions()` lists the registered classes.
+
+## Placeholders
+
+Register a placeholder that is available everywhere zMenu parses text (names, lore, requirements, actions...) as `%zmenu_<prefix><argument>%`:
+
+```java
+menuPlugin.registerPlaceholder("myplugin_balance_", (offlinePlayer, argument) -> {
+    // %zmenu_myplugin_balance_gold%  ->  argument = "gold"
+    return String.valueOf(MyEconomy.get(offlinePlayer.getUniqueId(), argument));
+});
+```
+
+- The first registered prefix that the text **starts with** wins, and everything after it is the argument. Pick a long, unique prefix.
+- Return `null` to leave the placeholder untouched.
+- When PlaceholderAPI is installed, the same placeholders are also exposed through the `zmenu` PlaceholderAPI expansion.
+- `menuPlugin.parse(player, text)` resolves a string with PlaceholderAPI and zMenu placeholders; `menuPlugin.getGlobalPlaceholders()` returns the values of `global-placeholders.yml`.
+
+For *per-click* placeholders (values that only exist while a button is rendered), use the `Placeholders` object passed to `getCustomItemStack` and to actions, see [MenuItemStack](./api-menu-item-stack#custom-placeholders).
+
+## Inventory Listeners and Fast Events
+
+See [Events](./api-events#fastevent-high-performance-alternative) for `FastEvent` and `InventoryListener`.
+
+## Title Animations
+
+Title animations are produced by a `TitleAnimationLoader` registered with `TitleAnimationManager#registerLoader(id, loader)`; the `id` is what players write in `title-animation.plugin`. See [Services & Managers](./api-services#titleanimationmanager) for the complete walkthrough.
+
+## Custom Items and Mechanics
+
+Plugins can attach behaviors to custom items defined in `items/*.yml` ([Custom items](../configurations/items/custom-items), [Mechanics](../configurations/items/mechanics)). A `MechanicFactory` parses the `mechanics.<id>` section of each item; a `MechanicListener` reacts to gameplay.
+
+```java
+public class FlightFactory extends MechanicFactory<FlightMechanic> {
+
+    public FlightFactory(MenuPlugin plugin) {
+        super(plugin, "flight");   // the key under `mechanics:`
+    }
+
+    @Override
+    public @NotNull FlightMechanic parse(MenuPlugin plugin, String itemId, ConfigurationSection mechanicSection,
+                                         YamlConfiguration configurationFile, File file, String path) {
+        FlightMechanic mechanic = new FlightMechanic(itemId, this, mechanicSection);
+        this.addToImplemented(mechanic);
+        return mechanic;
+    }
+}
+
+public class FlightMechanic extends Mechanic<FlightFactory> {
+    public FlightMechanic(String itemId, FlightFactory factory, ConfigurationSection section) {
+        super(itemId, factory, section);
+    }
+}
+```
+
+```java
+ItemManager items = menuPlugin.getItemManager();
+FlightFactory factory = new FlightFactory(menuPlugin);
+items.registerMechanicFactory(factory);
+items.registerListeners(this, "flight", new FlightListener(factory));   // MechanicListener (a Bukkit Listener)
+```
+
+`MechanicListener#onItemGive(Player, ItemStack, String itemId)` is called when zMenu gives a custom item that has your mechanic; return `true` to cancel the default delivery (the item is then not added to the inventory). `ItemManager` also offers `isCustomItem(...)`, `getItemId(ItemStack)`, `giveItem(Player, String)` and `getItemIds()`. The `ZMenuItemsLoad` event tells you when items are (re)loaded.
+
+## Patterns
+
+Patterns are normally files in `patterns/`, but a plugin can register them at runtime or read the existing ones:
+
+```java
+PatternManager patterns = menuPlugin.getPatternManager();
+Optional<Pattern> pattern = patterns.getPattern("pattern_cookies");
+Optional<ActionPattern> actionPattern = patterns.getActionPattern("default-actions");
+
+patterns.registerPattern(myPattern);
+patterns.registerActionPattern(myActionPattern);
+patterns.unregisterPattern(myPattern);
+patterns.loadPattern(file);            // parse a pattern file
+```
+
+## Commands
+
+```java
+CommandManager commands = menuPlugin.getCommandManager();
+
+Optional<Command> command = commands.getCommand("shop");     // by name
+Optional<Command> forInventory = commands.getCommand(inventory);
+commands.loadCommand(this, new File(getDataFolder(), "commands.yml"));  // register the commands of a file under your plugin
+commands.unregisterCommands(this);                           // on disable
+```
+
+`Command` exposes `command()`, `aliases()`, `permission()`, `inventory()`, `arguments()`, `actions()` and `subCommands()`. See [Custom commands](../configurations/custom-commands) for the YAML.
+
+## Dialogs and Bedrock Forms
+
+Dialogs (Paper) and Bedrock forms (Geyser/Floodgate) have their own managers, which can be `null` when the feature is unavailable:
+
+```java
+DialogManager dialogs = menuPlugin.getDialogManager();     // null unless Paper 1.21.7+ with enable-mini-message-format
+if (dialogs != null) {
+    dialogs.getDialog("confirmation-dialog").ifPresent(dialog -> dialogs.openDialog(player, dialog));
+}
+
+BedrockManager bedrock = menuPlugin.getBedrockManager();   // null without Geyser/Floodgate
+if (bedrock != null && bedrock.isBedrockPlayer(player)) {
+    bedrock.getBedrockInventory("simple-form").ifPresent(form -> bedrock.openBedrockInventory(player, form));
+}
+```
+
+Both managers mirror `InventoryManager`: `loadDialog(plugin, fileName)` / `loadBedrockInventory(plugin, fileName)` load a file from your plugin, `getDialog(...)` / `getBedrockInventory(...)` look one up (by name, by plugin name + file name, or by `Plugin` + file name; dialogs also accept `plugin:name`), `delete...(plugin)` unloads, `reload...` reloads, and `openDialog(player, dialog, oldInventories)` keeps a navigation history. When a client cannot display dialogs (`ClientVersionManager#supportsDialogs`), zMenu opens the fallback inventory instead. Opening goes through `PlayerOpenInventoryEvent` like regular inventories.
+
+Dialog and form contents are described in YAML; see [Dialogs](../configurations/dialogues) and [Bedrock](../configurations/bedrock). Their body, input and component classes (`DialogButton`, `InputButton`, `BodyButton`, `BedrockInputButton`, ...) live under `fr.maxlego08.menu.api.button.buttons`.
+
+## Services
+
+The managers are also registered in Bukkit's `ServicesManager`: see [Services & Managers](./api-services) (and the list in the [API Introduction](./api-introduction#services)). `ClientVersionManager` tells you which Minecraft version a player uses (ViaVersion / ProtocolSupport aware) and `WebsiteManager` handles the marketplace downloads.
+
+## Storage
+
+`StorageManager` (`menuPlugin.getStorageManager()`) persists player data and saved inventories (`upsertData`, `removeData`, `clearData`, `storeInventory`, ...). Use it through the [Player Data API](./api-player-data) rather than directly.
+
+## Known Limits
+
+- **Item rules** (`Rule` / `RuleLoader`, used by `item_drag` and the `item-rule` requirement): `@AutoRuleLoader` only scans the zMenu jar, so external plugins register their loader with `ButtonManager#registerRuleLoader(RuleLoader)`.
+- **Actions and requirements have no `unregister`**; a plugin that reloads must register the same loader instances again.
+- **`ButtonOption` / `InventoryOption` lookups** (`getOption(name)`, `getInventoryOption(name)`) compare the registered *class name*, not the `getName()` of the option, and a registered class is skipped if another registered class has the same name.

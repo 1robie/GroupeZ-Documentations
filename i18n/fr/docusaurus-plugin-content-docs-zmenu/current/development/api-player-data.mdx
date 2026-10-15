@@ -1,0 +1,266 @@
+---
+sidebar_position: 5
+title: API des données joueur
+description: Travailler avec le stockage des données joueur de zMenu
+---
+
+# API des données joueur {#api-des-donnees-joueur}
+
+Apprenez à lire et écrire les [données joueur](../configurations/player-data) de zMenu depuis votre plugin.
+
+## Vue d'ensemble
+
+zMenu stocke des paires clé/valeur par joueur. Ces données sont :
+
+- gardées en mémoire et écrites dans la base configurée (SQLite, MySQL ou MariaDB, voir `config.yml`)
+- lisibles dans les menus avec `%zmenu_player_value_<cle>%` et modifiables avec l'action `data`
+- éventuellement temporaires (une valeur peut expirer)
+- accessibles depuis l'API via le `DataManager`
+
+Les valeurs sont stockées sous forme de texte. Les nombres sont interprétés avec `ADD`, `SUBTRACT` ou `math: true`.
+
+## Les types
+
+| Type | Rôle |
+|------|------|
+| `DataManager` | Point d'entrée : trouver les joueurs et ajouter des données (`fr.maxlego08.menu.api.players`) |
+| `PlayerData` | Toutes les entrées `Data` d'un joueur |
+| `Data` | Une entrée : clé, valeur et expiration |
+
+```java
+DataManager dataManager = menuPlugin.getDataManager();
+// ou : Bukkit.getServicesManager().load(DataManager.class)
+```
+
+## Lire des données {#lire-des-donnees}
+
+```java
+UUID uuid = player.getUniqueId();
+
+// Optional<Data> - vide quand la cle n'existe pas ou a expire
+Optional<Data> data = dataManager.getData(uuid, "coins");
+
+int coins = data.map(Data::getValue)
+        .map(Object::toString)
+        .map(Integer::parseInt)
+        .orElse(0);
+```
+
+### Toutes les données d'un joueur {#toutes-les-donnees-dun-joueur}
+
+```java
+Optional<PlayerData> playerData = dataManager.getPlayer(uuid);   // vide si le joueur n'a pas encore de donnees
+PlayerData created = dataManager.getOrCreate(uuid);              // cree un conteneur vide si besoin
+
+for (Data entry : created.getDatas()) {
+    System.out.println(entry.getKey() + " = " + entry.getValue());
+}
+
+boolean has = created.containsKey("coins");
+List<String> keys = dataManager.getKeys(uuid);   // cles d'un joueur
+List<String> allKeys = dataManager.getKeys();    // toutes les cles connues, plus celles de default_values.yml
+```
+
+Les entrées expirées sont supprimées automatiquement quand vous les lisez.
+
+### Ce que fournit `Data`
+
+| Méthode | Description |
+|---------|-------------|
+| `getKey()` | La clé |
+| `getValue()` | La valeur (`Object` ; en général un `String` une fois chargée depuis la base) |
+| `getExpiredAt()` | Date d'expiration en millisecondes epoch, `0` si la valeur n'expire jamais |
+| `isExpired()` | `true` si `getExpiredAt()` est dans le passé |
+| `add(int)` / `remove(int)` | Modifie la valeur en mémoire (voir plus bas) |
+| `negate()` | Remplace la valeur par son opposé |
+
+## Écrire des données {#ecrire-des-donnees}
+
+L'API ne fournit pas de classe `Data` toute prête : vous implémentez vous-même la petite interface (la classe de zMenu est dans le module du plugin et ne fait pas partie de l'API) :
+
+```java
+public class SimpleData implements Data {
+
+    private final String key;
+    private Object value;
+    private final long expiredAt;
+
+    /** @param expiredAt millisecondes epoch, 0 pour aucune expiration */
+    public SimpleData(String key, Object value, long expiredAt) {
+        this.key = key;
+        this.value = value;
+        this.expiredAt = expiredAt;
+    }
+
+    @Override public String getKey() { return this.key; }
+    @Override public Object getValue() { return this.value; }
+    @Override public long getExpiredAt() { return this.expiredAt; }
+    @Override public boolean isExpired() { return this.expiredAt != 0 && System.currentTimeMillis() > this.expiredAt; }
+    @Override public void add(int amount) { this.value = (int) Double.parseDouble(String.valueOf(this.value)) + amount; }
+    @Override public void remove(int amount) { this.add(-amount); }
+    @Override public void negate() { this.value = -(int) Double.parseDouble(String.valueOf(this.value)); }
+}
+```
+
+### Définir une valeur {#definir-une-valeur}
+
+`addData` crée l'entrée du joueur si besoin, **remplace** toute valeur précédente de la même clé et l'enregistre dans la base :
+
+```java
+dataManager.addData(uuid, new SimpleData("coins", 100, 0));
+
+// Expire dans une heure
+long inOneHour = System.currentTimeMillis() + 3_600_000L;
+dataManager.addData(uuid, new SimpleData("vip_boost", "true", inOneHour));
+```
+
+### Ajouter ou soustraire à un nombre {#ajouter-ou-soustraire-a-un-nombre}
+
+`Data#add` ne modifie la valeur **qu'en mémoire** ; persistez-la avec `StorageManager#upsertData` :
+
+```java
+Optional<Data> existing = dataManager.getData(uuid, "coins");
+if (existing.isPresent()) {
+    Data data = existing.get();
+    data.add(50);                                              // ou data.remove(25)
+    menuPlugin.getStorageManager().upsertData(uuid, data);     // sauvegarde
+} else {
+    dataManager.addData(uuid, new SimpleData("coins", 50, 0));
+}
+```
+
+`add` et `remove` travaillent sur des entiers : une valeur décimale comme `"1.5"` est tronquée à `1` avant l'opération.
+
+### Supprimer des données {#supprimer-des-donnees}
+
+```java
+dataManager.getPlayer(uuid).ifPresent(playerData -> playerData.removeData("coins")); // une cle d'un joueur
+dataManager.clearKey("coins");        // cette cle pour tous les joueurs
+dataManager.clearPlayer(uuid);        // tout ce qui concerne un joueur
+dataManager.clearAll();               // tout
+```
+
+## Valeurs par défaut {#valeurs-par-defaut}
+
+Quand une clé n'existe pas pour un joueur, `%zmenu_player_value_<cle>%` retourne le texte `Key '<cle>' doesn't exist for this player`. Pour obtenir une valeur par défaut propre, déclarez-la dans `plugins/zMenu/default_values.yml` (relu par `/zm reload`) :
+
+```yaml
+values:
+  coins: 0
+  playtime_level: 0
+```
+
+Ces valeurs par défaut sont utilisées par les placeholders (et listées par `getKeys()`) ; elles ne sont **pas** retournées par `getData(...)`, qui reste vide tant qu'aucune valeur n'est écrite. Gérez le cas vide dans votre code.
+
+## Exposer vos propres placeholders
+
+Pour rendre les valeurs de votre plugin lisibles dans les menus, enregistrez un placeholder `%zmenu_<prefixe>_...%` :
+
+```java
+menuPlugin.registerPlaceholder("myplugin_coins_", (offlinePlayer, key) -> {
+    // %zmenu_myplugin_coins_<cle>% -> `key` est ce qui suit le prefixe
+    return String.valueOf(myEconomy.getBalance(offlinePlayer.getUniqueId()));
+});
+```
+
+Le préfixe est comparé avec `startsWith` dans l'ordre d'enregistrement : choisissez-en un distinctif. Si PlaceholderAPI est installé, le même placeholder fonctionne aussi sous la forme `%zmenu_myplugin_coins_<cle>%`. Voir [Points d'extension](./api-extensions#placeholders).
+
+## Exemple complet : système de monnaie {#exemple-complet--systeme-de-monnaie}
+
+```java
+public class CurrencyManager {
+
+    private static final String COINS_KEY = "coins";
+
+    private final MenuPlugin menuPlugin;
+    private final DataManager dataManager;
+
+    public CurrencyManager(MenuPlugin menuPlugin) {
+        this.menuPlugin = menuPlugin;
+        this.dataManager = menuPlugin.getDataManager();
+    }
+
+    public int getCoins(UUID uuid) {
+        return this.dataManager.getData(uuid, COINS_KEY)
+                .map(data -> (int) Double.parseDouble(String.valueOf(data.getValue())))
+                .orElse(0);
+    }
+
+    public void setCoins(UUID uuid, int amount) {
+        this.dataManager.addData(uuid, new SimpleData(COINS_KEY, Math.max(0, amount), 0));
+    }
+
+    public void addCoins(UUID uuid, int amount) {
+        this.setCoins(uuid, this.getCoins(uuid) + amount);
+    }
+
+    public boolean removeCoins(UUID uuid, int amount) {
+        int current = this.getCoins(uuid);
+        if (current < amount) return false;
+        this.setCoins(uuid, current - amount);
+        return true;
+    }
+}
+```
+
+```java
+CurrencyManager currency = new CurrencyManager(menuPlugin);
+currency.addCoins(player.getUniqueId(), 100);
+if (!currency.removeCoins(player.getUniqueId(), 500)) {
+    player.sendMessage("Not enough coins!");
+}
+```
+
+Dans un menu, la même clé s'affiche et se modifie avec les fonctionnalités intégrées :
+
+```yaml
+item:
+  material: GOLD_INGOT
+  name: "&6Coins: &f%zmenu_player_value_coins%"
+actions:
+  - type: data
+    action: ADD
+    key: coins
+    value: "10"
+```
+
+## Exemple complet : récompense quotidienne avec donnée expirante {#exemple-complet--recompense-quotidienne-avec-donnee-expirante}
+
+Une entrée qui expire toute seule est un cooldown pratique : une fois disparue, la récompense peut être réclamée de nouveau.
+
+```java
+public boolean claimDailyReward(Player player) {
+    UUID uuid = player.getUniqueId();
+
+    // Toujours en cooldown : l'entree existe et n'a pas expire
+    if (this.dataManager.getData(uuid, "daily_claimed").isPresent()) {
+        return false;
+    }
+
+    long tomorrow = System.currentTimeMillis() + 24L * 60 * 60 * 1000;
+    this.dataManager.addData(uuid, new SimpleData("daily_claimed", "true", tomorrow));
+    this.currency.addCoins(uuid, 250);
+    return true;
+}
+```
+
+En YAML, testez-la avec les placeholders `%zmenu_player_is_expired_daily_claimed%` et `%zmenu_player_expire_format_daily_claimed%` (temps restant).
+
+## Threads
+
+Le `DataManager` garde ses données dans une simple map en mémoire et sauvegarde via le cache de la couche de stockage. Appelez-le depuis le thread principal / de région du joueur, comme les actions de zMenu. Si vous devez lire depuis une tâche asynchrone, lisez uniquement (`getData`) et ne modifiez pas les objets `Data` en concurrence.
+
+## Bonnes pratiques
+
+1. **Préfixez vos clés** (`monplugin_coins`) pour éviter les collisions avec les menus des administrateurs
+2. **Utilisez des `UUID`**, pas des pseudos
+3. **Gérez les clés manquantes** : `getData` retourne un `Optional` vide
+4. **Persistez après `add`/`remove`** avec `getStorageManager().upsertData(...)`
+5. **Utilisez l'expiration** pour les cooldowns plutôt que de stocker vos propres timestamps
+6. **Déclarez des valeurs par défaut** dans `default_values.yml` pour les valeurs affichées dans les menus
+
+## Étapes suivantes {#etapes-suivantes}
+
+- Écoutez les [Événements](./api-events)
+- Parcourez tous les [Points d'extension](./api-extensions)
+- Relisez l'[Introduction à l'API](./api-introduction)

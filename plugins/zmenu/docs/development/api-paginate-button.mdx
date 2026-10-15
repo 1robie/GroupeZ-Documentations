@@ -1,0 +1,238 @@
+---
+sidebar_position: 7
+title: Paginate Button
+description: Creating paginated button lists in zMenu
+---
+
+# Paginate Button
+
+Learn how to create buttons that display a paginated list of elements (players, shop items, homes, ...).
+
+## Two Flavours
+
+| Base class | Pages are... | Navigation buttons |
+|------------|--------------|--------------------|
+| `PaginateButton` | the **pages of the whole inventory**: the player moves with the usual `NEXT` / `PREVIOUS` buttons and `%page%` / `%max-page%` | [`NEXT`](../configurations/buttons/types/next) / [`PREVIOUS`](../configurations/buttons/types/previous) |
+| `GenericPaginationButton<T>` (extends `GenericPaginateButton` and `PaginateButton`) | stored **per player and per `context-id`**, so one inventory can hold several independent lists | `PAGINATION_NEXT` / `PAGINATION_PREVIOUS` with the same `context-id` |
+
+Both are abstract classes of `fr.maxlego08.menu.api.button`. A paginate button is always `isPermanent()` (it is drawn on every page) and has "special rendering": it draws several items itself in `onRender`.
+
+## PaginateButton
+
+You implement:
+
+- `int getPaginationSize(Player player)`: how many elements there are in total.
+- `onRender(Player, InventoryEngine)`: draw the elements of the **current page** (`inventory.getPage()`) in the slots of the button (`getSlots()`).
+
+zMenu computes the number of pages of the inventory as `ceil(paginationSize / getSlots().size())` for the paginate button that has the most elements, and the `NEXT` / `PREVIOUS` buttons take care of the rest.
+
+```java
+import fr.maxlego08.menu.api.button.PaginateButton;
+import fr.maxlego08.menu.api.engine.InventoryEngine;
+import fr.maxlego08.menu.api.engine.Pagination;
+import fr.maxlego08.menu.api.utils.Placeholders;
+
+public class OnlinePlayersButton extends PaginateButton {
+
+    @Override
+    public int getPaginationSize(@NotNull Player player) {
+        return Bukkit.getOnlinePlayers().size();
+    }
+
+    @Override
+    public void onRender(@NotNull Player player, @NotNull InventoryEngine inventory) {
+        List<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
+        List<Integer> slots = new ArrayList<>(this.getSlots());
+
+        // Elements of the current page
+        List<Player> pageContent = new Pagination<Player>().paginate(players, slots.size(), inventory.getPage());
+
+        for (int index = 0; index < pageContent.size(); index++) {
+            Player target = pageContent.get(index);
+
+            // The `item:` of the YAML is used as a template
+            Placeholders placeholders = new Placeholders();
+            placeholders.register("target", target.getName());
+            ItemStack itemStack = this.getCustomItemStack(player, false, placeholders);
+
+            inventory.addItem(slots.get(index), itemStack)
+                    .setClick(event -> player.sendMessage("You clicked on " + target.getName()));
+        }
+    }
+}
+```
+
+- `Pagination<T>` is a helper with `paginate(List<T>, int size, int page)` (page starts at 1) and `paginateReverse(...)`.
+- `inventory.addItem(slot, itemStack)` returns an `ItemButton` on which you set click handlers: `setClick(...)`, `setLeftClick`, `setRightClick`, `setShiftLeftClick`, `setShiftRightClick`, `setMiddleClick`, `setDropClick` or `setClick(ClickType, ...)`.
+- Capture what you need in the lambda (the `Player`, the element), do not store the `InventoryClickEvent`.
+
+### Registering
+
+The button has no extra YAML key, so `NoneLoader` is enough:
+
+```java
+menuPlugin.getButtonManager().register(new NoneLoader(this, OnlinePlayersButton.class, "ONLINE_PLAYERS"));
+```
+
+### YAML
+
+```yaml
+name: "&6Players (%page%/%max-page%)"
+size: 54
+
+items:
+  players:
+    type: ONLINE_PLAYERS
+    slots:
+      - 10-16
+      - 19-25
+      - 28-34
+    item:
+      material: PLAYER_HEAD
+      playerHead: "%target%"
+      name: "&e%target%"
+
+  previous:
+    type: PREVIOUS
+    slot: 48
+    isPermanent: true
+    item:
+      material: ARROW
+      name: "&ePrevious page"
+
+  next:
+    type: NEXT
+    slot: 50
+    isPermanent: true
+    item:
+      material: ARROW
+      name: "&eNext page"
+```
+
+## GenericPaginationButton
+
+Use it when the page must be remembered per player and per list. You provide:
+
+| Method | Role |
+|--------|------|
+| `String getContextId(Player)` | Identifier of the list; the navigation buttons target it with `context-id` |
+| `PaginationManager getPaginationManager()` | Usually `menuPlugin.getInventoryManager().getPaginationManager()` |
+| `List<T> getElements(Player)` | All the elements |
+| `int getPaginationSize(Player)` | Number of elements (normally `getElements(player).size()`) |
+| `void renderElement(Player, InventoryEngine, int slot, T element, Placeholders)` | Draw one element. `placeholders` already contains `page` and `max_page`. |
+
+`onRender` is `final` here: it slices the elements for the current page, then calls `renderElement` for each slot.
+
+```java
+public class HomesButton extends GenericPaginationButton<Home> {
+
+    private final MenuPlugin plugin;
+    private final HomeService homes;
+
+    public HomesButton(MenuPlugin plugin, HomeService homes) {
+        this.plugin = plugin;
+        this.homes = homes;
+    }
+
+    @Override
+    public @NotNull String getContextId(@NotNull Player player) {
+        return "homes";
+    }
+
+    @Override
+    public @NotNull PaginationManager getPaginationManager() {
+        return this.plugin.getInventoryManager().getPaginationManager();
+    }
+
+    @Override
+    protected @NotNull List<Home> getElements(@NotNull Player player) {
+        return this.homes.getHomes(player.getUniqueId());
+    }
+
+    @Override
+    public int getPaginationSize(@NotNull Player player) {
+        return this.getElements(player).size();
+    }
+
+    @Override
+    protected void renderElement(@NotNull Player player, @NotNull InventoryEngine inventory, int slot,
+                                 @NotNull Home home, @NotNull Placeholders placeholders) {
+        placeholders.register("home", home.getName());
+        inventory.addItem(slot, this.getCustomItemStack(player, false, placeholders))
+                .setClick(event -> player.teleportAsync(home.getLocation()));
+    }
+}
+```
+
+Its loader is a normal `ButtonLoader`; the navigation is configured in YAML with the built-in buttons, which find the paginate button whose `getContextId(player)` equals their own `context-id`:
+
+```yaml
+items:
+  homes:
+    type: HOMES
+    slots: [10-16, 19-25]
+    item:
+      material: RED_BED
+      name: "&e%home%"
+
+  next:
+    type: PAGINATION_NEXT
+    context-id: homes
+    only-refresh-button: true   # redraw only the list, not the whole inventory
+    slot: 50
+    item:
+      material: ARROW
+      name: "&eNext"
+
+  previous:
+    type: PAGINATION_PREVIOUS
+    context-id: homes
+    only-refresh-button: true
+    slot: 48
+    item:
+      material: ARROW
+      name: "&ePrevious"
+```
+
+`GenericPaginateButton` also gives you `getCurrentPage(player)` (0-based) / `getCurrentPageOneIndexed(player)`, `setCurrentPage`, `nextPage`, `previousPage`, `resetPagination`, `getMaxPage`, `hasNextPage` and `hasPreviousPage`. The `reset-pagination` action resets a context from YAML. `PaginationManager` (`InventoryManager#getPaginationManager()`) holds the states: `getPage`, `setPage`, `getMaxPage`, `removePlayerStates(uuid)`, `clearAll()`.
+
+:::note Built-in PAGINATION types
+The `PAGINATION` and `DYNAMIC_PAGINATION` button types are part of [zMenu+](../zmenu-plus). The `PAGINATION_NEXT` / `PAGINATION_PREVIOUS` buttons ship with zMenu and work with any `GenericPaginateButton`, including yours.
+:::
+
+## Handling Empty Lists
+
+Use the `else` of the button (shown when its `view-requirement` fails) or a separate button with a view requirement on a placeholder you register yourself:
+
+```yaml
+items:
+  empty:
+    slot: 22
+    view-requirement:
+      requirements:
+        - type: placeholder
+          placeholder: "%zmenu_myplugin_count%"
+          action: EQUAL_TO
+          value: "0"
+    item:
+      material: BARRIER
+      name: "&cNothing to display"
+```
+
+## Real-Time Updates
+
+The inventory is re-rendered every `update-interval` milliseconds (`updateInterval` in the inventory file) and when you call `menuPlugin.getInventoryManager().updateInventory(player)`. `onRender` therefore runs again and should only read data (never block): cache expensive results.
+
+## Best Practices
+
+1. **Keep `getPaginationSize` cheap**: it is called on every render
+2. **Return the same list order** between renders, otherwise items jump between pages
+3. **Use the YAML `item:` as a template** (`getCustomItemStack` + placeholders) so server owners can restyle it
+4. **Never keep the `Player`** beyond the click lambda
+5. **Use `context-id`** when an inventory has more than one list
+
+## Next Steps
+
+- Create [Custom Buttons](./api-buttons)
+- Build items with [MenuItemStack](./api-menu-item-stack)
+- Browse every [Extension point](./api-extensions)

@@ -1,0 +1,349 @@
+---
+sidebar_position: 3
+title: Custom Buttons
+description: Creating custom button types for zMenu
+---
+
+# Custom Buttons
+
+Learn how to create and register custom button types in zMenu.
+
+## Overview
+
+A custom button type is made of two classes:
+
+1. A **`ButtonLoader`** (abstract class) that reads the YAML of your button and builds the button.
+2. A **`Button`** (abstract class) that holds the behavior: what is rendered, what happens on click.
+
+zMenu then handles everything that is common to all buttons for you (`slot`, `slots`, `item`, `actions`, `click-requirement`, `view-requirement`, `else`, `sound`, `messages`, `update`, ... see [Button configuration](../configurations/buttons/button)). Your loader only has to read the keys that are specific to **your** type.
+
+```text
+YAML  ->  ButtonLoader#load(...)  ->  Button instance  ->  zMenu applies slot / item / actions / requirements
+```
+
+## Creating a Button Loader
+
+```java
+import fr.maxlego08.menu.api.button.Button;
+import fr.maxlego08.menu.api.button.DefaultButtonValue;
+import fr.maxlego08.menu.api.loader.ButtonLoader;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
+
+public class MyButtonLoader extends ButtonLoader {
+
+    public MyButtonLoader(Plugin plugin) {
+        // "my_custom_button" is the value of `type:` in the YAML, "mcb" is an alias
+        super(plugin, "my_custom_button", "mcb");
+    }
+
+    @Override
+    public Button load(@NotNull YamlConfiguration configuration, @NotNull String path, @NotNull DefaultButtonValue defaultButtonValue) {
+        // `path` already ends with a dot, e.g. "items.my-button."
+        String customProperty = configuration.getString(path + "custom-property", "default");
+        int customNumber = configuration.getInt(path + "custom-number", 0);
+        boolean customFlag = configuration.getBoolean(path + "custom-flag", false);
+
+        return new MyCustomButton(customProperty, customNumber, customFlag);
+    }
+}
+```
+
+Things to know:
+
+- The constructor is `ButtonLoader(Plugin plugin, String name, String... aliases)`. The `name` and the aliases are what players write in `type:`; they are matched case-insensitively.
+- `path` ends with a `.`: write `path + "key"`, not `path + ".key"`.
+- Return `null` (and log why) if the configuration is invalid; the button is then skipped.
+- `DefaultButtonValue` carries the defaults inherited from a pattern or the inventory (`getSlot()`, `getFile()`, ...). Most loaders ignore it.
+- `ButtonLoader.loadSlot(List<String>)` is a static helper that expands `"10-16"` style slot lists.
+- Registering a name or alias already used by another plugin throws `ButtonAlreadyRegisterException`.
+
+## Creating a Button
+
+```java
+import fr.maxlego08.menu.api.button.Button;
+import fr.maxlego08.menu.api.engine.InventoryEngine;
+import fr.maxlego08.menu.api.utils.Placeholders;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.jetbrains.annotations.NotNull;
+
+public class MyCustomButton extends Button {
+
+    private final String customProperty;
+    private final int customNumber;
+    private final boolean customFlag;
+
+    public MyCustomButton(String customProperty, int customNumber, boolean customFlag) {
+        this.customProperty = customProperty;
+        this.customNumber = customNumber;
+        this.customFlag = customFlag;
+    }
+
+    @Override
+    public void onClick(@NotNull Player player, @NotNull InventoryClickEvent event,
+                        @NotNull InventoryEngine inventory, int slot, @NotNull Placeholders placeholders) {
+        // Always call super first: it runs click requirements, sounds, messages and the `actions` list
+        super.onClick(player, event, inventory, slot, placeholders);
+
+        player.sendMessage("Property: " + this.customProperty + ", number: " + this.customNumber);
+        if (this.customFlag) {
+            player.sendMessage("Flag is enabled!");
+        }
+    }
+}
+```
+
+`Button` has no abstract method, so you only override what you need:
+
+| Method | When it is called |
+|--------|-------------------|
+| `onClick(Player, InventoryClickEvent, InventoryEngine, int, Placeholders)` | Any click. The default implementation runs requirements and actions. |
+| `onLeftClick`, `onRightClick`, `onMiddleClick` (`Player, InventoryClickEvent, InventoryEngine, int`) | Click-specific hooks |
+| `onRender(Player, InventoryEngine)` | The button is drawn. Override it for buttons that draw several items (see [Paginate Button](./api-paginate-button)). |
+| `getCustomItemStack(Player, boolean useCache, Placeholders)` | Build the displayed `ItemStack`. Override it to add placeholders (see [MenuItemStack](./api-menu-item-stack)). |
+| `onInventoryOpen(Player, InventoryEngine, Placeholders)` | The inventory containing the button is opened |
+| `onInventoryClose(Player, InventoryEngine)` | The inventory is closed |
+| `onAnvilTextChange(...)` | Text typed in an anvil inventory |
+| `isPermanent()` | Return `true` to show the button on every page |
+| `isClickable()` | Return `false` to ignore clicks |
+
+Useful getters inherited from `Button`: `getItemStack()` (the `MenuItemStack` read from `item:`), `getSlot()`, `getSlots()`, `getName()` (the YAML key of the button).
+
+## Registering Your Button
+
+Register the loader in your `onEnable` (with `depend: [zMenu]`, zMenu is already enabled):
+
+```java
+@Override
+public void onEnable() {
+    MenuPlugin menuPlugin = (MenuPlugin) Bukkit.getPluginManager().getPlugin("zMenu");
+    menuPlugin.getButtonManager().register(new MyButtonLoader(this));
+}
+```
+
+:::tip Registration order does not matter
+When zMenu parses an inventory that uses a button type, action or requirement it does not know yet, it **keeps the file on hold** instead of failing. As soon as you call `register(...)` (or `registerAction` / `registerPermissible`), every waiting inventory that now has all its dependencies is loaded. So an inventory that uses your `type: my_custom_button` can sit in the `inventories/` folder of zMenu even though your plugin enables after zMenu.
+:::
+
+zMenu also fires a `ButtonLoaderRegisterEvent` once, during its own start-up, right after the built-in loaders are registered. It is only useful if your listener is registered **before** zMenu enables (for example in your plugin's `onLoad()`), and it is not fired again on `/zm reload`:
+
+```java
+@Override
+public void onLoad() {
+    getServer().getPluginManager().registerEvents(new Listener() {
+        @EventHandler
+        public void onRegister(ButtonLoaderRegisterEvent event) {
+            event.register(new MyButtonLoader(MyPlugin.this));
+        }
+    }, this);
+}
+```
+
+Remove your loaders when your plugin disables:
+
+```java
+menuPlugin.getButtonManager().unregisters(this); // every loader registered by this plugin
+```
+
+`ButtonManager` also exposes `getLoaders()`, `getLoaders(Plugin)` and `getLoader(String name)` to inspect what is registered.
+
+## Using Your Custom Button
+
+```yaml
+items:
+  my-custom-item:
+    type: my_custom_button
+    slot: 13
+    custom-property: "Hello World"
+    custom-number: 42
+    custom-flag: true
+    item:
+      material: DIAMOND
+      name: "&b&lCustom Button"
+      lore:
+        - "&7This is a custom button!"
+    actions:
+      - type: sound
+        sound: ENTITY_EXPERIENCE_ORB_PICKUP
+```
+
+## Buttons Without Configuration: NoneLoader
+
+If your button has no extra YAML keys, you do not need to write a loader. `NoneLoader(Plugin plugin, Class<? extends Button> clazz, String name)` instantiates the class for you, using a public constructor whose single parameter accepts the `plugin` you passed, else a no-argument constructor:
+
+```java
+menuPlugin.getButtonManager().register(new NoneLoader(this, MyPaginatedButton.class, "MY_PAGINATED_BUTTON"));
+```
+
+## Complete Example: Teleport Button
+
+```java
+public class TeleportButtonLoader extends ButtonLoader {
+
+    public TeleportButtonLoader(Plugin plugin) {
+        super(plugin, "teleport");
+    }
+
+    @Override
+    public Button load(@NotNull YamlConfiguration config, @NotNull String path, @NotNull DefaultButtonValue defaults) {
+        String world = config.getString(path + "world", "world");
+        double x = config.getDouble(path + "x", 0);
+        double y = config.getDouble(path + "y", 64);
+        double z = config.getDouble(path + "z", 0);
+        float yaw = (float) config.getDouble(path + "yaw", 0);
+        float pitch = (float) config.getDouble(path + "pitch", 0);
+        return new TeleportButton(world, x, y, z, yaw, pitch);
+    }
+}
+```
+
+```java
+public class TeleportButton extends Button {
+
+    private final String worldName;
+    private final double x, y, z;
+    private final float yaw, pitch;
+
+    public TeleportButton(String worldName, double x, double y, double z, float yaw, float pitch) {
+        this.worldName = worldName;
+        this.x = x; this.y = y; this.z = z;
+        this.yaw = yaw; this.pitch = pitch;
+    }
+
+    @Override
+    public void onClick(@NotNull Player player, @NotNull InventoryClickEvent event,
+                        @NotNull InventoryEngine inventory, int slot, @NotNull Placeholders placeholders) {
+        super.onClick(player, event, inventory, slot, placeholders);
+
+        // Resolve the world at click time: it may not be loaded when the YAML is parsed
+        World world = Bukkit.getWorld(this.worldName);
+        if (world == null) {
+            player.sendMessage("World not found: " + this.worldName);
+            return;
+        }
+        player.closeInventory();
+        player.teleportAsync(new Location(world, this.x, this.y, this.z, this.yaw, this.pitch)); // Folia safe
+    }
+}
+```
+
+## Complete Example: Counter Button
+
+A button that remembers a per-player value and displays it through a placeholder:
+
+```java
+public class CounterButton extends Button {
+
+    private final Map<UUID, Integer> counts = new ConcurrentHashMap<>();
+    private final int step;
+
+    public CounterButton(int step) {
+        this.step = step;
+    }
+
+    @Override
+    public ItemStack getCustomItemStack(@NotNull Player player, boolean useCache, @NotNull Placeholders placeholders) {
+        placeholders.register("count", String.valueOf(this.counts.getOrDefault(player.getUniqueId(), 0)));
+        // Never use the cache here: the item changes on every click
+        return super.getCustomItemStack(player, false, placeholders);
+    }
+
+    @Override
+    public void onClick(@NotNull Player player, @NotNull InventoryClickEvent event,
+                        @NotNull InventoryEngine inventory, int slot, @NotNull Placeholders placeholders) {
+        super.onClick(player, event, inventory, slot, placeholders);
+
+        int delta = event.isRightClick() ? -this.step : this.step;
+        this.counts.merge(player.getUniqueId(), delta, Integer::sum);
+
+        // Redraw the inventory so the new value is displayed
+        inventory.getPlugin().getInventoryManager().updateInventory(player);
+    }
+}
+```
+
+```yaml
+items:
+  counter:
+    type: counter
+    slot: 13
+    step: 5
+    item:
+      material: PAPER
+      name: "&eCounter: &f%count%"
+      lore:
+        - "&7Left click: +5"
+        - "&7Right click: -5"
+```
+
+For a counter that survives restarts, store the value with the [Player Data API](./api-player-data) instead of a map.
+
+## Adding Keys to Every Button: ButtonOption
+
+A `ButtonOption` lets a plugin read **extra keys on any button** (even built-in ones), without defining a new type. It is useful for integrations such as "this button also runs my cooldown".
+
+```java
+public class CooldownOption implements ButtonOption {
+
+    private final Plugin plugin;
+    private int cooldownSeconds;
+
+    // zMenu instantiates the class with this exact constructor; options without it are silently ignored
+    public CooldownOption(Plugin plugin) {
+        this.plugin = plugin;
+    }
+
+    @Override
+    public String getName() {
+        return "cooldown";
+    }
+
+    @Override
+    public Plugin getPlugin() {
+        return this.plugin;
+    }
+
+    @Override
+    public void loadButton(Button button, YamlConfiguration configuration, String path,
+                           InventoryManager inventoryManager, ButtonManager buttonManager,
+                           Loader<MenuItemStack> itemStackLoader, File file) {
+        this.cooldownSeconds = configuration.getInt(path + "my-plugin-cooldown", 0);
+    }
+
+    @Override
+    public void onClick(Button button, Player player, InventoryClickEvent event,
+                        InventoryEngine inventoryEngine, int slot, boolean isSuccess) {
+        if (this.cooldownSeconds > 0 && isSuccess) {
+            // ... start a cooldown for the player
+        }
+    }
+}
+```
+
+```java
+menuPlugin.getInventoryManager().registerOption(this, CooldownOption.class);
+// on disable
+menuPlugin.getInventoryManager().unregisterOptions(this);
+```
+
+A new instance is created for every loaded button, so fields are per-button. `isSuccess` is `true` when all click requirements passed. Override `serialize(Button, ConfigurationSection)` if your keys must be written back when a menu is exported.
+
+The same mechanism exists for whole inventories with `InventoryOption`, see [Extension points](./api-extensions#inventory-options).
+
+## Best Practices
+
+1. **Call `super.onClick`** so requirements, sounds and actions keep working
+2. **Never block** the main thread in `onClick`; use `menuPlugin.getScheduler()` for async work
+3. **Validate YAML** in the loader and return `null` with a clear log message on error
+4. **Do not keep `Player` references**; store `UUID`s
+5. **Prefer actions** for behaviors that do not need a new YAML type: see [Custom Actions](./api-actions)
+6. **Unregister** your loaders and options in `onDisable`
+
+## Next Steps
+
+- Build items dynamically with [MenuItemStack](./api-menu-item-stack)
+- Create a [Paginated Button](./api-paginate-button)
+- Create [Custom Actions](./api-actions)
+- Browse every [Extension point](./api-extensions)

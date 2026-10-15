@@ -1,0 +1,246 @@
+---
+sidebar_position: 4
+title: Actions personnalisées
+description: Créer des types d'actions personnalisés pour zMenu
+---
+
+# Actions personnalisées
+
+Apprenez à créer et enregistrer des types d'actions personnalisés dans zMenu.
+
+## Vue d'ensemble
+
+Les actions s'exécutent quand un joueur clique sur un bouton (`actions:`), quand une condition réussit ou est refusée (`success:` / `deny:`), quand un inventaire s'ouvre ou se ferme (`open-actions:` / `close-actions:`) et dans les [commandes personnalisées](../configurations/custom-commands). Une action personnalisée ajoute un nouveau `type:` utilisable à tous ces endroits.
+
+Comme pour les boutons, une action est composée de deux classes :
+
+1. Un **`ActionLoader`** (classe abstraite) : lit la map YAML d'une action et retourne une `Action`.
+2. Une **`Action`** (classe abstraite) : contient le code exécuté pour un joueur.
+
+zMenu lit pour vous les clés communes à toutes les actions : `delay` (ticks), `chance` (0-100), `debug` et `deny-chance-actions`. Votre loader ne lit que ses propres clés.
+
+## Créer une Action
+
+```java
+import fr.maxlego08.menu.api.button.Button;
+import fr.maxlego08.menu.api.engine.InventoryEngine;
+import fr.maxlego08.menu.api.requirement.Action;
+import fr.maxlego08.menu.api.utils.Placeholders;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+public class RepeatMessageAction extends Action {
+
+    private final String message;
+    private final int times;
+
+    public RepeatMessageAction(String message, int times) {
+        this.message = message;
+        this.times = times;
+    }
+
+    @Override
+    protected void execute(@NotNull Player player, @Nullable Button button,
+                           @NotNull InventoryEngine inventoryEngine, @NotNull Placeholders placeholders) {
+        // 1. placeholders zMenu (%player%, placeholders de bouton, ...)  2. PlaceholderAPI et %zmenu_*%
+        String text = inventoryEngine.getPlugin().parse(player, placeholders.parse(this.message));
+        for (int i = 0; i < this.times; i++) {
+            inventoryEngine.getPlugin().getMetaUpdater().sendMessage(player, text);
+        }
+    }
+}
+```
+
+Notes :
+
+- `execute` est `protected abstract` ; zMenu l'appelle après avoir appliqué `delay` et `chance`. Le placeholder `%player%` est toujours enregistré dans `placeholders`.
+- `button` vaut `null` quand l'action s'exécute depuis une commande ou un hook d'ouverture/fermeture d'inventaire.
+- `inventoryEngine.getPlugin()` vous donne le `MenuPlugin` (`parse`, `getMetaUpdater()`, `getScheduler()`, managers...).
+- `execute` s'exécute sur le thread du joueur. Pour Folia, utilisez `inventoryEngine.getPlugin().getScheduler()` (FoliaLib) plutôt que le scheduler Bukkit.
+- Pour que zMenu puisse exporter l'action (export de menu, sérialisation), surchargez `serializeProperties(Map<String, Object> map)` et faites `put("type", "...")` plus vos clés. Sinon, la sérialisation lève une `UnsupportedOperationException` ; le chargement fonctionne quand même.
+
+## Créer un Action Loader
+
+```java
+import fr.maxlego08.menu.api.loader.ActionLoader;
+import fr.maxlego08.menu.api.utils.TypedMapAccessor;
+
+import java.io.File;
+
+public class RepeatMessageLoader extends ActionLoader {
+
+    public RepeatMessageLoader() {
+        // Toutes les cles utilisables dans `type:`. Utilisez des minuscules !
+        super("repeat_message", "repeat-message");
+    }
+
+    @Override
+    public Action load(@NotNull String path, @NotNull TypedMapAccessor accessor, @NotNull File file) {
+        String message = accessor.getString("message", "");
+        int times = accessor.getInt("times", 1);
+        if (message.isEmpty()) {
+            return null; // action invalide : zMenu l'ignore
+        }
+        return new RepeatMessageAction(message, times);
+    }
+}
+```
+
+- Le constructeur prend une ou plusieurs clés (`ActionLoader(String... keys)` ou `ActionLoader(List<String>)`). **Écrivez-les en minuscules** : la recherche met en minuscules le `type` lu dans le YAML, une clé contenant des majuscules ne correspondrait donc jamais.
+- `path` est l'emplacement de la liste d'actions, utile uniquement pour les messages d'erreur.
+- `TypedMapAccessor` enveloppe la map YAML de l'action : `getString`, `getInt`, `getLong`, `getDouble`, `getFloat`, `getBoolean`, `getStringList`, `getIntList`, `getMapList`, `getObject`, `contains`, chacune avec une valeur par défaut optionnelle.
+- Pour lire une section `item:` imbriquée dans un `MenuItemStack`, utilisez `inventoryManager.loadItemStack(file, path, map)` (voir l'action intégrée `item_give`).
+- Retournez `null` quand la configuration est invalide.
+
+## Enregistrer votre action
+
+```java
+@Override
+public void onEnable() {
+    MenuPlugin menuPlugin = (MenuPlugin) Bukkit.getPluginManager().getPlugin("zMenu");
+    menuPlugin.getButtonManager().registerAction(new RepeatMessageLoader());
+}
+```
+
+Comme pour les boutons, les inventaires qui utilisent une action que zMenu ne connaît pas encore sont mis en attente et chargés dès que l'action est enregistrée : l'ordre d'activation des plugins n'a donc pas d'importance.
+
+Il n'existe pas de `unregisterAction`. Enregistrer une clé qui existe déjà remplace silencieusement l'ancien loader : choisissez une clé unique (par exemple préfixée par le nom de votre plugin).
+
+## Utiliser votre action personnalisée
+
+```yaml
+items:
+  my-button:
+    slot: 13
+    item:
+      material: DIAMOND
+      name: "&bClick me"
+    actions:
+      - type: repeat_message
+        message: "&aHello, %player%!"
+        times: 3
+        delay: 20          # cle commune : attend 1 seconde
+        chance: 50         # cle commune : 50% de chances de s'executer
+```
+
+## Exemple complet : action de particules
+
+```java
+public class ParticleAction extends Action {
+
+    private final Particle particle;
+    private final int count;
+    private final double offset;
+
+    public ParticleAction(Particle particle, int count, double offset) {
+        this.particle = particle;
+        this.count = count;
+        this.offset = offset;
+    }
+
+    @Override
+    protected void execute(@NotNull Player player, @Nullable Button button,
+                           @NotNull InventoryEngine inventoryEngine, @NotNull Placeholders placeholders) {
+        Location location = player.getLocation().add(0, 1, 0);
+        player.getWorld().spawnParticle(this.particle, location, this.count, this.offset, this.offset, this.offset, 0.1);
+    }
+}
+```
+
+```java
+public class ParticleLoader extends ActionLoader {
+
+    public ParticleLoader() {
+        super("particle");
+    }
+
+    @Override
+    public Action load(@NotNull String path, @NotNull TypedMapAccessor accessor, @NotNull File file) {
+        Particle particle;
+        try {
+            particle = Particle.valueOf(accessor.getString("particle", "HEART").toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException exception) {
+            return null;
+        }
+        return new ParticleAction(particle, accessor.getInt("count", 10), accessor.getDouble("offset", 0.5));
+    }
+}
+```
+
+```yaml
+actions:
+  - type: particle
+    particle: HEART
+    count: 30
+    offset: 1.0
+```
+
+## Exemple complet : action Vault
+
+```java
+public class VaultAction extends Action {
+
+    private final boolean give;
+    private final double amount;
+
+    public VaultAction(boolean give, double amount) {
+        this.give = give;
+        this.amount = amount;
+    }
+
+    @Override
+    protected void execute(@NotNull Player player, @Nullable Button button,
+                           @NotNull InventoryEngine inventoryEngine, @NotNull Placeholders placeholders) {
+        RegisteredServiceProvider<Economy> provider = Bukkit.getServicesManager().getRegistration(Economy.class);
+        if (provider == null) return;
+
+        Economy economy = provider.getProvider();
+        EconomyResponse response = this.give ? economy.depositPlayer(player, this.amount) : economy.withdrawPlayer(player, this.amount);
+        if (!response.transactionSuccess()) {
+            inventoryEngine.getPlugin().getMetaUpdater().sendMessage(player, "&cTransaction failed: " + response.errorMessage);
+        }
+    }
+}
+```
+
+```java
+public class VaultLoader extends ActionLoader {
+
+    public VaultLoader() {
+        super("vault_money");
+    }
+
+    @Override
+    public Action load(@NotNull String path, @NotNull TypedMapAccessor accessor, @NotNull File file) {
+        boolean give = accessor.getString("operation", "give").equalsIgnoreCase("give");
+        return new VaultAction(give, accessor.getDouble("amount", 0));
+    }
+}
+```
+
+```yaml
+actions:
+  - type: vault_money
+    operation: give
+    amount: 100
+```
+
+## Conditions personnalisées
+
+Un type de *condition* (le `type:` utilisé sous `requirements:`) suit le même schéma avec `PermissibleLoader` et `Permissible`. Voir [Conditions personnalisées](./api-requirements).
+
+## Bonnes pratiques
+
+1. **Clés en minuscules**, uniques et descriptives (`monplugin_do_thing`)
+2. **Validez les entrées** dans le loader et retournez `null` avec un log quand elles sont invalides
+3. **Ne bloquez pas** le thread du joueur ; passez par `getScheduler()` pour le travail asynchrone
+4. **Appliquez les placeholders** avec `inventoryEngine.getPlugin().parse(player, placeholders.parse(text))`
+5. **Gardez les actions sans état** : une instance est partagée par tous les joueurs qui cliquent sur le bouton
+6. **Documentez vos clés YAML** pour les administrateurs qui utiliseront votre action
+
+## Étapes suivantes
+
+- Travaillez avec les [Données joueur](./api-player-data)
+- Écoutez les [Événements](./api-events)
+- Parcourez tous les [Points d'extension](./api-extensions)

@@ -1,0 +1,614 @@
+---
+sidebar_position: 1
+title: Configuration d'inventaire
+description: Référence complète des options de configuration d'inventaire
+---
+
+# Configuration d'inventaire
+
+Cette page documente toutes les options de configuration disponibles pour créer des inventaires dans zMenu.
+
+## Emplacement des fichiers
+
+Les inventaires sont stockés dans le dossier `plugins/zMenu/inventories/`. Chaque fichier YAML représente un inventaire. Vous pouvez organiser les inventaires dans des sous-dossiers.
+
+```
+plugins/zMenu/inventories/
+├── main_menu.yml
+├── shop.yml
+├── warps/
+│   ├── spawn.yml
+│   └── hub.yml
+└── admin/
+    └── admin_menu.yml
+```
+
+## Structure de base
+
+```yaml
+# Nom de l'inventaire affiche dans la barre de titre
+name: "&6Mon Inventaire"
+
+# Taille de l'inventaire (9, 18, 27, 36, 45 ou 54)
+size: 54
+
+# Activer ou desactiver cet inventaire
+enable: true
+
+# Definitions des boutons
+items:
+  nom-bouton:
+    # Configuration du bouton...
+```
+
+## Options de configuration
+
+### name
+
+Le titre affiché en haut de l'inventaire.
+
+```yaml
+name: "&6&lMon Menu Serveur"
+```
+
+**Fonctionnalités :**
+- Prend en charge les codes couleur (`&6`, `&#FF5500`)
+- Prend en charge MiniMessage (si activé)
+- Prend en charge les placeholders (`%player%`, `%page%`)
+- Maximum 32 caractères (limitation de Minecraft)
+
+**Placeholders de pagination :**
+```yaml
+name: "&6Boutique &7(Page %page%/%max-page%)"
+```
+
+---
+
+### size
+
+Le nombre d'emplacements dans l'inventaire. Doit être un multiple de 9.
+
+| Taille | Lignes | Description |
+|--------|--------|-------------|
+| 9 | 1 | Une seule ligne |
+| 18 | 2 | Deux lignes |
+| 27 | 3 | Trois lignes (petit coffre) |
+| 36 | 4 | Quatre lignes |
+| 45 | 5 | Cinq lignes |
+| 54 | 6 | Six lignes (double coffre) |
+
+```yaml
+size: 54
+```
+
+---
+
+### rename-requirements (Anvil)
+
+Lorsque vous utilisez `type: ANVIL`, l'inventaire devient une **saisie de texte** : le joueur peut taper du texte dans le champ de renommage de l'enclume. À chaque modification du texte, zMenu exécute les requirements définis sous `rename-requirements`, ce qui permet de valider en direct ce que le joueur tape.
+
+L'enclume possède 3 slots : les deux slots d'entrée (`0` et `1`) et le slot de résultat (`2`).
+
+```yaml
+name: "&8Tapez quelque chose"
+type: ANVIL
+
+rename-requirements:
+  requirements:
+    - type: placeholder
+      placeholder: "%new_text%"
+      action: CONTAINS_STRING
+      value: "admin"
+      deny:
+        - type: message
+          messages:
+            - "&cVous ne pouvez pas utiliser ce mot !"
+
+items:
+  input:
+    slot: 0
+    item:
+      material: PAPER
+      name: "Tapez ici"
+  result:
+    slot: 2
+    item:
+      material: NETHER_STAR
+      name: "&aVous avez tape : &f%new_text%"
+```
+
+**Placeholders disponibles dans `rename-requirements` :**
+
+| Placeholder  | Description                                                                  |
+|--------------|------------------------------------------------------------------------------|
+| `%type%`     | Le type de changement : `ADDED`, `REMOVED`, `CLEARED`, `REPLACED` ou `EQUAL` |
+| `%old_text%` | Le texte avant le changement                                                 |
+| `%new_text%` | Le texte actuel dans le champ de renommage                                   |
+| `%char%`     | Le caractère ajouté ou retiré (uniquement pour `ADDED` / `REMOVED`)          |
+
+:::info
+L'item de résultat placé dans le slot `2` est envoyé directement au joueur et mis à jour à chaque frappe, ce qui permet de construire un aperçu en direct de ce que le joueur tape.
+:::
+
+---
+
+### enable
+
+Activer ou désactiver cet inventaire. Les inventaires désactivés ne peuvent pas être ouverts.
+
+```yaml
+enable: true
+```
+
+C'est utile pour désactiver temporairement un inventaire sans supprimer le fichier.
+
+---
+
+### update-interval
+
+Rafraîchir automatiquement l'inventaire à intervalle régulier (en millisecondes). Défaut : `1000`. `updateInterval` est accepté comme alias.
+
+```yaml
+update-interval: 1000  # Rafraichir chaque seconde (1000 ms)
+```
+
+:::info
+1000 ms = 1 seconde. Utilisez ceci pour les inventaires avec des placeholders dynamiques nécessitant des mises à jour fréquentes.
+:::
+
+---
+
+### clearInventory
+
+Vider l'inventaire du joueur pendant que le menu est ouvert et le restaurer à la fermeture.
+
+```yaml
+clearInventory: true
+```
+
+**Cas d'utilisation :**
+- Packs de textures personnalisés qui recouvrent tout l'écran
+- Empêcher l'interaction d'items dans le menu
+
+---
+
+### type
+
+Le type d'inventaire. Défaut : `CHEST`. Les valeurs sont celles de l'enum Bukkit `InventoryType` (`CHEST`, `DISPENSER`, `DROPPER`, `FURNACE`, `WORKBENCH`, `ENCHANTING`, `BREWING`, `ANVIL`, `BEACON`, `HOPPER`, `SHULKER_BOX`, `BARREL`, `BLAST_FURNACE`, `LECTERN`, `SMOKER`, `LOOM`, `CARTOGRAPHY`, `GRINDSTONE`, `STONECUTTER`, `SMITHING`, ...). `CRAFTING` et `PLAYER` ne sont pas pris en charge.
+
+```yaml
+type: HOPPER
+```
+
+:::info
+Avec un type autre que `CHEST`, l'option `size` est ignorée car chaque type a une taille fixe. `type: ANVIL` nécessite Minecraft 1.21+.
+:::
+
+---
+
+### clear-inventory-type
+
+Choisit la méthode utilisée pour vider l'inventaire du joueur (avec `clearInventory`). Défaut : `DEFAULT`.
+
+```yaml
+clear-inventory-type: DEFAULT
+```
+
+- `DEFAULT` - Vide l'inventaire du joueur et sauvegarde son contenu pour le restaurer plus tard
+- `PACKET_EVENT` - Utilise PacketEvents pour masquer l'inventaire via des paquets sans le modifier (nécessite PacketEvents)
+
+---
+
+### cancel-item-pickup
+
+Empêche les joueurs de ramasser des items pendant que l'inventaire est ouvert. Défaut : `false`. `cancelItemPickup` est accepté comme alias.
+
+```yaml
+cancel-item-pickup: true
+```
+
+---
+
+### click-limiter-enabled
+
+Active le limiteur de clics pour empêcher les joueurs de cliquer trop vite. Défaut : `true`.
+
+```yaml
+click-limiter-enabled: true
+```
+
+---
+
+### target-player-name-placeholder
+
+Définit un placeholder personnalisé pour le nom du joueur cible (utile quand un inventaire est ouvert pour un autre joueur). Défaut : `%player_name%`. `target_player_name_placeholder` est accepté comme alias.
+
+```yaml
+target-player-name-placeholder: "%target%"
+```
+
+---
+
+### action-patterns
+
+Applique des patterns d'actions à tous les boutons de cet inventaire. Les patterns d'actions sont définis dans le dossier `plugins/zMenu/actions_patterns/` (voir [Patterns](../patterns)).
+
+```yaml
+action-patterns:
+  - "default-actions"
+```
+
+Les actions du pattern sont ajoutées **après** les actions propres du bouton, uniquement aux boutons qui définissent au moins une action (mettez [`stop-on-empty: false`](../buttons/button) sur un bouton pour les appliquer aussi à un bouton sans action), et une action dont le `type` est déjà utilisé par le bouton n'est pas ajoutée une seconde fois.
+
+---
+
+### title-animation
+
+Anime le titre de l'inventaire avec plusieurs frames. **Nécessite** [PacketEvents](https://github.com/retrooper/packetevents).
+
+```yaml
+title-animation:
+  titles:
+    - "&bBienvenue dans le &aMenu !"
+    - "&eProfitez de &nos &9fonctionnalites !"
+  cycles: 5
+  initial-delay: 1
+  interval: 2
+  time-unit: SECONDS
+  show-items-after-animation: true
+  item-update-interval: 1
+```
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `titles` | Liste | - | Liste des frames du titre |
+| `cycles` | Entier | -1 | Nombre de cycles (-1 pour l'infini) |
+| `initial-delay` | Entier | 20 | Délai avant le début de l'animation |
+| `interval` | Entier | 20 | Temps entre chaque frame |
+| `time-unit` | String | SECONDS | Unité de temps (`NANOSECONDS`, `MICROSECONDS`, `MILLISECONDS`, `SECONDS`, `MINUTES`, `HOURS`, `DAYS`) |
+| `show-items-after-animation` | Booléen | false | Affiche les items une fois l'animation terminée |
+| `plugin` | String | premier disponible | Identifiant du fournisseur d'animation de titre, la casse n'a pas d'importance (celui fourni est `packet-events`). Un identifiant incorrect écrit un avertissement et aucune animation n'est jouée. |
+| `item-update-interval` | Entier | 1 | Fréquence de mise à jour des items pendant l'animation |
+
+:::caution Les délais utilisent l'unité de temps choisie
+`initial-delay` et `interval` sont exprimés dans `time-unit`. Leur valeur par défaut de `20` correspond donc à 20 **secondes** avec l'unité `SECONDS` par défaut. Pour une animation rapide, utilisez `time-unit: MILLISECONDS` (par exemple `interval: 500`) ou diminuez les valeurs.
+:::
+
+:::note Animations infinies
+Avec `cycles: -1` (par défaut) ou `0`, l'animation ne se termine jamais. Combiné avec `show-items-after-animation: true`, les items ne seraient alors **jamais** affichés, car ils ne sont envoyés qu'à la fin du dernier cycle : utilisez un `cycles` positif avec cette option. `item-update-interval` n'est utilisé que lorsque `show-items-after-animation` vaut `false` : les items sont renvoyés toutes les N frames (`0` le désactive). Les titres acceptent les placeholders.
+:::
+
+---
+
+### fillItem
+
+Définir un item pour remplir tous les emplacements vides.
+
+```yaml
+fillItem:
+  material: BLACK_STAINED_GLASS_PANE
+  name: "&8"
+```
+
+Cela remplit automatiquement tout emplacement non occupé par un bouton.
+
+---
+
+### patterns
+
+Appliquer des patterns réutilisables à cet inventaire.
+
+```yaml
+patterns:
+  - "navigation_bar"
+  - "border_pattern"
+```
+
+Les patterns doivent être définis dans le dossier `plugins/zMenu/patterns/`. Voir [Patterns](../patterns) pour les détails.
+
+---
+
+### matrix
+
+Définir visuellement la disposition de l'inventaire en utilisant des caractères.
+
+```yaml
+matrix:
+  - "AAAAAAAAA"
+  - "A       A"
+  - "A   B   A"
+  - "A       A"
+  - "AAAAAAAAA"
+
+items:
+  A:
+    item:
+      material: BLACK_STAINED_GLASS_PANE
+      name: "&8"
+  B:
+    item:
+      material: DIAMOND
+      name: "&bItem central"
+```
+
+Chaque caractère représente un item. Les espaces sont des emplacements vides.
+
+---
+
+### items
+
+Les boutons dans votre inventaire. C'est ici que vous définissez tous les éléments cliquables.
+
+```yaml
+items:
+  mon-bouton:
+    slot: 0
+    item:
+      material: DIAMOND
+      name: "&bDiamant"
+    actions:
+      - type: message
+        messages:
+          - "&aVous avez clique sur le diamant !"
+
+  autre-bouton:
+    slot: 8
+    item:
+      material: EMERALD
+      name: "&aEmeraude"
+```
+
+Voir [Configuration des boutons](../buttons/button) pour la documentation complète des boutons.
+
+---
+
+### open-requirement
+
+Exigences qui doivent être remplies pour ouvrir cet inventaire. Elles sont vérifiées avant l'ouverture : si elles ne sont pas remplies, l'inventaire ne s'ouvre pas et les actions de refus s'exécutent. Notez que `view-requirement` est une clé de bouton et n'est pas lue au niveau de l'inventaire.
+
+```yaml
+open-requirement:
+  requirements:
+    - type: permission
+      permission: "monserveur.premium"
+```
+
+---
+
+### openWithItem
+
+Définir un item qui ouvre cet inventaire lorsqu'il est tenu et cliqué.
+
+```yaml
+openWithItem:
+  item:
+    material: COMPASS
+    name: "&6&lMenu"
+    lore:
+      - "&7Clic droit pour ouvrir"
+  actions:
+    - RIGHT_CLICK_AIR
+    - RIGHT_CLICK_BLOCK
+  type: full  # full, material, name, lore, modelId, itemModel
+```
+
+**Types d'actions** (valeurs `Action` de Bukkit ; listez chacune de celles qui doivent déclencher le menu) :
+- `RIGHT_CLICK_AIR` - Clic droit dans l'air
+- `LEFT_CLICK_AIR` - Clic gauche dans l'air
+- `RIGHT_CLICK_BLOCK` - Clic droit sur un bloc
+- `LEFT_CLICK_BLOCK` - Clic gauche sur un bloc
+- `PHYSICAL` - Interaction physique (plaque de pression, etc.)
+
+**Options de type** (comment l'item tenu est comparé à `item`, défaut `full`) :
+- `full` - L'item doit correspondre exactement
+- `material` - Seul le matériau est comparé
+- `name` - Seul le nom d'affichage est comparé
+- `lore` - Seul le lore est comparé
+- `modelId` - Seul le custom model data est comparé
+- `itemModel` - Seul l'item model est comparé
+
+Donnez l'item aux joueurs avec :
+```
+/zm giveopenitem <inventaire> <joueur>
+```
+
+---
+
+### openActions
+
+Actions à exécuter lorsque l'inventaire s'ouvre.
+
+```yaml
+openActions:
+  - type: sound
+    sound: ENTITY_EXPERIENCE_ORB_PICKUP
+  - type: message
+    messages:
+      - "&aBienvenue dans le menu !"
+```
+
+---
+
+### closeActions
+
+Actions à exécuter lorsque l'inventaire se ferme.
+
+```yaml
+closeActions:
+  - type: message
+    messages:
+      - "&7Merci de votre visite !"
+```
+
+---
+
+### local-placeholders
+
+Définir des placeholders spécifiques à l'inventaire.
+
+```yaml
+local-placeholders:
+  server-ip: "play.monserveur.com"
+  discord: "discord.gg/monserveur"
+
+items:
+  info:
+    item:
+      lore:
+        - "&7IP : &f%server-ip%"
+        - "&7Discord : &f%discord%"
+```
+
+---
+
+## Exemple complet
+
+```yaml
+name: "&6&lMenu Serveur &7(&f%page%&7/&f%maxPage%&7)"
+size: 54
+enable: true
+update-interval: 40
+
+fillItem:
+  material: GRAY_STAINED_GLASS_PANE
+  name: "&8"
+
+patterns:
+  - "navigation"
+
+open-requirement:
+  requirements:
+    - type: permission
+      permission: "server.menu.use"
+      deny:
+        - type: message
+          messages:
+            - "&cVous n'avez pas la permission d'utiliser ce menu !"
+
+openActions:
+  - type: sound
+    sound: BLOCK_CHEST_OPEN
+    pitch: 1.2
+
+closeActions:
+  - type: sound
+    sound: BLOCK_CHEST_CLOSE
+
+local-placeholders:
+  menu-version: "1.0"
+
+items:
+  titre:
+    slot: 4
+    item:
+      material: NETHER_STAR
+      name: "&6&lMenu Serveur"
+      lore:
+        - "&8Version %menu-version%"
+        - ""
+        - "&7Bienvenue, &f%player%&7 !"
+        - ""
+        - "&7Selectionnez une option ci-dessous."
+
+  teleports:
+    slot: 20
+    item:
+      material: ENDER_PEARL
+      name: "&b&lTeleportations"
+      lore:
+        - "&7Acceder aux options de teleportation"
+    actions:
+      - type: inventory
+        inventory: "teleports_menu"
+
+  shop:
+    slot: 22
+    item:
+      material: GOLD_INGOT
+      name: "&e&lBoutique"
+      lore:
+        - "&7Acheter et vendre des items"
+    actions:
+      - type: inventory
+        inventory: "shop_menu"
+
+  settings:
+    slot: 24
+    item:
+      material: COMPARATOR
+      name: "&c&lParametres"
+      lore:
+        - "&7Configurer vos preferences"
+    actions:
+      - type: inventory
+        inventory: "settings_menu"
+
+  fermer:
+    slot: 49
+    item:
+      material: BARRIER
+      name: "&c&lFermer"
+      lore:
+        - "&7Fermer ce menu"
+    actions:
+      - type: close
+```
+
+### inventory-replacement
+
+Rediriger automatiquement les joueurs Bedrock vers un formulaire Bedrock natif (ou vers un autre inventaire) lorsqu'ils tentent d'ouvrir cet inventaire. Les joueurs Java voient l'inventaire classique normalement.
+
+:::warning Prérequis
+Cette fonctionnalité nécessite que **Geyser** ou **Floodgate** soit installé sur votre serveur.
+:::
+
+```yaml
+inventory-replacement:
+  name: "shop-form"
+  plugin: "zMenu"
+  pages:
+    - 1
+```
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `name` | String | - | Le nom du fichier de formulaire Bedrock (sans `.yml`) |
+| `plugin` | String | `zMenu` | Le plugin propriétaire du formulaire Bedrock |
+| `pages` | Liste | vide | Rediriger uniquement sur ces pages (vide = toutes les pages) |
+| `mode` | String | `CUMULUS` | `CUMULUS` : ouvrir un formulaire Bedrock. `CHEST` : ouvrir à la place un autre inventaire zMenu nommé `name` |
+
+Voir [Formulaires Bedrock](../bedrock) pour la documentation complète sur la création de formulaires Bedrock.
+
+---
+
+## Inventaires multi-pages
+
+zMenu crée automatiquement la pagination lorsque les boutons ont plusieurs emplacements ou pages définis :
+
+```yaml
+items:
+  shop-item:
+    slots:
+      - 10-16
+      - 19-25
+      - 28-34
+    item:
+      # Cela creera plusieurs pages s'il y a plus d'items que d'emplacements
+```
+
+Utilisez les types de boutons `NEXT` et `PREVIOUS` pour la navigation. Voir [Types de boutons](../buttons/types/next) pour les détails.
+
+## Bonnes pratiques
+
+1. **Organisez vos inventaires** dans des sous-dossiers par catégorie
+2. **Utilisez des patterns** pour les éléments répétés comme les bordures
+3. **Utilisez des placeholders locaux** pour les valeurs utilisées plusieurs fois
+4. **Testez avec `/zm reload inventory <nom>`** pour une itération rapide
+5. **Utilisez des noms de boutons significatifs** pour une maintenance plus facile
+6. **Gardez des tailles d'inventaire appropriées** - n'utilisez pas 54 emplacements si vous n'avez besoin que de 27
+
+## Prochaines étapes
+
+- Apprenez à [Créer un inventaire](./create-inventory) étape par étape
+- Configurez les [Boutons](../buttons/button) pour votre inventaire
+- Ajoutez des [Actions](../buttons/actions) pour rendre les boutons interactifs

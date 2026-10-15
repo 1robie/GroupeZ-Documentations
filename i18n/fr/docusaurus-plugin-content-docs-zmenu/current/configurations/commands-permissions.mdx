@@ -1,0 +1,365 @@
+---
+sidebar_position: 2
+title: Commandes et Permissions
+description: Toutes les commandes et permissions de zMenu
+---
+
+# Commandes et Permissions
+
+Cette page liste toutes les commandes et permissions disponibles dans zMenu.
+
+## Commande principale
+
+La commande principale est `/zm` (alias : `/zmenu`).
+
+**Permission de base** : `zmenu.use`
+
+## Liste des commandes
+
+### Commandes générales {#commandes-generales}
+
+| Commande | Permission | Description |
+|----------|-----------|-------------|
+| `/zm` | `zmenu.use` | Afficher le menu d'aide |
+| `/zm version` | `zmenu.version` | Afficher les informations de version du plugin |
+| `/zm list` | `zmenu.list` | Lister tous les inventaires chargés |
+| `/zm documentation` | `zmenu.documentation` | Voir les liens de documentation |
+| `/zm addons` | `zmenu.addons` | Lister les addons officiels |
+| `/zm contributors` | `zmenu.contributors` | Afficher les contributeurs du plugin |
+| `/zm website` | `zmenu.website` | Lister les commandes de synchronisation Inventory Builder (voir [Commandes de synchronisation](#commandes-de-synchronisation-live)) |
+| `/zm create <file-name> <inventory-size> <inventory-name>` | `zmenu.create` | Créer un nouveau fichier d'inventaire |
+| `/zm editor` | `zmenu.editor` | Envoyer un lien vers l'éditeur d'inventaire en ligne |
+
+`<inventory-size>` doit être compris entre `9` et `54` (l'auto-complétion propose les multiples de 9). `<inventory-name>` correspond au reste de la ligne : il peut donc contenir des espaces et des codes couleur.
+
+```
+/zm create shop 54 &6&lBoutique du serveur
+```
+
+### Alias des commandes
+
+Chaque sous-commande possède un alias court utilisable à la place de son nom complet :
+
+| Commande | Alias | Commande | Alias |
+|----------|-------|----------|-------|
+| `open` | `o` | `players` | `p` |
+| `list` | `l` | `reload` | `rl` |
+| `version` | `v`, `ver` | `giveopenitem` | `goi` |
+| `documentation` | `doc` | `openMainMenu` | `omm` |
+| `contributors` | `contrib` | `website` | `w` |
+| `dialog` | `dialogs`, `d` | `bedrock` | `b` |
+
+Les sous-commandes imbriquées ont aussi des alias : `reload command` = `reload cmd`, `reload inventory` = `reload inv`, `reload config` = `reload cfg`, `players subtract` = `players sub`, `players remove` = `players r`, `players clearall` = `players ca`, `players convert` = `players c`, `website connect` = `website sync`, `website download` = `website dl`, `website unlink` = `website ul`, `dialog reload` / `bedrock reload` = `rl`, `dialog open` / `bedrock open` = `o`.
+
+```
+/zm o shop Notch
+/zm rl inv shop
+```
+
+:::info Commandes Dialog et Bedrock
+`/zm dialog` n'est enregistrée que si le serveur supporte les dialogues (Paper 1.21.7+), et `/zm bedrock` uniquement si le support des formulaires Bedrock est actif.
+:::
+
+### Commandes d'inventaire
+
+| Commande | Permission | Description |
+|----------|-----------|-------------|
+| `/zm open <inventaire> [joueur]` | `zmenu.open` | Ouvrir un inventaire pour vous-même ou pour un autre joueur |
+| `/zm open <inventaire> [joueur] [display-message] [args...]` | `zmenu.open` | Choisir si le message "inventaire ouvert" est affiché et passer des arguments |
+| `/zm openMainMenu [joueur] [display-message]` | `zmenu.open.main.menu` | Ouvrir l'inventaire défini par [`main-menu`](./config-yml#main-menu) |
+
+- `[joueur]` accepte un pseudo ou un sélecteur comme `@p`. Depuis la console, il est obligatoire.
+- `[display-message]` vaut `true` ou `false`. S'il est omis, la valeur de [`enable-open-message`](./config-yml#enable-open-message) est utilisée.
+- `[args...]` correspond au reste de la ligne. Utilisez des guillemets pour une valeur contenant des espaces. Chaque argument est soit `nom:valeur` (lu avec `%zmenu_argument_<nom>%`), soit une valeur seule, stockée sous sa position (`0`, `1`, ...) : la première valeur seule est donc `%zmenu_argument_0%`. L'argument spécial `page:<nombre>` ouvre en plus directement l'inventaire sur cette page.
+
+**Exemples :**
+```
+/zm open shop
+/zm open shop Notch
+/zm open shop Notch false
+/zm open shop Notch true categorie:armes page:2
+/zm open shop Notch true "Epee en fer" 5
+```
+
+Dans le dernier exemple, `%zmenu_argument_0%` vaut `Epee en fer` et `%zmenu_argument_1%` vaut `5`. Voir [Placeholders](./placeholders).
+
+`/zm giveopenitem` donne l'item configuré dans la section [`open-with-item`](./inventories/inventory) de l'inventaire ; voir [Commandes d'items](#commandes-ditems).
+
+### Commandes de rechargement
+
+| Commande | Permission | Description |
+|----------|-----------|-------------|
+| `/zm reload` | `zmenu.reload` | Recharger toutes les configurations |
+| `/zm reload config` | `zmenu.reload.config` | Recharger config.yml et les messages uniquement |
+| `/zm reload inventory` | `zmenu.reload.inventory` | Recharger tous les inventaires |
+| `/zm reload inventory <nom>` | `zmenu.reload.inventory` | Recharger un inventaire spécifique |
+| `/zm reload command` | `zmenu.reload.command` | Recharger toutes les commandes |
+| `/zm reload command <nom>` | `zmenu.reload.command` | Recharger une commande spécifique |
+
+`/zm reload` est le rechargement complet : il recharge `config.yml`, les messages, les [placeholders globaux](./global-placeholders), les [patterns](./patterns) et patterns d'actions, tous les inventaires, toutes les commandes personnalisées, les [items personnalisés](./items/custom-items) (les copies présentes dans les inventaires des joueurs en ligne sont mises à jour) et les valeurs par défaut des [données joueur](./player-data). Les dialogues et les formulaires Bedrock ont leurs propres commandes : `/zm dialog reload` et `/zm bedrock reload`.
+
+:::note
+Les inventaires sous [hot reload](../hot-reload) n'ont pas besoin de `/zm reload inventory` : ils sont rechargés dès que le fichier est enregistré.
+:::
+
+**Exemples :**
+```
+/zm reload
+/zm reload inventory shop
+/zm reload command warp
+```
+
+### Commandes d'items
+
+| Commande | Permission | Description |
+|----------|-----------|-------------|
+| `/zm giveitem <item-id> [joueur]` | `zmenu.give.item` | Donner un [item personnalisé](./items/custom-items) à un joueur (vous par défaut) |
+| `/zm giveopenitem <inventaire> [joueur]` | `zmenu.give.open.item` | Donner l'item qui ouvre un inventaire (son `open-with-item`) |
+| `/zm save <nom> [yml\|base64]` | `zmenu.save` | Exporter l'item tenu dans save_items.yml |
+
+### Commandes de données joueur {#commandes-de-donnees-joueur}
+
+| Commande | Permission | Description |
+|----------|-----------|-------------|
+| `/zm players add <joueur> <cle> <nombre>` | `zmenu.players.add` | Ajouter un nombre à une donnée joueur (créée si absente) |
+| `/zm players set <joueur> <cle> <expire-after> <valeur>` | `zmenu.players.set` | Définir une donnée joueur ; `<expire-after>` est en secondes, `0` = n'expire jamais |
+| `/zm players get <joueur> <cle>` | `zmenu.players.get` | Obtenir une valeur de données joueur |
+| `/zm players subtract <joueur> <cle> <nombre>` | `zmenu.players.subtract` | Soustraire un nombre à une donnée joueur |
+| `/zm players remove <joueur> <cle>` | `zmenu.players.remove` | Supprimer une clé de données joueur |
+| `/zm players removeall <cle>` | `zmenu.players.remove.all` | Supprimer une clé de tous les joueurs |
+| `/zm players clear <joueur>` | `zmenu.players.clear.player` | Effacer toutes les données d'un joueur |
+| `/zm players clearall` | `zmenu.players.clear.all` | Effacer toutes les données de tous les joueurs |
+| `/zm players keys <joueur>` | `zmenu.players.keys` | Lister toutes les clés pour un joueur |
+| `/zm players convert [joueur]` | `zmenu.players.convert` | Convertir les anciennes données JSON vers le stockage SQL (demande de relancer la commande dans les 30 secondes pour confirmer) |
+
+`<joueur>` accepte les joueurs hors ligne. La valeur de `set` correspond au reste de la ligne : elle peut donc contenir des espaces.
+
+**Exemples :**
+```
+/zm players set Notch coins 0 100
+/zm players set Notch daily-reward 86400 recupere
+/zm players add Notch coins 50
+/zm players subtract Notch coins 10
+/zm players get Notch coins
+/zm players keys Notch
+/zm players clear Notch
+```
+
+### Commandes de dialogues
+
+| Commande | Permission | Description |
+|----------|-----------|-------------|
+| `/zm dialog open <dialogue> [joueur] [display-message]` | `zmenu.open.dialog` | Ouvrir un dialogue pour vous-même ou pour un joueur |
+| `/zm dialog config <plugin-name> [joueur]` | `zmenu.open.dialog.config` | Ouvrir le dialogue de configuration en jeu d'un plugin enregistré auprès de zMenu (par exemple `zMenu`) |
+| `/zm dialog reload` | `zmenu.reload.dialog` | Recharger tous les fichiers de dialogues |
+
+```
+/zm dialog open default-dialog
+/zm dialog open confirmation-dialog Notch false
+/zm dialog config zMenu
+```
+
+### Commandes Bedrock
+
+| Commande | Permission | Description |
+|----------|-----------|-------------|
+| `/zm bedrock open <nom> [joueur] [display-message]` | `zmenu.open.bedrock` | Ouvrir un formulaire Bedrock (`display-message` vaut `true` ou `false`) |
+| `/zm bedrock reload` | `zmenu.reload.bedrock` | Recharger tous les fichiers de formulaires Bedrock |
+
+### Commandes de synchronisation live
+
+Ces commandes connectent votre serveur au site [Minecraft Inventory Builder](https://minecraft-inventory-builder.com) pour recharger instantanément vos inventaires.
+
+Ce sont toutes des sous-commandes de `/zm website` (alias `/zm w`). Lancer `/zm website` seule les liste.
+
+| Commande | Permission | Description |
+|----------|-----------|-------------|
+| `/zm website login` | `zmenu.login` | Lancer l'autorisation par appareil pour lier le serveur à votre compte du site |
+| `/zm website connect` | `zmenu.connect` | Ouvrir la connexion de synchronisation live (alias `sync`) |
+| `/zm website unlink` | `zmenu.unlink` | Détacher de force le serveur du site et effacer les identifiants |
+| `/zm website download <link> [force]` | `zmenu.download` | Télécharger un inventaire depuis un lien (nécessite [`enable-download-command: true`](./config-yml#enable-download-command)) |
+
+**Déroulement :**
+```
+/zm website login     # Validez le code affiche sur le site
+/zm website connect   # Ouvre le lien live
+# "Sync to Server" sur le builder web recharge maintenant l'inventaire en direct
+```
+
+Lorsque le serveur est déjà lié, la connexion est rouverte automatiquement au démarrage, sauf si [`enable-website-auto-connect`](./config-yml#enable-website-auto-connect) vaut `false`.
+
+`/zm website download` n'accepte que les liens des hôtes listés dans [`allowed-downloadable-website`](./config-yml#allowed-downloadable-website). `[force]` (`true`/`false`, `false` par défaut) écrase un fichier existant.
+
+### Commandes utilitaires
+
+| Commande | Permission | Description |
+|----------|-----------|-------------|
+| `/zm testdupe <inventory\|item>` | `zmenu.test.dupe` | Vous donne un bloc de pierre protégé, dans l'inventaire ou jeté au sol, pour tester le [système anti-duplication](./config-yml#enable-anti-dupe) (joueur uniquement) |
+| `/zm dumplog` | `zmenu.dumplog` | Envoie `logs/latest.log` sur [mclo.gs](https://mclo.gs) et affiche le lien |
+
+### Commandes de conversion
+
+Vous venez de DeluxeMenus ? Convertissez tous vos menus en inventaires zMenu en une seule commande. Consultez [Migrer depuis DeluxeMenus](../convert-deluxemenus) pour tout ce qui est converti.
+
+| Commande | Permission | Description |
+|----------|-----------|-------------|
+| `/zm convert deluxemenus` | `zmenu.convert` | Convertir tous les menus de `plugins/DeluxeMenus/gui_menus/` en inventaires zMenu |
+| `/zm convert deluxemenus <menu>` | `zmenu.convert` | Convertir un seul menu DeluxeMenus (nom du fichier, avec ou sans `.yml`) |
+| `/zm convert dm [menu]` | `zmenu.convert` | Alias de `/zm convert deluxemenus` |
+
+## Liste des permissions
+
+### Permissions principales
+
+| Permission | Description | Par défaut |
+|------------|-------------|------------|
+| `zmenu.use` | Accès aux commandes de base | true |
+| `zmenu.open` | Ouvrir les inventaires | op |
+| `zmenu.open.main.menu` | Ouvrir le menu principal | op |
+| `zmenu.reload` | Recharger les configurations | op |
+| `zmenu.reload.config` | Recharger config.yml et les messages | op |
+| `zmenu.reload.inventory` | Recharger les inventaires | op |
+| `zmenu.reload.command` | Recharger les commandes personnalisées | op |
+| `zmenu.reload.dialog` | Recharger les fichiers de dialogues (`/zm dialog reload`) | op |
+| `zmenu.create` | Créer de nouveaux inventaires | op |
+| `zmenu.editor` | Accéder à l'éditeur d'inventaire | op |
+| `zmenu.list` | Lister les inventaires chargés | op |
+| `zmenu.version` | Afficher les informations de version | op |
+| `zmenu.addons` | Lister les addons officiels | op |
+| `zmenu.contributors` | Afficher les contributeurs | op |
+| `zmenu.website` | Commande de base `/zm website` | op |
+
+### Permissions d'items
+
+| Permission | Description | Par défaut |
+|------------|-------------|------------|
+| `zmenu.give.item` | Donner des items personnalisés | op |
+| `zmenu.give.open.item` | Donner des items ouvrant le menu | op |
+| `zmenu.save` | Sauvegarder des items tenus | op |
+
+### Permissions de données joueur {#permissions-de-donnees-joueur}
+
+| Permission | Description | Par défaut |
+|------------|-------------|------------|
+| `zmenu.players` | Commande de base `/zm players` | op |
+| `zmenu.players.add` | Ajouter une valeur aux données joueur | op |
+| `zmenu.players.set` | Définir une valeur de données joueur | op |
+| `zmenu.players.get` | Obtenir une valeur de données joueur | op |
+| `zmenu.players.subtract` | Soustraire une valeur aux données joueur | op |
+| `zmenu.players.remove` | Supprimer une clé de données joueur | op |
+| `zmenu.players.remove.all` | Supprimer une clé de tous les joueurs | op |
+| `zmenu.players.clear.player` | Effacer toutes les données d'un joueur | op |
+| `zmenu.players.clear.all` | Effacer toutes les données de tous les joueurs | op |
+| `zmenu.players.keys` | Lister les clés d'un joueur | op |
+| `zmenu.players.convert` | Convertir les données JSON en SQL | op |
+
+### Permissions de dialogues
+
+| Permission | Description | Par défaut |
+|------------|-------------|------------|
+| `zmenu.dialog` | Commande de base `/zm dialog` | op |
+| `zmenu.open.dialog` | Ouvrir les dialogues | op |
+| `zmenu.open.dialog.config` | Ouvrir le dialogue de configuration d'un plugin | op |
+
+### Permissions Bedrock
+
+| Permission | Description | Par défaut |
+|------------|-------------|------------|
+| `zmenu.bedrock` | Commande de base `/zm bedrock` | op |
+| `zmenu.open.bedrock` | Ouvrir les formulaires Bedrock | op |
+| `zmenu.reload.bedrock` | Recharger les fichiers de formulaires Bedrock | op |
+
+### Permissions de synchronisation live
+
+| Permission | Description | Par défaut |
+|------------|-------------|------------|
+| `zmenu.login` | Lier le serveur au site Inventory Builder | op |
+| `zmenu.connect` | Ouvrir la connexion de synchronisation live | op |
+| `zmenu.unlink` | Détacher de force le serveur du site | op |
+| `zmenu.download` | Télécharger un inventaire depuis un lien | op |
+
+### Permissions utilitaires
+
+| Permission | Description | Par défaut |
+|------------|-------------|------------|
+| `zmenu.convert` | Convertir les menus DeluxeMenus | op |
+| `zmenu.test.dupe` | Tester le système anti-duplication | op |
+| `zmenu.documentation` | Voir la documentation | op |
+| `zmenu.dumplog` | Exporter les logs de debug | op |
+| `zmenu.paper.warning` | Recevoir l'avertissement "zMenu nécessite Paper" à la connexion, sur un serveur qui n'est pas Paper | op |
+
+## Permissions de commandes personnalisées {#permissions-de-commandes-personnalisees}
+
+Lorsque vous créez des commandes personnalisées dans `commands/commands.yml`, vous pouvez définir des permissions personnalisées :
+
+```yaml
+commands:
+  shop:
+    command: shop
+    inventory: shop_menu
+    permission: monserveur.shop
+    aliases:
+      - boutique
+      - magasin
+```
+
+Les joueurs auront besoin de la permission `monserveur.shop` pour utiliser `/shop`.
+
+## Permissions spécifiques aux inventaires {#permissions-specifiques-aux-inventaires}
+
+Vous pouvez exiger des permissions spécifiques pour ouvrir des inventaires en utilisant les exigences de vue :
+
+```yaml
+# Dans votre fichier d'inventaire
+view-requirement:
+  requirements:
+    - type: permission
+      permission: "monserveur.vip.menu"
+      deny:
+        - type: message
+          messages:
+            - "&cVous avez besoin du rang VIP pour acceder a ce menu !"
+```
+
+## Permission administrateur
+
+Pour les administrateurs de serveur, vous pouvez accorder toutes les permissions zMenu avec :
+
+```
+zmenu.*
+```
+
+Cela donne accès à toutes les commandes zMenu.
+
+## Exemples LuckPerms
+
+Accorder l'utilisation de base :
+```
+/lp user <joueur> permission set zmenu.use true
+```
+
+Accorder toutes les permissions admin :
+```
+/lp group admin permission set zmenu.* true
+```
+
+Accorder l'accès à un inventaire spécifique :
+```
+/lp group vip permission set monserveur.vip.menu true
+```
+
+## Plugins de permissions
+
+zMenu fonctionne avec tous les plugins de permissions qui supportent les permissions Bukkit :
+
+- LuckPerms (Recommandé)
+- PermissionsEx
+- GroupManager
+- UltraPermissions
+- Et bien d'autres
+
+## Prochaines étapes {#prochaines-etapes}
+
+- Apprenez les [Placeholders](./placeholders)
+- Créez des [Commandes personnalisées](./custom-commands)
+- Configurez les [Données joueur](./player-data) pour le stockage persistant

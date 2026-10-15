@@ -1,0 +1,178 @@
+---
+sidebar_position: 3
+title: Items personnalisés
+description: Définissez des items personnalisés dans le dossier items et donnez-les aux joueurs
+---
+
+# Items personnalisés
+
+En plus des items affichés dans les menus, zMenu peut gérer des **items personnalisés autonomes** — de vrais items qui se trouvent dans l'inventaire d'un joueur. Ils sont définis dans le dossier `items/`, distribués via une commande (ou depuis un bouton de menu), et peuvent porter des [mécaniques](./mechanics) comme être donnés à la première connexion.
+
+Comme ils sont stockés avec un id caché, zMenu peut aussi les **reconnaître plus tard** et les **garder à jour** : modifiez le nom ou le lore d'un item, rechargez, et chaque exemplaire déjà présent dans les inventaires est reconstruit automatiquement.
+
+## Le dossier `items/`
+
+Les items personnalisés sont chargés depuis :
+
+```
+plugins/zMenu/items/
+```
+
+Ce dossier est **toujours actif** — il n'existe aucune option pour l'activer ou le désactiver dans `config.yml`. Il est créé automatiquement au premier démarrage avec un exemple `default-items.yml` à l'intérieur.
+
+- Vous pouvez créer **autant de fichiers `.yml`** que vous voulez (par ex. `weapons.yml`, `tools.yml`, `events.yml`) pour organiser vos items.
+- Les **sous-dossiers sont supportés** : chaque fichier `.yml` trouvé n'importe où sous `items/` est chargé.
+- Chaque item est identifié par un **id d'item** — la clé YAML de premier niveau. Les ids doivent être uniques à travers tous les fichiers.
+
+## Définir un item
+
+Chaque clé de premier niveau est un id d'item, et son contenu utilise le **même format exact que les items de menu** (voir [Configuration d'item](./item)). Vous pouvez utiliser des matériaux de plugins connectés, des [composants](./components), des enchantements, des placeholders, des noms traduits, et tout ce que le loader d'item supporte.
+
+```yaml
+# plugins/zMenu/items/weapons.yml
+
+# "legendary-sword" est l'id de l'item
+legendary-sword:
+  material: DIAMOND_SWORD
+  name: "&b&lLegendary Sword"
+  lore:
+    - "&7Une lame d'une puissance pure."
+  amount: 1
+  enchantments:
+    - SHARPNESS,5
+  flags:
+    - HIDE_ENCHANTS
+  glow: true
+```
+
+Le fichier par défaut fourni avec le plugin montre la structure minimale :
+
+```yaml
+# plugins/zMenu/items/default-items.yml
+#<item-id>:
+#  name: ... # Meme format que pour les items dans les menus
+#  mechanics:
+#    <mechanic-id>:
+#      ... # Depend de la mecanique
+
+first-item:
+  name: "&aFirst Item"
+  lore:
+    - "&7This is the first item"
+    - "&7in the default items file."
+```
+
+### Items de base issus d'autres plugins
+
+Le `material` d'un item personnalisé accepte tous les [loaders de matériaux](./item#material) : un item peut donc partir d'un plugin intégré tout en ayant son propre nom, lore et ses mécaniques :
+
+```yaml
+ruby-blade:
+  material: itemsadder:my_namespace:ruby_sword   # ou oraxen:..., nexo:..., mmoitems:..., zitems:...
+  name: "&cRuby Blade"
+  mechanics:
+    itemjoin:
+      give-first-join: true
+```
+
+Vous pouvez aussi partir d'un item construit en jeu : exécutez `/zm save <nom> yml` en le tenant, puis copiez le bloc généré depuis `plugins/zMenu/save_items.yml` dans un fichier du dossier `items/` (voir [Sauvegarder un item tenu en main](./item#sauvegarder-un-item-tenu-en-main-zm-save)). Avec `base64`, l'item est stocké en `material: "base64:..."` et copié exactement.
+
+:::note
+Le plugin intégré doit être installé et chargé avant que zMenu ne construise l'item. S'il est absent, le matériau ne peut pas être résolu et l'item n'est pas créé.
+:::
+
+### Options de l'item
+
+En plus de toutes les options d'item standard, les items personnalisés acceptent deux options supplémentaires placées directement sous l'id de l'item.
+
+| Option              | Type    | Défaut  | Description                                                                                       |
+|---------------------|---------|---------|---------------------------------------------------------------------------------------------------|
+| `save-owner-in-pdc` | Boolean | `true`  | Enregistre le receveur comme **propriétaire** de l'item. Les placeholders du nom/lore sont alors toujours résolus pour ce propriétaire (voir [Propriétaire & placeholders](#proprietaire--placeholders)). |
+| `skip-item-update`  | Boolean | `false` | Si `true`, les exemplaires déjà dans les inventaires ne sont **jamais reconstruits** au join/reload. À utiliser pour des items que les joueurs peuvent personnaliser et conserver tels quels. |
+
+```yaml
+legendary-sword:
+  material: DIAMOND_SWORD
+  name: "&b&lLegendary Sword"
+  save-owner-in-pdc: true
+  skip-item-update: false
+```
+
+## Donner des items
+
+### `/zmenu giveitem`
+
+Donnez un item personnalisé à un joueur avec :
+
+```
+/zmenu giveitem <item-id> [player]
+```
+
+- `<item-id>` — l'id défini dans vos fichiers `items/` (auto-complété automatiquement).
+- `[player]` — cible optionnelle ; par défaut vous-même quand la commande est exécutée en jeu.
+
+| | |
+|-|-|
+| **Permission** | `zmenu.give.item` |
+| **Se donner l'item** | `/zmenu giveitem legendary-sword` |
+| **Donner à quelqu'un d'autre** | `/zmenu giveitem legendary-sword Notch` |
+
+### Depuis un bouton de menu
+
+Il n'existe pas d'action dédiée « donner un item personnalisé » — vous distribuez l'item avec une [action](../buttons/actions) de commande classique qui exécute `zmenu giveitem` :
+
+```yaml
+buttons:
+  claim-reward:
+    material: CHEST
+    name: "&aRecuperez votre epee"
+    slot: 13
+    actions:
+      - click: LEFT
+        type: console_command
+        commands:
+          - "zmenu giveitem legendary-sword %player%"
+```
+
+Utiliser une action `console_command` signifie que la commande est exécutée depuis la console, donc le joueur qui clique n'a pas besoin de la permission `zmenu.give.item` lui-même.
+
+## Garder les items à jour {#garder-les-items-a-jour}
+
+Les items personnalisés sont marqués avec un id caché, ce qui permet à zMenu de gérer les exemplaires déjà présents dans les inventaires des joueurs. Cette vérification s'exécute **quand un joueur se connecte** et **quand vous exécutez `/zmenu reload`** (pour chaque joueur en ligne) :
+
+- **L'item existe toujours** → il est reconstruit à partir de la configuration actuelle, donc les modifications du nom, du lore, des enchantements, etc. sont appliquées automatiquement aux exemplaires existants (sauf `skip-item-update: true`).
+- **L'id de l'item n'existe plus** (vous l'avez supprimé des fichiers) → les marqueurs cachés sont retirés et l'item reste dans l'inventaire comme un item normal.
+
+:::tip
+Modifiez un item, exécutez `/zmenu reload`, et les joueurs en ligne voient la version mise à jour sans avoir à recevoir un nouvel item.
+:::
+
+### Propriétaire & placeholders {#proprietaire--placeholders}
+
+Le comportement des placeholders dans le nom/lore dépend de `save-owner-in-pdc` :
+
+- **`save-owner-in-pdc: true`** (défaut) — l'item est lié au joueur à qui il a été donné. Les placeholders sont toujours résolus pour ce **propriétaire**, et les mises à jour n'ont lieu que lorsque le propriétaire est en ligne.
+- **`save-owner-in-pdc: false`** — l'item est générique. Les placeholders sont résolus pour celui qui le **tient actuellement**, et les mises à jour utilisent le porteur.
+
+## Mécaniques {#mecaniques}
+
+Un item peut recevoir des **mécaniques** — des comportements réutilisables attachés sous une section `mechanics:`. Deux sont disponibles de base : `itemjoin` (donner à la première connexion, verrouiller à un slot, empêcher la modification) et `on-click` (exécuter des actions au clic sur l'item) :
+
+```yaml
+starter-map:
+  material: FILLED_MAP
+  name: "&eServer Guide"
+  mechanics:
+    itemjoin:
+      give-first-join: true
+      fixed-slot: 8
+      prevent-inventory-modification: true
+```
+
+Consultez la page dédiée [Mécaniques d'Item](./mechanics) pour la liste complète des mécaniques et leurs options.
+
+## Prochaines étapes {#prochaines-etapes}
+
+- Configurez l'item lui-même avec [Configuration d'item](./item)
+- Donnez un comportement aux items avec [Mécaniques d'Item](./mechanics)
+- Ajoutez des [Actions](../buttons/actions) à un bouton pour donner des items au clic

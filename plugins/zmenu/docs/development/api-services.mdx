@@ -1,0 +1,165 @@
+---
+sidebar_position: 9
+title: Services & Managers
+description: Bukkit services registered by zMenu, the anti-dupe manager, title animation providers and the website manager
+---
+
+# Services & Managers
+
+Besides `MenuPlugin` (see [API Introduction](./api-introduction)), zMenu exposes its managers as **Bukkit services**. This page lists them and documents the managers that have no page of their own.
+
+## Bukkit services
+
+zMenu registers these services with the highest priority, so you can get them without depending on the `ZMenuPlugin` class:
+
+| Service | What it is for |
+|---------|----------------|
+| `InventoryManager` | Load, find and open inventories, FastEvent listeners ([Inventories](./api-inventory), [Events](./api-events)) |
+| `ButtonManager` | Register button types, actions and requirement types ([Buttons](./api-buttons), [Actions](./api-actions), [Requirements](./api-requirements)) |
+| `CommandManager` | Custom commands and command arguments |
+| `DataManager` | Player data ([Player Data](./api-player-data)) |
+| `InventoriesPlayer` | Stores and gives back a player's real inventory while a menu with [`clear-inventory`](../configurations/inventories/inventory#clear-inventory) is open |
+| `PatternManager` | Patterns and action patterns |
+| `DupeManager` | Anti-dupe protection of items, see [below](#dupemanager) |
+| `Enchantments` | Enchantment lookup by name, used by item configurations |
+| `TitleAnimationManager` | Title animation providers, see [below](#titleanimationmanager) |
+| `WebsiteManager` | Inventory Builder link and downloads, see [below](#websitemanager) |
+
+```java
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.RegisteredServiceProvider;
+
+RegisteredServiceProvider<DupeManager> provider =
+        Bukkit.getServicesManager().getRegistration(DupeManager.class);
+
+if (provider != null) {
+    DupeManager dupeManager = provider.getProvider();
+}
+```
+
+`MenuPlugin#getProvider(Class)` does the same lookup and returns `null` (after logging a message) when the service is missing. Every manager above is also available directly on `MenuPlugin` (`getInventoryManager()`, `getDupeManager()`, `getTitleAnimationManager()`...).
+
+`MenuPlugin` also exposes a few helpers that are not services: `isFolia()`, `isPaper()`, `isPaperOrFolia()`, `isSpigot()`, `getScheduler()` (the FoliaLib scheduler, use it instead of the Bukkit scheduler so your code works on Folia), `parse(player, text)` (PlaceholderAPI and `%zmenu_*%` placeholders) and `registerPlaceholder(...)`.
+
+## DupeManager
+
+The anti-dupe system (see [`enable-anti-dupe`](../configurations/config-yml#enable-anti-dupe)) tags every item that zMenu puts in a menu with a hidden marker. When a player uses, drops, places, picks up or clicks a tagged item, the item is removed and the action is cancelled (and optionally reported to a Discord webhook).
+
+```java
+DupeManager dupeManager = menuPlugin.getDupeManager();
+
+// Mark an item as "belongs to a menu": it will be removed as soon as a player interacts with it.
+ItemStack protectedItem = dupeManager.protectItem(new ItemStack(Material.STONE));
+
+// Check an item
+boolean isMenuItem = dupeManager.isDupeItem(protectedItem); // true
+```
+
+- `protectItem` returns the protected item (use the returned stack).
+- The marker key is exposed as `DupeManager.KEY` (`"ZMENU-ITEM"`).
+- Use `/zm testdupe <inventory|item>` in game to get a protected stone block and watch it being removed, see [Commands](../configurations/commands-permissions#utility-commands).
+
+If you give items that must **not** leave a menu, protect them with `protectItem`. Items you give to players on purpose (rewards) must not be protected.
+
+## TitleAnimationManager
+
+Title animations are animated inventory titles (see [`title-animation`](../configurations/inventories/inventory#title-animation)). The actual packet work is done by a **provider**; zMenu ships one, `packet-events`, registered when the PacketEvents plugin is installed.
+
+```java
+TitleAnimationManager manager = menuPlugin.getTitleAnimationManager();
+
+manager.registerLoader("my-provider", new MyTitleAnimationLoader()); // false if the id is already taken
+Optional<TitleAnimationLoader> loader = manager.getLoader("my-provider");
+Optional<TitleAnimationLoader> any = manager.getFirstLoader();
+```
+
+An inventory selects a provider with `title-animation.plugin: <id>` (the lookup ignores case). Without `plugin`, zMenu uses `getFirstLoader()`, which is the first provider registered: if several providers are installed, always set `plugin` in your menus. An unknown id logs a warning and the animation is ignored.
+
+A provider has three parts:
+
+```java
+import fr.maxlego08.menu.api.MenuPlugin;
+import fr.maxlego08.menu.api.animation.PlayerTitleAnimation;
+import fr.maxlego08.menu.api.animation.TitleAnimation;
+import fr.maxlego08.menu.api.animation.TitleAnimationLoader;
+import fr.maxlego08.menu.api.animation.TitleAnimationSettings;
+import fr.maxlego08.menu.api.exceptions.InventoryException;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
+import java.util.List;
+
+// 1. Loader: reads the `title-animation` section.
+public class MyTitleAnimationLoader extends TitleAnimationLoader {
+    @Override
+    public TitleAnimation load(@NotNull YamlConfiguration configuration, @NotNull String path, Object... objects) throws InventoryException {
+        // loadSettings reads titles, cycles, initial-delay, interval, time-unit,
+        // show-items-after-animation and item-update-interval for you.
+        return new MyTitleAnimation(super.loadSettings(configuration, path));
+    }
+}
+
+// 2. Animation: one per inventory, creates a runner per player.
+public class MyTitleAnimation implements TitleAnimation {
+    private final TitleAnimationSettings settings;
+
+    public MyTitleAnimation(TitleAnimationSettings settings) {
+        this.settings = settings;
+    }
+
+    @Override
+    public PlayerTitleAnimation playTitleAnimation(@NotNull MenuPlugin plugin, int containerId,
+                                                   @NotNull InventoryType type, int size, @NotNull Object... args) {
+        return new MyPlayerTitleAnimation(plugin, this.settings, containerId, type, size);
+    }
+
+    @Override
+    public void serialize(@NotNull org.bukkit.configuration.ConfigurationSection section) {
+        this.settings.serialize(section); // optional, needed to export the menu
+    }
+}
+
+// 3. Player runner: timing is handled by PlayerTitleAnimation, you only send the packets.
+public class MyPlayerTitleAnimation extends PlayerTitleAnimation {
+    public MyPlayerTitleAnimation(MenuPlugin plugin, TitleAnimationSettings settings, int id, InventoryType type, int size) {
+        super(plugin, settings, id, type, size);
+    }
+
+    @Override
+    public void sendTitle(@NotNull Player player, @NotNull String title) {
+        // send the new title for the open container (title already has placeholders applied)
+    }
+
+    @Override
+    public void sendInventoryContent(@NotNull Player player, @NotNull List<ItemStack> inventoryContents) {
+        // resend the items: changing a title makes the client clear the container
+    }
+}
+```
+
+`PlayerTitleAnimation` runs the frames with the scheduler of the plugin (`initial-delay`, `interval` and `time-unit` from the settings, `cycles`; a value of `-1` or `0` repeats forever) and calls `sendTitle` for each frame. It requires a Paper server (it throws `UnsupportedOperationException` on Spigot).
+
+## WebsiteManager
+
+Handles the link with the [Minecraft Inventory Builder](https://minecraft-inventory-builder.com) website behind `/zm website ...` (see [Live Sync Commands](../configurations/commands-permissions#live-sync-commands)).
+
+| Method | Description |
+|--------|-------------|
+| `isLinked()` | Whether this server is linked to a website account |
+| `getApiUrl()` | The configured [`api-url`](../configurations/config-yml#api-url) |
+| `startDeviceFlow(sender)` | Same as `/zm website login` |
+| `connect(sender)` | Same as `/zm website connect` |
+| `forceUnlink(sender)` | Same as `/zm website unlink` |
+| `downloadFromUrl(sender, url, force)` | Same as `/zm website download`; only hosts from [`allowed-downloadable-website`](../configurations/config-yml#allowed-downloadable-website) are accepted |
+
+The methods that take a `CommandSender` send their progress and errors to it as chat messages.
+
+## Next Steps
+
+- [Custom Requirements](./api-requirements)
+- [Events](./api-events)
+- [API Introduction](./api-introduction)

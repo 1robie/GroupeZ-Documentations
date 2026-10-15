@@ -1,0 +1,155 @@
+---
+sidebar_position: 1
+title: Premiers pas
+description: Introduction à zMenu - Le plugin d'inventaire le plus puissant pour Minecraft
+---
+
+# Premiers pas avec zMenu
+
+**zMenu** est le plugin d'inventaire (GUI) le plus puissant et flexible pour les serveurs Minecraft. Il vous permet de créer de beaux menus interactifs avec un système de configuration extensif qui vous donne un contrôle total sur chaque aspect de vos inventaires.
+
+## Qu'est-ce que zMenu ?
+
+zMenu est un plugin d'inventaire de qualité premium qui permet aux administrateurs de serveurs de créer des GUIs (Interfaces Graphiques Utilisateur) personnalisées pour leurs serveurs Minecraft. Que vous ayez besoin d'un simple sélecteur de serveur, d'un système de boutique complexe ou d'un menu de quêtes interactif, zMenu fournit tous les outils nécessaires.
+
+## Vous venez de DeluxeMenus ? Changez en une commande
+
+Vous n'avez pas à réécrire vos menus. zMenu **convertit automatiquement vos menus DeluxeMenus** : items, slots, commandes de clic, prérequis et commandes d'ouverture sont traduits en inventaires zMenu en quelques secondes.
+
+```
+/zm convert deluxemenus
+```
+
+Tout ce qui ne peut pas être converti à l'identique est listé en haut de chaque fichier converti, et vos fichiers DeluxeMenus ne sont jamais modifiés. [Lire le guide de migration →](./convert-deluxemenus)
+
+## Modifiez en direct avec le hot reload
+
+Enregistrez un fichier, le menu est à jour en jeu. **Pas de `/zm reload`, pas de redémarrage.** Avec le [hot reload](./hot-reload) activé, zMenu surveille votre dossier `inventories/` et recharge, charge ou décharge les inventaires dès que leurs fichiers changent. Les joueurs qui ont le menu ouvert voient la nouvelle version instantanément, sur la même page, et un fichier contenant une erreur ne remplace jamais la version fonctionnelle.
+
+```yaml
+# config.yml
+hot-reload:
+  enable: true
+```
+
+## Fonctionnalités clés
+
+### Migration et workflow
+- **[Convertisseur DeluxeMenus](./convert-deluxemenus)** : convertissez tous vos menus DeluxeMenus avec `/zm convert deluxemenus`
+- **[Hot reload](./hot-reload)** : les modifications de vos fichiers d'inventaire sont appliquées instantanément, sans aucune commande
+- **Éditeur en ligne** : concevez vos menus visuellement sur [minecraft-inventory-builder.com](https://minecraft-inventory-builder.com)
+
+### Inventaires hautement personnalisables
+- Créez des inventaires de toutes tailles (9 à 54 emplacements)
+- Support multi-pages avec pagination automatique
+- Titres personnalisés avec support des placeholders
+- Items de remplissage pour les emplacements vides
+- Système de mise en page basé sur une matrice pour un design facile
+
+### Système de boutons puissant
+- **12+ types de boutons intégrés** : NONE, INVENTORY, BACK, NEXT, PREVIOUS, HOME, JUMP, MAINMENU, SWITCH, ITEM_DRAG, PAGINATION_NEXT, PAGINATION_PREVIOUS, plus les types de saisie des dialogues et des formulaires Bedrock
+- Actions de clic personnalisées pour chaque bouton de souris
+- Exigences de vue et de clic
+- Support des têtes de joueurs avec textures personnalisées
+- Mises à jour dynamiques des items
+
+### Système d'actions extensif
+- **Plus de 28 types d'actions** incluant messages, sons, commandes, téléportation et plus
+- Exécutez des actions en tant que joueur, console ou avec permissions OP
+- Enchaînez plusieurs actions ensemble
+- Actions conditionnelles avec exigences
+
+### Fonctionnalités avancées
+- **Système de patterns** : créez des modèles de boutons réutilisables
+- **Données joueur** : stockez et récupérez des données spécifiques aux joueurs
+- **Placeholders globaux** : définissez des valeurs utilisées dans tous les inventaires
+- **Support PlaceholderAPI** : intégration complète avec PAPI
+- **Support MiniMessage** : formatage de texte moderne pour les serveurs Paper
+- **Système anti-duplication** : protection intégrée contre les exploits de duplication d'items
+- **Support base de données** : MySQL, MariaDB et SQLite pour la persistance des données
+
+### Convivial pour les développeurs
+- API propre et bien documentée
+- Enregistrement de types de boutons personnalisés
+- Enregistrement de types d'actions personnalisés
+- Système d'événements pour les interactions d'inventaire
+
+## Pourquoi choisir zMenu ?
+
+| Fonctionnalité | zMenu | Autres plugins |
+|----------------|-------|----------------|
+| Import des menus DeluxeMenus | Une commande | Réécriture à la main |
+| Hot reload | Automatique, sans commande | Rechargement manuel |
+| Types de boutons | 12+ intégrés | Limité |
+| Types d'actions | 30+ | Basique |
+| Support multi-pages | Natif | Nécessite souvent des contournements |
+| Système de patterns | Oui | Non |
+| Stockage données joueur | Oui | Rarement |
+| Support MiniMessage | Oui | Rarement |
+| Support base de données | MySQL/MariaDB/SQLite | Généralement fichiers uniquement |
+| Qualité API | Complète | Souvent minimale |
+| Développement actif | Oui | Variable |
+| Gratuit | Oui | Souvent payant |
+
+## Comment ça fonctionne
+
+zMenu utilise des fichiers de configuration YAML pour définir vos inventaires. Voici un aperçu simplifié :
+
+1. Les **inventaires** sont définis dans le dossier `inventories/`
+2. Chaque inventaire contient des **boutons** (items avec lesquels les joueurs peuvent interagir)
+3. Les boutons peuvent avoir des **actions** qui s'exécutent au clic
+4. Les **exigences** contrôlent qui peut voir ou cliquer sur les boutons
+5. Les **patterns** permettent de réutiliser des configurations de boutons
+
+### Exemple simple
+
+```yaml
+# inventories/mon_menu.yml
+name: "&6Mon premier menu"
+size: 27
+
+items:
+  bouton-bienvenue:
+    slot: 13
+    item:
+      material: DIAMOND
+      name: "&bBienvenue !"
+      lore:
+        - "&7Cliquez-moi pour recevoir un message"
+    actions:
+      - type: message
+        messages:
+          - "&aBonjour, %player% !"
+          - "&7Merci d'utiliser zMenu !"
+```
+
+Ceci crée un inventaire simple de 27 emplacements avec un diamant au centre qui envoie un message au clic.
+
+## Versions Minecraft supportées
+
+zMenu supporte les versions Minecraft **1.20.6 et plus récentes** et fonctionne avec :
+- Paper (requis)
+- Purpur
+- Pufferfish
+- Folia
+
+:::warning Paper requis
+Depuis la version **1.1.1.6**, zMenu fonctionne **uniquement sur Paper** — vous devez utiliser Paper, un fork de Paper (Purpur, Pufferfish) ou Folia. Sur Spigot, le plugin se charge quand même, mais uniquement pour afficher un avertissement expliquant que Paper est requis : aucune fonctionnalité de zMenu n'y fonctionne.
+:::
+
+## Prochaines étapes
+
+Prêt à commencer ? Suivez ces étapes :
+
+1. [Installez zMenu](./installation) sur votre serveur et ouvrez les [menus d'exemple](./configurations/example-menus) qu'il crée
+2. Vous utilisez DeluxeMenus ? [Convertissez vos menus](./convert-deluxemenus) en une commande
+3. Activez le [hot reload](./hot-reload) pour voir vos modifications instantanément
+4. Apprenez le [système de configuration](./configurations/informations)
+5. [Créez votre premier inventaire](./configurations/inventories/create-inventory)
+6. Explorez les [types de boutons](./configurations/buttons/button) et les [actions](./configurations/buttons/actions)
+
+## Obtenir de l'aide
+
+- **Discord** : rejoignez notre [serveur Discord](https://discord.groupez.dev) pour du support
+- **SpigotMC** : visitez la [page ressource SpigotMC](https://www.spigotmc.org/resources/zmenu.110402/)
+- **GitHub** : signalez les problèmes sur [GitHub](https://github.com/Maxlego08/zMenu)

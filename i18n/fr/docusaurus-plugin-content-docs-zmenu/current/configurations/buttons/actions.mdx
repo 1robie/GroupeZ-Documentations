@@ -1,0 +1,1213 @@
+---
+sidebar_position: 3
+title: Actions
+description: Référence complète de tous les types d'actions dans zMenu
+---
+
+# Actions
+
+Les actions sont des commandes exécutées lorsqu'un joueur interagit avec un bouton. zMenu fournit plus de 30 types d'actions pour divers usages.
+
+## Utilisation de base
+
+```yaml
+items:
+  mon-bouton:
+    slot: 0
+    item:
+      material: DIAMOND
+    actions:
+      - type: message
+        messages:
+          - "&aBonjour, %player% !"
+      - type: sound
+        sound: UI_BUTTON_CLICK
+```
+
+## Options communes
+
+Toutes les actions supportent les paramètres optionnels suivants :
+
+### delay
+
+Ajouter un délai (en ticks) avant l'exécution de l'action. 20 ticks = 1 seconde.
+
+```yaml
+actions:
+  - type: refresh
+    delay: 10  # Attendre 10 ticks avant de rafraichir
+```
+
+---
+
+### chance
+
+Définir un pourcentage de chance pour que l'action s'exécute. Combiné avec `deny-chance-actions` pour définir des actions alternatives lorsque la chance échoue.
+
+```yaml
+actions:
+  - type: console-command
+    commands:
+      - "give %player% diamond 1"
+    chance: 50  # 50% de chance d'execution
+    deny-chance-actions:  # Actions a executer si la chance echoue
+      - type: message
+        messages:
+          - "&cPas de chance cette fois !"
+```
+
+**Options :**
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `delay` | Entier | Délai en ticks avant l'exécution (20 ticks = 1 seconde) |
+| `chance` | Nombre | Pourcentage de chance (0-100) pour que l'action s'exécute. Par défaut `100` |
+| `deny-chance-actions` | Liste | Actions à exécuter si la vérification de chance échoue |
+| `debug` | Booléen | Affiche des informations de debug à l'exécution de l'action. Par défaut `false` |
+
+**Exemple avec les deux options :**
+
+```yaml
+actions:
+  - type: refresh
+    delay: 20  # Attendre 1 seconde
+    chance: 75  # 75% de chance
+    deny-chance-actions:
+      - type: message
+        messages:
+          - "&cLe rafraichissement a echoue !"
+```
+
+## Actions de message
+
+### message
+
+Envoyer un message au joueur.
+
+```yaml
+- type: message
+  messages:
+    - "&aLigne 1"
+    - "&bLigne 2"
+  minimessage: true  # Optionnel : Utiliser le format MiniMessage (defaut : true, alias : mini-message)
+```
+
+Une seule ligne peut aussi être écrite avec la clé `message` : `message: "&aBonjour !"`.
+
+---
+
+### messages
+
+Alias de `message`.
+
+```yaml
+- type: messages
+  messages:
+    - "&aPlusieurs lignes"
+    - "&bDe texte"
+```
+
+---
+
+### message-to
+
+Envoyer un message à un joueur spécifique.
+
+```yaml
+- type: message-to
+  target-player: "Notch"
+  messages:
+    - "&aBonjour de la part de %player% !"
+  minimessage: true  # Optionnel, defaut : true (alias : mini-message)
+```
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `target-player` | Texte | `""` | Nom du joueur qui reçoit le message |
+| `messages` | Liste | - | Lignes à envoyer. Une seule chaîne `message` est aussi acceptée |
+| `minimessage` | Booléen | `true` | Interpréter les lignes en MiniMessage. Alias : `mini-message` |
+
+<Aliases keys={['message-to', 'messages-to']} />
+
+---
+
+### broadcast
+
+Envoyer un message à tous les joueurs en ligne.
+
+```yaml
+- type: broadcast
+  messages:
+    - "&6[Annonce] &f%player% a achete un item special !"
+  minimessage: true  # Optionnel : defaut : true (alias : mini-message)
+  requirements:      # Optionnel : seuls les joueurs validant ces exigences recoivent le message
+    - type: permission
+      permission: "server.vip"
+```
+
+---
+
+### broadcast-message
+
+Envoyer une liste de lignes de chat à tous les joueurs en ligne.
+
+```yaml
+- type: broadcast_message
+  messages:
+    - "&6[Boutique] &f%sender% &7vient d'acheter un grade !"
+  minimessage: true # Optionnel, par defaut : true
+```
+
+**Options :**
+
+| Option | Type | Requis | Description |
+|--------|------|--------|-------------|
+| `messages` | Liste | Oui | Les lignes envoyées à tous les joueurs en ligne. Doit être écrit sous forme de liste YAML. |
+| `minimessage` | Booléen | Non | Interpréter chaque ligne en MiniMessage. Par défaut `true`. Mettre `false` pour l'envoyer telle quelle. Alias : `mini-message`. |
+
+**Placeholders :** `%sender%` est remplacé par le nom du joueur qui a déclenché l'action, `%receiver%` par le nom de chaque joueur qui reçoit la ligne.
+
+**Alias :** `broadcast_message` et `broadcast message`.
+
+:::info Différence avec `broadcast`
+`broadcast_message` résout ses placeholders **une seule fois**, pour le joueur qui l'a déclenché, puis envoie ce même résultat à tout le monde : seul `%receiver%` varie. [`broadcast`](#broadcast) les résout **à nouveau pour chaque destinataire** et accepte une liste `requirements` pour filtrer qui reçoit le message.
+
+Utilisez `broadcast` quand le texte doit différer selon le destinataire ou être filtré, et `broadcast_message` pour une simple annonce à propos du joueur qui a cliqué.
+:::
+
+:::warning
+Contrairement à l'action `message`, la clé au singulier `message` et une chaîne unique en ligne ne sont **pas** acceptées : `messages` doit être une liste YAML. La substitution de `%player%` et le découpage sur `\n` ne sont pas appliqués non plus.
+:::
+
+---
+
+### action-bar
+
+Afficher un message dans la barre d'action.
+
+```yaml
+- type: action
+  message: "&aBienvenue dans la boutique !"
+  minimessage: true  # Optionnel, defaut : true
+```
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `message` | Texte | - | Le texte de la barre d'action |
+| `minimessage` | Booléen | `true` | Interpréter le texte en MiniMessage |
+
+<Aliases keys={['action', 'actionbar']} />
+
+---
+
+### title
+
+Afficher un titre et un sous-titre.
+
+```yaml
+- type: title
+  title: "&6&lBienvenue !"
+  subtitle: "&7Profitez de votre sejour"
+  start: 20       # Ticks
+  duration: 60    # Ticks
+  end: 20         # Ticks
+```
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `title` | Texte | - | La ligne de titre |
+| `subtitle` | Texte | - | La ligne de sous-titre |
+| `start` | Nombre | `0` | Durée d'apparition, en ticks |
+| `duration` | Nombre | `0` | Durée d'affichage à l'écran, en ticks |
+| `end` | Nombre | `0` | Durée de disparition, en ticks |
+
+---
+
+### change-title
+
+Changer le titre de l'inventaire.
+
+:::warning Nécessite PacketEvents
+Cette action n'est disponible que si le plugin [PacketEvents](https://github.com/retrooper/packetevents) est installé sur votre serveur. Sans lui, l'action n'est pas enregistrée.
+:::
+
+```yaml
+- type: change-title
+  inventory-name: "Mon nouveau titre"
+```
+
+| Option | Type | Requis | Description |
+|--------|------|--------|-------------|
+| `inventory-name` | Texte | Non | Le nouveau titre de l'inventaire. Par défaut `menu` |
+
+<Aliases keys={['change-title', 'change-title-name']} />
+
+---
+
+### broadcast-title
+
+Afficher un titre et un sous-titre à tous les joueurs en ligne d'un coup. Les options sont les mêmes que celles de [`title`](#title), qui ne vise que le joueur ayant cliqué.
+
+```yaml
+- type: broadcast_title
+  title: "&6&lEVENEMENT"
+  subtitle: "&7Lance par &f%player%"
+  start: 20       # Ticks
+  duration: 60    # Ticks
+  end: 20         # Ticks
+```
+
+**Options :**
+
+| Option | Type | Requis | Description |
+|--------|------|--------|-------------|
+| `title` | Texte | Oui | La ligne de titre. Voir l'avertissement ci-dessous. |
+| `subtitle` | Texte | Oui | La ligne de sous-titre. Voir l'avertissement ci-dessous. |
+| `start` | Nombre | Non | Durée d'apparition, en ticks. Par défaut `0`. |
+| `duration` | Nombre | Non | Durée d'affichage à l'écran, en ticks. Par défaut `0`. |
+| `end` | Nombre | Non | Durée de disparition, en ticks. Par défaut `0`. |
+
+Les placeholders sont résolus **une seule fois, pour le joueur qui a déclenché l'action**, donc `%player_name%` désigne ce joueur et non chaque destinataire : c'est en général ce que l'on veut pour une annonce.
+
+**Alias :** `broadcast_title` et `broadcast title`.
+
+:::warning Toujours écrire les deux lignes et les trois durées
+`title` et `subtitle` n'ont pas de valeur par défaut : en omettre un envoie le texte littéral `null` à tous les joueurs. Les trois durées valent `0` par défaut, ce qui fait apparaître puis disparaître le titre immédiatement sur la plupart des clients. Renseignez-les explicitement, comme dans l'exemple ci-dessus.
+:::
+
+---
+
+### toast
+
+Afficher une notification toast (popup de succès).
+
+```yaml
+- type: toast
+  material: DIAMOND       # Materiau de l'icone (defaut : PAPER)
+  message: "&aSucces debloque !"
+  toast-type: CHALLENGE   # TASK, GOAL ou CHALLENGE (defaut : CHALLENGE)
+  model-id: "0"           # Optionnel : custom model data
+  glowing: false          # Optionnel : effet brillant (defaut : false)
+```
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `material` | Texte | `PAPER` | Matériau de l'icône du toast |
+| `message` | Texte | `Default message` | Le texte du toast |
+| `toast-type` | Texte | `CHALLENGE` | Style du cadre : `TASK`, `GOAL` ou `CHALLENGE` |
+| `model-id` | Texte | `0` | Custom model data de l'item d'icône |
+| `glowing` | Booléen | `false` | Ajoute un effet brillant à l'icône |
+
+<Aliases keys={['toast', 'send toast']} />
+
+## Actions de son
+
+### sound
+
+Jouer un son pour le joueur.
+
+```yaml
+- type: sound
+  sound: ENTITY_EXPERIENCE_ORB_PICKUP
+  pitch: 1.0    # 0.5 a 2.0
+  volume: 1.0   # Distance
+  sound-category: MASTER  # Categorie de son optionnelle (defaut : MASTER, alias : category)
+```
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `sound` | Texte | - | Le nom du son |
+| `pitch` | Décimal | `1.0` | Hauteur du son |
+| `volume` | Décimal | `1.0` | Volume du son |
+| `sound-category` | Texte | `MASTER` | Catégorie du son. Alias : `category` |
+
+**Sons courants :**
+- `UI_BUTTON_CLICK`
+- `ENTITY_EXPERIENCE_ORB_PICKUP`
+- `ENTITY_PLAYER_LEVELUP`
+- `ENTITY_VILLAGER_YES`
+- `ENTITY_VILLAGER_NO`
+- `BLOCK_NOTE_BLOCK_PLING`
+- `BLOCK_CHEST_OPEN`
+- `BLOCK_CHEST_CLOSE`
+
+---
+
+### broadcast-sound
+
+Jouer un son à tous les joueurs en ligne.
+
+```yaml
+- type: broadcast_sound
+  sound: ENTITY_ENDER_DRAGON_DEATH
+  pitch: 1.0
+  volume: 1.0
+  sound-category: MASTER  # Optionnel
+```
+
+**Alias :** `broadcast_sound`, `broadcast sound`. Mêmes options que [`sound`](#sound).
+
+## Actions de commande
+
+### player-command
+
+Exécuter une commande en tant que joueur.
+
+```yaml
+- type: player-command
+  commands:
+    - "spawn"
+    - "kit starter"
+  command-in-chat: false  # Optionnel : executer via le chat au lieu d'un dispatch (defaut : false)
+```
+
+| Option | Type | Requis | Description |
+|--------|------|--------|-------------|
+| `commands` | Liste | Oui | Liste des commandes à exécuter |
+| `command-in-chat` | Booléen | Non | Exécuter via le chat au lieu d'un dispatch (défaut : false). Alias : `commandInChat` |
+
+<Aliases keys={['player-command', 'player_command', 'player_commands', 'player command', 'player commands', 'player-commands']} />
+
+---
+
+### player-command-as-op
+
+Exécuter une commande en tant que joueur avec les permissions OP.
+
+```yaml
+- type: player-command-as-op
+  commands:
+    - "gamemode creative"
+```
+
+<Aliases keys={['player-command-as-op', 'player-commands-as-op', 'player_command_as_op', 'player_commands_as_op', 'player command as op', 'player commands as op']} />
+
+Cette action doit être activée dans la configuration : `enable-player-commands-as-op-action: true`.
+
+:::warning
+Utilisez avec précaution ! Cela donne au joueur un accès temporaire de niveau OP.
+:::
+
+---
+
+### console-command
+
+Exécuter une commande depuis la console.
+
+```yaml
+- type: console-command
+  commands:
+    - "give %player% diamond 64"
+    - "eco give %player% 1000"
+```
+
+**Options :**
+
+| Option | Type | Requis | Description |
+|--------|------|--------|-------------|
+| `commands` | Liste | Oui | Les commandes à exécuter en tant que console |
+| `stop-on-failure` | Booléen | Non | Interrompre les commandes suivantes dès qu'une commande signale un échec. Par défaut `false`. Alias : `stop_on_failure`. |
+
+<Aliases keys={['console-command', 'console-commands', 'console_command', 'console_commands', 'console command', 'console commands', 'command', 'commands']} />
+
+**Interrompre une chaîne qui a échoué**
+
+Par défaut, toutes les commandes de la liste sont exécutées, quoi qu'aient fait les précédentes. Avec `stop-on-failure`, la première commande qui signale un échec interrompt celles qui la suivent : une chaîne du type « retirer l'argent » puis « donner le grade » ne peut donc plus donner le grade si le paiement a échoué.
+
+```yaml
+- type: console-command
+  stop-on-failure: true
+  commands:
+    - "eco take %player% 1000"
+    - "lp user %player% parent add vip"
+```
+
+:::warning Pourquoi c'est désactivé par défaut
+Bukkit renvoie un échec aussi bien pour une commande qui n'existe pas **que** pour une commande dont l'exécuteur a renvoyé `false`, ce que beaucoup de plugins font simplement pour afficher leur aide. Activer cette option sans précaution peut donc interrompre une chaîne qui fonctionnait. Testez chaque chaîne avant de l'activer.
+:::
+
+---
+
+### chat
+
+Forcer le joueur à envoyer un message dans le chat.
+
+```yaml
+- type: chat
+  messages:
+    - "Bonjour tout le monde !"
+```
+
+| Option | Type | Requis | Description |
+|--------|------|--------|-------------|
+| `messages` | Liste | Oui | La liste des messages que le joueur doit envoyer |
+
+---
+
+### random-player-command
+
+:::info zMenu+
+Cette action nécessite [zMenu+](https://minecraft-music-inventory.com/resources/zmenu.music.331).
+:::
+
+Exécuter une sélection aléatoire de commandes en tant que joueur à partir d'une liste. Les commandes sont sélectionnées **sans remise** (pas de doublons dans une seule exécution).
+
+```yaml
+- type: random_player_command
+  commands:
+    - "say J'ai eu l'option 1 !"
+    - "say J'ai eu l'option 2 !"
+    - "say J'ai eu l'option 3 !"
+    - "say J'ai eu l'option 4 !"
+  amount: 1               # Nombre de commandes a executer aleatoirement (defaut : 1)
+  command-in-chat: false   # Optionnel : executer via le chat au lieu d'un dispatch (defaut : false)
+```
+
+**Options :**
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `commands` | Liste | Requis | Liste des commandes parmi lesquelles choisir aléatoirement |
+| `amount` | Entier | `1` | Nombre de commandes aléatoires à exécuter |
+| `command-in-chat` | Booléen | `false` | Si `true`, envoie via `player.chat()` ; si `false`, dispatch en tant que commande |
+
+<Aliases keys={['random_player_command', 'random_player_commands', 'random-player-command', 'random-player-commands']} />
+
+---
+
+### random-console-command
+
+:::info zMenu+
+Cette action nécessite [zMenu+](https://minecraft-music-inventory.com/resources/zmenu.music.331).
+:::
+
+Exécuter une sélection aléatoire de commandes console à partir d'une liste. Les commandes sont sélectionnées **sans remise** (pas de doublons dans une seule exécution). Supporte le placeholder `%player%`.
+
+```yaml
+- type: random_console_command
+  commands:
+    - "give %player% diamond 1"
+    - "give %player% emerald 1"
+    - "give %player% gold_ingot 1"
+    - "give %player% iron_ingot 1"
+  amount: 2    # Executer 2 commandes aleatoires de la liste
+```
+
+**Options :**
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `commands` | Liste | Requis | Liste des commandes console parmi lesquelles choisir aléatoirement |
+| `amount` | Entier | `1` | Nombre de commandes aléatoires à exécuter |
+
+<Aliases keys={['random_console_command', 'random_console_commands', 'random-console-command', 'random-console-commands', 'random-command', 'random-commands']} />
+
+## Actions d'inventaire
+
+### inventory
+
+Ouvrir un autre inventaire.
+
+```yaml
+- type: inventory
+  inventory: "shop"
+  plugin: "MonPlugin"  # Optionnel : plugin proprietaire de l'inventaire
+  page: 1          # Optionnel : page specifique (defaut : 1)
+  arguments:       # Optionnel : passer des arguments
+    - "arg1"
+```
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `inventory` | Texte | - | Nom de l'inventaire à ouvrir |
+| `plugin` | Texte | aucun | Nom du plugin si l'inventaire vient d'un autre plugin |
+| `page` | Texte | `1` | Page à ouvrir |
+| `arguments` | Liste | vide | Arguments passés à l'inventaire |
+
+<Aliases keys={['inventory', 'inv']} />
+
+---
+
+### close
+
+Fermer l'inventaire actuel.
+
+```yaml
+- type: close
+```
+
+---
+
+### back
+
+Retourner à l'inventaire précédent.
+
+```yaml
+- type: back
+```
+
+---
+
+### refresh
+
+Rafraîchir le bouton actuel.
+
+```yaml
+- type: refresh
+```
+
+---
+
+### refresh-inventory
+
+Rafraîchir l'inventaire entier (redessiner tous les boutons).
+
+```yaml
+- type: refresh-inventory
+```
+
+<Aliases keys={['refresh-inventory', 'refresh inventory', 'ri']} />
+
+## Actions joueur
+
+### teleport
+
+Téléporter le joueur à des coordonnées.
+
+```yaml
+- type: teleport
+  world: "world"
+  x: 0
+  y: 100
+  z: 0
+  yaw: 0       # Optionnel
+  pitch: 0     # Optionnel
+```
+
+Valeurs par défaut : `world` = `world`, `x`, `y`, `z`, `yaw` et `pitch` = `0.0`. **Alias :** `teleport`, `tp`.
+
+---
+
+### connect
+
+Connecter le joueur à un autre serveur (BungeeCord/Velocity).
+
+```yaml
+- type: connect
+  server: "lobby"   # Optionnel, defaut : hub
+```
+
+## Actions de données
+
+### data
+
+Modifier les valeurs de données joueur.
+
+```yaml
+- type: data
+  action: SET       # SET, ADD, SUBTRACT, REMOVE (defaut : SET)
+  key: "coins"
+  value: "100"
+  math: true        # Optionnel : activer les expressions mathematiques
+  seconds: 0        # Optionnel : duree de vie en secondes (0 = permanent)
+```
+
+**Options :**
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `action` | Texte | L'opération à effectuer (voir tableau ci-dessous). Par défaut `SET` |
+| `key` | Texte | La clé de donnée joueur concernée |
+| `value` | Texte | La valeur à utiliser (supporte les placeholders) |
+| `math` | Booléen | Active l'évaluation d'expressions mathématiques dans `value` (défaut : `false`) |
+| `seconds` | Nombre | Si défini, la valeur expire après ce nombre de secondes |
+
+**Actions :**
+
+| Action | Description | Exemple |
+|--------|-------------|---------|
+| `SET` | Définir à une valeur spécifique | `value: "100"` |
+| `ADD` | Ajouter à la valeur actuelle | `value: "50"` |
+| `SUBTRACT` | Soustraire de la valeur actuelle | `value: "25"` |
+| `REMOVE` | Supprimer entièrement la clé | - |
+
+**Expressions mathématiques :**
+```yaml
+- type: data
+  action: ADD
+  key: "total"
+  value: "%zmenu_player_value_base%*1.5"
+  math: true
+```
+
+## Actions d'économie
+
+### deposit
+
+Ajouter de l'argent au solde du joueur.
+
+```yaml
+- type: deposit
+  currency: "vault"       # Optionnel : plugin de monnaie (defaut : vault)
+  #economy:               # Si le plugin d'economie gere plusieurs monnaies, precisez laquelle
+  amount: 100
+  reason: "Recompense"    # Optionnel (defaut : "no reason")
+```
+
+---
+
+### withdraw
+
+Retirer de l'argent du solde du joueur.
+
+```yaml
+- type: withdraw
+  currency: "vault"  # Optionnel : plugin de monnaie (defaut : vault)
+  amount: 50
+  reason: "Achat"  # Optionnel (defaut : "no reason")
+```
+
+**Options (`deposit` et `withdraw`) :**
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `amount` | Texte | - | Montant à ajouter/retirer (supporte les placeholders) |
+| `currency` | Texte | `VAULT` | Plugin de monnaie (insensible à la casse) |
+| `economy` | Texte | aucun | Nom de l'économie, pour les plugins avec plusieurs monnaies |
+| `reason` | Texte | `no reason` | Raison transmise au plugin d'économie |
+
+**Alias :** `deposit` / `money add`, `withdraw` / `money remove`.
+
+## Action de livre
+
+### book
+
+Ouvrir un livre écrit pour le joueur.
+
+```yaml
+- type: book
+  author: "Serveur"
+  title: "&6Livre de bienvenue"
+  lines:
+    1:
+      - "&6Bienvenue !"
+      - "&7Ceci est la page 1"
+      - "de notre livre de bienvenue."
+    2:
+      - "&6Page 2"
+      - "&7Plus de contenu ici."
+```
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `title` | Texte | Le titre du livre |
+| `author` | Texte | L'auteur du livre |
+| `lines` | Map | Les pages : chaque clé est une page, chaque valeur une liste de lignes (jointes par un retour à la ligne) |
+
+## Action de dialogue
+
+### dialog
+
+Ouvrir un dialogue (nécessite Paper 1.21.7+).
+
+```yaml
+- type: dialog
+  dialog: "confirmation"
+  plugin: "MonPlugin"   # Optionnel : plugin proprietaire du dialogue
+  arguments:            # Optionnel : arguments passes au dialogue
+    - "arg1"
+```
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `dialog` | Texte | Nom du fichier de dialogue (sans .yml) |
+| `plugin` | Texte | Nom du plugin si le dialogue est externe |
+| `arguments` | Liste | Arguments à passer au dialogue |
+
+## Actions Discord
+
+### discord
+
+Envoyer un message à un webhook Discord.
+
+```yaml
+- type: discord
+  webhook: "https://discord.com/api/webhooks/..."
+  message: "%player% a fait un achat !"
+  username: "Bot Boutique"          # Optionnel
+  avatar: "https://..."             # Optionnel
+  embeds:                           # Optionnel
+    - title: "Nouvel achat"
+      description: "%player% a achete un item"
+      color: "#00FF00"
+```
+
+| Option | Type | Requis | Description |
+|--------|------|--------|-------------|
+| `webhook` | Texte | Oui | URL du webhook Discord |
+| `message` | Texte | Non | Message texte à envoyer |
+| `username` | Texte | Non | Remplace le nom d'affichage du webhook |
+| `avatar` | URL | Non | Remplace l'avatar du webhook |
+| `embeds` | Liste | Non | Objets embed Discord |
+
+<Aliases keys={['discord', 'send discord', 'discord webhook', 'discordwebhook']} />
+
+---
+
+### discord_component
+
+Envoyer un message Discord avec boutons/composants.
+
+```yaml
+- type: discord_component
+  webhook: "https://discord.com/api/webhooks/..."
+  username: "Bot Boutique"          # Optionnel
+  avatar-url: "https://..."         # Optionnel (alias : avatar_url)
+  component:
+    - title: "Nouvel achat"
+      description: "%player% a achete un item"
+      color: "#00FF00"
+```
+
+| Option | Type | Requis | Description |
+|--------|------|--------|-------------|
+| `webhook` | Texte | Oui | URL du webhook Discord (l'action est ignorée sans webhook) |
+| `component` | Liste | Non | Objets composant Discord à envoyer |
+| `username` | Texte | Non | Remplace le nom d'affichage du webhook |
+| `avatar-url` | URL | Non | Remplace l'avatar du webhook. Alias : `avatar_url` |
+
+<Aliases keys={['discord_component', 'discord component', 'discord webhook component', 'discordwebhookcomponent']} />
+
+## Actions d'intégration
+
+### luckperm-set
+
+Modifier les permissions LuckPerms (nécessite le plugin LuckPerms).
+
+```yaml
+- type: permission-set
+  permission: "server.vip"
+  value: true         # Accorder (true) ou retirer (false), defaut : true
+  expiration: 2592000 # Duree avant expiration ; -1 = permanent (defaut : -1)
+  time-unit: SECONDS  # Optionnel : unite de expiration (defaut : SECONDS)
+```
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `permission` | Texte | - | Le nœud de permission LuckPerms |
+| `value` | Booléen | `true` | `true` pour accorder, `false` pour retirer |
+| `expiration` | Nombre | `-1` | Durée avant expiration ; `-1` = permanent |
+| `time-unit` | Texte | `SECONDS` | Unité de `expiration` : tout `TimeUnit` Java (`SECONDS`, `MINUTES`, `HOURS`, `DAYS`...) |
+
+<Aliases keys={['permission-set', 'permission set', 'set permission', 'set-permission']} />
+
+---
+
+### shopkeeper
+
+Interagir avec le plugin Shopkeepers.
+
+```yaml
+- type: shopkeeper
+  name: "nom_boutique"   # defaut : error_name
+```
+
+Cette action n'est enregistrée que si le plugin Shopkeepers est installé.
+
+## Actions d'item
+
+Ces actions donnent ou retirent des items directement dans le menu ou dans l'inventaire du joueur. Parfaites pour les boutiques, les kits ou les systèmes de récompenses.
+
+### set_item
+
+Place un item dans un ou plusieurs slots, dans le menu ou dans l'inventaire du joueur.
+
+```yaml
+- type: set_item
+  slot: 13              # ou slots: [13, 14, 15]
+  in-player-inventory: false  # false = menu (defaut), true = inventaire du joueur
+  dupe-protection: true       # defaut : true
+  item:
+    material: DIAMOND
+    name: "&bRecompense"
+```
+
+**Options :**
+
+| Option                | Type    | Défaut  | Description                                                       |
+|-----------------------|---------|---------|-------------------------------------------------------------------|
+| `slot`                | Entier  | -       | Le slot à remplir (utilisez `slots` pour plusieurs slots)         |
+| `slots`               | Liste   | -       | La liste des slots à remplir                                      |
+| `in-player-inventory` | Booléen | `false` | Place l'item dans l'inventaire du joueur au lieu du menu          |
+| `dupe-protection`     | Booléen | `true`  | Protège l'item placé contre la duplication                        |
+| `item`                | Item    | -       | L'item à placer (peut aussi être défini directement dans l'action) |
+
+Alias disponibles : `set_item`, `set-item`.
+
+---
+
+### take_item
+
+Retire un certain nombre d'items correspondants de l'inventaire du joueur.
+
+```yaml
+- type: take_item
+  amount: 1
+  verification: SIMILAR  # SIMILAR (defaut), MODELID ou MATERIAL
+  use-cache: false       # defaut : false
+  item:
+    material: DIAMOND
+```
+
+**Options :**
+
+| Option         | Type    | Défaut    | Description                                                         |
+|----------------|---------|-----------|---------------------------------------------------------------------|
+| `amount`       | Entier  | `1`       | Nombre d'items à retirer au joueur                                  |
+| `verification` | Texte   | `SIMILAR` | Méthode de comparaison : `SIMILAR`, `MODELID` (custom model data) ou `MATERIAL` (matériau seul). En majuscules |
+| `use-cache`    | Booléen | `false`   | Utilise l'item en cache lors de la construction de l'item cible     |
+| `item`         | Item    | -         | L'item à comparer et à retirer (peut aussi être défini directement) |
+
+Alias disponibles : `take_item`, `take-item`.
+
+---
+
+### item_give
+
+Donne un item directement dans l'inventaire du joueur. Si l'inventaire est plein, le reste est lâché à la position du joueur.
+
+```yaml
+- type: item_give
+  item:
+    material: DIAMOND
+    name: "&bDiamant gratuit"
+    amount: 1
+```
+
+| Option | Type | Requis | Description |
+|--------|------|--------|-------------|
+| `item` | Item | Oui | L'item à donner (supporte toutes les options de configuration d'item) |
+
+Alias disponibles : `item_give`, `item-give`.
+
+---
+
+### item_edit
+
+Modifie l'item qui se trouve déjà dans un slot donné. Les propriétés écrites sous `item` sont appliquées **par-dessus l'item existant** (par exemple `durability: 0` le répare, `name` le renomme) ; tout ce que vous n'écrivez pas est conservé.
+
+```yaml
+- type: item_edit
+  slot: "player:5"
+  item:
+    material: DIAMOND_SWORD
+    name: "&6Epee amelioree"
+```
+
+| Option | Type | Requis | Description |
+|--------|------|--------|-------------|
+| `slot` | Texte | Oui | L'item à modifier, écrit `<source>:<slot>` (voir ci-dessous) |
+| `item` | Item | Oui | Les propriétés à appliquer à cet item |
+
+Le `slot` utilise la même syntaxe que les [placeholders d'item](../placeholders#placeholders-dinspection-ditem) :
+
+| Valeur | Item modifié |
+|--------|--------------|
+| `inventory:<n>` | Slot `n` du **menu** ouvert par le joueur (par exemple le slot d'un bouton `item_drag`) |
+| `player:<n>` | Slot `n` de l'inventaire du joueur |
+| `armor:helmet` / `chestplate` / `leggings` / `boots` | Une pièce d'armure |
+
+Un nombre seul comme `"5"` n'est pas reconnu.
+
+Alias disponibles : `item_edit`, `item-edit`.
+
+---
+
+### reset-pagination
+
+Réinitialise l'état de pagination pour un ou plusieurs identifiants de contexte, ou pour tous les contextes.
+
+```yaml
+# Reinitialiser des contextes precis
+- type: reset-pagination
+  reset-type: context
+  context-id: "ma_liste"        # un seul contexte
+  # context-ids: ["liste1", "liste2"]  # ou plusieurs
+
+# Reinitialiser tous les contextes du joueur
+- type: reset-pagination
+  reset-type: all
+```
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `reset-type` | Texte | `context` | Mode : `context` (identifiants précis) ou `all` (tous les contextes) |
+| `context-id` | Texte | - | Identifiant unique de contexte à réinitialiser (`reset-type: context`) |
+| `context-ids` | Liste | - | Plusieurs identifiants de contexte à réinitialiser |
+
+---
+
+### refresh_slot
+
+Rafraîchit uniquement le ou les slots indiqués, sans redessiner tout l'inventaire.
+
+```yaml
+- type: refresh_slot
+  slots: [13, 14, 15]
+  in-player-inventory: false  # defaut : false
+```
+
+**Options :**
+
+| Option                | Type    | Défaut  | Description                                                  |
+|-----------------------|---------|---------|--------------------------------------------------------------|
+| `slots`               | Liste   | -       | La liste des slots à rafraîchir                              |
+| `in-player-inventory` | Booléen | `false` | Rafraîchit les slots de l'inventaire du joueur au lieu du menu |
+
+Alias disponibles : `refresh_slot`, `refresh-slot`.
+
+## Exemples complets
+
+### Achat avec retour
+
+```yaml
+items:
+  acheter-item:
+    slot: 13
+    item:
+      material: DIAMOND_SWORD
+      name: "&6&lEpee en diamant"
+      lore:
+        - "&7Prix : &a500$"
+    click-requirement:
+      requirements:
+        - type: placeholder
+          value: "%vault_eco_balance%"
+          action: SUPERIOR_OR_EQUAL
+          number: 500
+          deny:
+            - type: message
+              messages:
+                - "&cVous avez besoin de 500$ !"
+            - type: sound
+              sound: ENTITY_VILLAGER_NO
+      success:
+        - type: withdraw
+          amount: 500
+        - type: console-command
+          commands:
+            - "give %player% diamond_sword 1"
+        - type: message
+          messages:
+            - "&aAchat reussi !"
+        - type: sound
+          sound: ENTITY_PLAYER_LEVELUP
+        - type: close
+```
+
+### Paramètre à bascule avec données
+
+```yaml
+items:
+  bascule:
+    slot: 22
+    type: SWITCH
+    placeholder: "%zmenu_player_value_setting%"
+    buttons:
+      "on":
+        item:
+          material: LIME_DYE
+          name: "&a&lParametre : ON"
+        actions:
+          - type: data
+            action: SET
+            key: "setting"
+            value: "off"
+          - type: message
+            messages:
+              - "&7Parametre desactive"
+          - type: sound
+            sound: UI_BUTTON_CLICK
+          - type: refresh
+      "off":
+        item:
+          material: GRAY_DYE
+          name: "&7&lParametre : OFF"
+        actions:
+          - type: data
+            action: SET
+            key: "setting"
+            value: "on"
+          - type: message
+            messages:
+              - "&7Parametre active"
+          - type: sound
+            sound: UI_BUTTON_CLICK
+          - type: refresh
+```
+
+### Bouton multi-actions
+
+```yaml
+items:
+  recompense:
+    slot: 13
+    item:
+      material: CHEST
+      name: "&e&lRecompense quotidienne"
+    actions:
+      - type: console-command
+        commands:
+          - "give %player% diamond 5"
+      - type: deposit
+        amount: 1000
+      - type: data
+        action: SET
+        key: "last_reward"
+        value: "%zmenu_time_unix_timestamp%"
+      - type: title
+        title: "&6&lRecompense reclamee !"
+        subtitle: "&75 Diamants + 1000$"
+      - type: sound
+        sound: ENTITY_PLAYER_LEVELUP
+      - type: broadcast
+        messages:
+          - "&6%player% &7a reclame sa recompense quotidienne !"
+      - type: close
+```
+
+## Ordre des actions
+
+Les actions s'exécutent dans l'ordre où elles sont listées. Si vous devez fermer l'inventaire après une téléportation, mettez `close` avant `teleport` :
+
+```yaml
+actions:
+  - type: close
+  - type: teleport
+    world: "world"
+    x: 0
+    y: 100
+    z: 0
+```
+
+## Utiliser les actions dans les exigences
+
+Les actions peuvent aussi être utilisées dans les blocs `deny` et `success` des exigences :
+
+```yaml
+click-requirement:
+  requirements:
+    - type: permission
+      permission: "server.vip"
+      deny:
+        - type: message
+          messages:
+            - "&cVous avez besoin du VIP !"
+  success:
+    - type: message
+      messages:
+        - "&aAcces accorde !"
+```
+
+## Tableau de référence rapide
+
+### Options communes (toutes les actions)
+
+| Option | Description |
+|--------|-------------|
+| `delay` | Délai en ticks avant l'exécution |
+| `chance` | Pourcentage de chance d'exécution |
+| `deny-chance-actions` | Actions alternatives si la chance échoue |
+| `debug` | Afficher des informations de debug (défaut `false`) |
+
+### Types d'actions
+
+| Action | Description |
+|--------|-------------|
+| `message` | Envoyer un message au joueur |
+| `broadcast` | Envoyer un message à tous, résolu par destinataire et filtrable |
+| `broadcast_message` | Envoyer un message à tous, résolu une fois pour le joueur qui a cliqué |
+| `action` | Afficher la barre d'action |
+| `title` | Afficher titre/sous-titre |
+| `broadcast_title` | Afficher titre/sous-titre à tous les joueurs |
+| `toast` | Afficher un toast de succès |
+| `sound` | Jouer un son |
+| `player-command` | Exécuter une commande en tant que joueur |
+| `console-command` | Exécuter une commande en tant que console |
+| `random-player-command` | Exécuter des commandes aléatoires en tant que joueur (zMenu+) |
+| `random-console-command` | Exécuter des commandes console aléatoires (zMenu+) |
+| `inventory` | Ouvrir un inventaire |
+| `close` | Fermer l'inventaire |
+| `back` | Revenir en arrière |
+| `refresh` | Rafraîchir le bouton |
+| `teleport` | Téléporter le joueur |
+| `connect` | Changer de serveur |
+| `data` | Modifier les données joueur |
+| `deposit` | Ajouter de l'argent |
+| `withdraw` | Retirer de l'argent |
+| `player-command-as-op` | Exécuter une commande en tant que joueur avec OP |
+| `chat` | Faire envoyer un message dans le chat au joueur |
+| `message-to` | Envoyer un message à un joueur précis |
+| `broadcast_sound` | Jouer un son à tous les joueurs |
+| `change-title` | Changer le titre de l'inventaire (PacketEvents) |
+| `refresh-inventory` | Rafraîchir tout l'inventaire |
+| `book` | Ouvrir un livre |
+| `dialog` | Ouvrir un dialogue |
+| `bedrock` | Ouvrir un formulaire Bedrock |
+| `discord` | Envoyer un message Discord |
+| `discord_component` | Envoyer un message Discord avec composants |
+| `permission-set` | Modifier les permissions LuckPerms |
+| `shopkeeper` | Interagir avec Shopkeepers |
+| `item_give` | Donner un item au joueur |
+| `item_edit` | Remplacer l'item d'un slot |
+| `reset-pagination` | Réinitialiser la pagination |
+| `set_item` | Placer un item dans des slots du menu/joueur |
+| `take_item` | Retirer des items correspondants au joueur |
+| `refresh_slot` | Rafraîchir uniquement certains slots |
+
+## Action Bedrock
+
+### bedrock
+
+Ouvrir un formulaire Bedrock natif pour les joueurs connectés via Geyser/Floodgate.
+
+:::warning Prérequis
+Les formulaires Bedrock nécessitent **Geyser** ou **Floodgate** installé sur votre serveur.
+:::
+
+```yaml
+- type: bedrock
+  bedrock: "simple-form"
+```
+
+**Avec des arguments :**
+```yaml
+- type: bedrock
+  bedrock: "feedback-form"
+  arguments:
+    - "arg1"
+    - "arg2"
+```
+
+**Depuis un plugin externe :**
+```yaml
+- type: bedrock
+  bedrock: "custom-form"
+  plugin: "MonPlugin"
+```
+
+**Options :**
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `bedrock` | Texte | Nom du fichier de formulaire Bedrock (sans .yml) |
+| `plugin` | Texte | Nom du plugin si utilisation d'un formulaire externe |
+| `arguments` | Liste | Arguments à passer au formulaire |
+
+Voir [Formulaires Bedrock](../bedrock) pour la documentation complète de configuration des formulaires Bedrock.
+
+## Prochaines étapes
+
+- Apprenez les [Données joueur](../player-data) pour stocker des valeurs
+- Voir les [Exigences](./button#exigences) pour les actions conditionnelles
+- Créez des [Patterns](../patterns) avec des actions par défaut

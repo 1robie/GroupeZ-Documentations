@@ -44,7 +44,7 @@ zMenu supports many material sources through its loader system:
 | **Armor (slot)**     | `armor:HEAD`, `armor:CHEST`, `armor:LEGS`, `armor:FEET` | Built-in | Player's equipped armor                                                        |
 | **zHead**            | `zhd:<id>`                                              | Free     | [Polymart](https://polymart.org/resource/2070)                                 |
 | **MagicCosmetics**   | `magic_cosmetics:HAT`, `magic_cosmetics:BAG`, etc.      | Paid     | [Polymart](https://polymart.org/product/6981/magic-cosmetics-gui-non-animated) |
-| **HMCCosmetics**     | `hmc_cosmetics:<type>`, `hmc_cosmetics:<type>-<player>` | Paid     | [SpigotMC](https://www.spigotmc.org/resources/100107/)                         |
+| **HMCCosmetics**     | `hmc_cosmetics:<slot>`, `hmc_cosmetics:<player>-<slot>` | Paid     | [SpigotMC](https://www.spigotmc.org/resources/100107/)                         |
 | **zItems**           | `zitems:<id>`                                           | Paid     | [SpigotMC](https://www.spigotmc.org/resources/118638/)                         |
 | **HeadDatabase**     | `hdb:<id>`                                              | Paid     | [SpigotMC](https://www.spigotmc.org/resources/14280/)                          |
 | **Oraxen**           | `oraxen:<item name>`                                    | Paid     | [SpigotMC](https://www.spigotmc.org/resources/72448/)                          |
@@ -52,7 +52,10 @@ zMenu supports many material sources through its loader system:
 | **SlimeFun**         | `slimefun:<item name>`                                  | Free     | [GitHub](https://github.com/Slimefun/Slimefun4)                                |
 | **Nova**             | `nova:<item/block name>`                                | Free     | [GitHub](https://github.com/xenondevs/Nova)                                    |
 | **Base64**           | `base64:<item in base64>`                               | Built-in | Import items as base64 string                                                  |
-| **PlayerHead**       | `playerHead:<player name>`, `playerHead:%player%`       | Built-in | Display a player's head                                                        |
+| **Eco**              | `eco:<item lookup key>`                                 | Paid     | [Auxilor](https://plugins.auxilor.io/all-plugins/the-item-lookup-system)       |
+| **MythicMobs**       | `mythicmobs:<item id>`                                  | Free     | [SpigotMC](https://www.spigotmc.org/resources/5702/)                           |
+| **BreweryX**         | `breweryx:<recipe id>`, `breweryx:<recipe id>:<quality>` | Free    | [SpigotMC](https://www.spigotmc.org/resources/114777/)                         |
+| **NextGens**         | `nextgens_generators:<generator id>`                    | Paid     | NextGens generators                                                            |
 | **CraftEngine**      | `craftengine:<item id>`                                 | Free     | [Modrinth](https://modrinth.com/plugin/craftengine)                            |
 | **ExecutableItems**  | `ei:<item id>`                                          | Paid     | [SpigotMC](https://www.spigotmc.org/resources/83070/)                          |
 | **ExecutableBlocks** | `eb:<block id>`                                         | Paid     | [SpigotMC](https://www.spigotmc.org/resources/94696/)                          |
@@ -66,8 +69,8 @@ zMenu supports many material sources through its loader system:
 # Vanilla material
 material: DIAMOND_SWORD
 
-# Player head
-material: "playerHead:%player%"
+# Player head (use the player-head key, see below)
+player-head: "%player%"
 
 # Custom head from zHead
 material: "zhd:123"
@@ -220,6 +223,33 @@ Define how the lore should interact with existing item lore. This is especially 
 | `REPLACE` | Replace the existing lore entirely (default) |
 | `APPEND`  | Add lines after the existing lore            |
 | `PREPEND` | Add lines before the existing lore           |
+
+---
+
+### center-name
+
+Center the item name using the inventory width (default: `false`).
+
+```yaml
+item:
+  material: DIAMOND
+  name: "&bCentered title"
+  center-name: true
+```
+
+---
+
+### center-lore
+
+Center every lore line (default: `false`).
+
+```yaml
+item:
+  material: DIAMOND
+  lore:
+    - "&7Centered line"
+  center-lore: true
+```
 
 ---
 
@@ -595,9 +625,9 @@ This allows resource packs to display custom models for items.
 
 ---
 
-### item-model <span class="badge badge--danger">1.21+</span>
+### item-model <span class="badge badge--danger">1.21.4+</span>
 
-Set the item model using a namespaced key (Minecraft 1.21+).
+Set the item model using a namespaced key (Minecraft 1.21.4+).
 
 ```yaml
 item:
@@ -817,7 +847,7 @@ item:
 
 ### attribute-merge-strategy
 
-Define how attribute modifiers should merge with existing item attributes.
+Define how attribute modifiers should merge with existing item attributes. Default: `ADD`.
 
 ```yaml
 item:
@@ -934,7 +964,8 @@ You can use either `enchantments` or `enchants` to add enchantments to your item
 </details>
 
 **Usage:**
-- Each enchantment entry is in the format `ENCHANTMENT_NAME,level` (e.g., `SHARPNESS,5`).
+- Each enchantment entry is in the format `ENCHANTMENT_NAME,level` (e.g., `SHARPNESS,5`); `ENCHANTMENT_NAME:level` is also accepted.
+- If `enchants` is empty, `enchantments` is read instead.
 - You can use any alias listed above for the enchantment name.
 - These options are for the top-level item configuration, not for components.
 
@@ -942,7 +973,7 @@ You can use either `enchantments` or `enchants` to add enchantments to your item
 
 ### trim
 
-Define armor trim patterns and materials.
+Define armor trim patterns and materials (Minecraft 1.20+). The trim is only applied when `enable` is `true` (default: `false`) and both `pattern` and `material` are valid namespaced keys.
 
 ```yaml
 item:
@@ -1211,7 +1242,7 @@ For custom items from ItemsAdder:
 
 ```yaml
 item:
-  material: ITEMSADDER:my_namespace:ruby_gem
+  material: itemsadder:my_namespace:ruby_gem
   name: "&c&lRuby Gem"
 ```
 
@@ -1219,9 +1250,62 @@ For Oraxen items:
 
 ```yaml
 item:
-  material: ORAXEN:amethyst_sword
+  material: oraxen:amethyst_sword
   name: "&d&lAmethyst Sword"
 ```
+
+## Saving a held item (`/zm save`)
+
+Instead of writing an item by hand, you can build it in-game and export it:
+
+```
+/zm save <name> [yml|base64]
+```
+
+- Permission: `zmenu.save`, player only, the item must be in your main hand.
+- The result is written to `plugins/zMenu/save_items.yml` under `items.<name>`. The name must be unused, otherwise the command refuses to overwrite.
+- `base64` (default) stores `material: "base64:<data>"`, an exact copy of the item.
+- `yml` converts the item to the normal item format described on this page (`name`, `lore`, `enchantments`, `flags`, `attributes`, `components`, ...). Copy the block into a menu or into the `items/` folder.
+
+With `yml`, zMenu rebuilds the converted item and compares it with the original. If anything differs, or a setting has no matching component, the whole item is saved as `base64:` instead and the chat message lists the components that could not be written as YAML.
+
+Version behaviour of the conversion:
+
+- Paper 1.21.3+: every data component overridden on the item is converted to its zMenu [component](./components) (including `custom-data` from the persistent data container).
+- Older servers: the item's `ItemMeta` is read instead, and settings such as flags, `hide-tooltip` and `fire-resistant` are exported as item options.
+
+Only non-default values are written: for example `amount` is omitted when it is 1, `lore-type` when it is `REPLACE`, and `model-id` when it is 0. Colors of potions, leather armor and firework effects are written as `alpha,red,green,blue`, and enchantments are written as `name,level`.
+
+## Troubleshooting / FAQ
+
+| Console message | Cause and fix |
+|-----------------|---------------|
+| `Amount type X is not valid at ...amount-type` | Unknown `amount-type`. Use one of the values listed in the message (see [amount-type](#amount-type)). The default is used instead. |
+| `Lore type X is not valid at ...lore-type` | Unknown `lore-type`. Use one of the values listed in the message (see [lore-type](#lore-type)). |
+| `Item rarity X is not valid at ...item-rarity` | Unknown rarity. Use one of the values listed in the message. |
+| `an error occurred while loading the enchantment X` | The enchantment is written wrongly. Each entry must be `name,level` or `name:level` (for example `sharpness,5`) with a level that is a whole number and an enchantment name that exists on your server version. The faulty entry is skipped, the others still load. |
+| `Trim pattern 'X' was not found ...` / `Trim material 'X' was not found ...` | The trim key does not exist. The message lists the available ones. |
+| `Invalid namespace for trim pattern/material` | The trim key is not a valid namespaced key (for example `minecraft:coast`). |
+| `Color X is not valid ..., expected numbers between 0 and 255` | A `color` value is malformed. Use three numbers from 0 to 255. |
+| `Leather material X has no armor type ..., its color will be ignored` | `color` was set on an item that is not leather armor. Remove it or change the material. |
+| `Equipment slot X is not valid` | The `armor` material loader received an unknown slot. Use one of the slots listed in the message. |
+| `Error while applying ItemComponent 'X' for item ...` | The component was read correctly but could not be applied to the item when it was built (usually a value that does not exist on your server version). The item is still created without that component. |
+| `Error with update display name for item ...` | The `name` could not be processed, often because of a broken placeholder or MiniMessage tag. |
+
+:::warning Silent failures
+Some mistakes produce **no message at all**:
+
+- An error thrown while *loading* a component from `components:` is only printed when `enable-debug: true` is set in `config.yml`. Without it the component is silently skipped.
+- A component key that does not exist (typo, or a component newer than your server) is silently ignored.
+- Unknown entries in `flags` are silently skipped.
+- The whole `components:` section is ignored on servers older than 1.20.5.
+
+When a component does not appear on the item, enable `enable-debug`, run `/zmenu reload`, and check the console.
+:::
+
+:::tip Caching
+`enable-cache-item-stack` (in `config.yml`, `true` by default) pre-builds each item once when the menu is loaded. Items that use PlaceholderAPI placeholders or a dynamic material are never pre-built, and `skip-first-cache: true` opts a single item out. If an item looks stale or the load logs errors about a missing player, set `skip-first-cache: true` on it.
+:::
 
 ## Best Practices
 

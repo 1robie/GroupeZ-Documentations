@@ -1,0 +1,222 @@
+---
+sidebar_position: 2
+title: Installation de zMenu
+description: Comment télécharger, installer et configurer zMenu sur votre serveur Minecraft
+---
+
+# Installation de zMenu
+
+Ce guide vous accompagnera dans le processus d'installation de zMenu sur votre serveur Minecraft.
+
+## Prérequis
+
+Avant d'installer zMenu, assurez-vous que votre serveur répond aux exigences suivantes :
+
+| Prérequis | Version minimum |
+|-----------|-----------------|
+| Minecraft | 1.20.6 et plus récent (Paper 26+ supporté) |
+| Java | **Java 21** (requis) |
+| Logiciel serveur | **Paper**, Purpur, Pufferfish ou Folia |
+
+:::warning Paper est requis
+zMenu est un plugin **exclusivement Paper** : il fournit un `paper-plugin.yml`, que seul Paper lit. Utilisez Paper, un fork de Paper (Purpur / Pufferfish) ou Folia.
+
+Sur Spigot, le plugin se charge et s'active quand même, mais **rien ne fonctionne** : aucun menu, aucune commande, aucune API. Il affiche seulement un avertissement dans la console, et envoie le même avertissement à la connexion aux joueurs possédant `zmenu.paper.warning` (les opérateurs par défaut), vous indiquant d'installer Paper.
+:::
+
+:::tip Configuration recommandée
+Pour une meilleure expérience, nous recommandons d'utiliser **Paper** ou **Purpur** avec **Java 21**. Cela active le support du formatage MiniMessage et offre de meilleures performances.
+:::
+
+:::tip Vous migrez depuis DeluxeMenus ?
+Gardez vos menus : une fois zMenu installé, lancez `/zm convert deluxemenus` pour convertir chaque menu DeluxeMenus en inventaire zMenu. Consultez [Migrer depuis DeluxeMenus](./convert-deluxemenus).
+:::
+
+:::info Le premier démarrage nécessite Internet
+Au premier chargement, zMenu télécharge quelques librairies d'exécution (le driver MariaDB et Reflections) via le chargeur de librairies de Paper. Sur un réseau restreint, vous pouvez indiquer un miroir avec la variable d'environnement `PAPER_DEFAULT_CENTRAL_REPOSITORY` ou l'option JVM `-Dorg.bukkit.plugin.java.LibraryLoader.centralURL`.
+:::
+
+## Téléchargement
+
+Vous pouvez télécharger zMenu depuis les sources suivantes :
+
+- **SpigotMC** (Principal) : [https://www.spigotmc.org/resources/zmenu.110402/](https://www.spigotmc.org/resources/zmenu.110402/)
+- **GitHub Releases** : [https://github.com/Maxlego08/zMenu/releases](https://github.com/Maxlego08/zMenu/releases)
+- **Modrinth** : [https://modrinth.com/plugin/zmenu](https://modrinth.com/plugin/zmenu)
+
+## Étapes d'installation
+
+### Étape 1 : Télécharger le plugin
+
+Téléchargez la dernière version de `zMenu.jar` depuis l'une des sources listées ci-dessus.
+
+### Étape 2 : Installer le plugin
+
+1. Arrêtez votre serveur Minecraft s'il est en cours d'exécution
+2. Placez le fichier `zMenu.jar` dans le dossier `plugins/` de votre serveur
+3. Démarrez votre serveur
+
+### Étape 3 : Vérifier l'installation
+
+Après le démarrage de votre serveur, vérifiez que zMenu s'est chargé correctement :
+
+1. Vérifiez dans la console du serveur :
+   ```
+   [zMenu] zMenu has been enabled!
+   ```
+
+2. Exécutez la commande `/zm version` en jeu ou depuis la console pour voir les informations de version
+
+### Étape 4 : Configuration initiale
+
+Après le premier démarrage, zMenu créera la structure de dossiers suivante :
+
+```
+plugins/zMenu/
+├── config.yml                    # Fichier de configuration principal
+├── global-placeholders.yml       # Valeurs des placeholders globaux
+├── default_values.yml            # Valeurs par defaut des placeholders de donnees joueur
+├── commands/
+│   ├── commands.yml              # Definitions des commandes personnalisees
+│   └── punish/punish.yml         # Commande avec arguments (exemple)
+├── inventories/
+│   ├── basic_inventory.yml       # Exemple d'inventaire
+│   ├── advanced_inventory.yml    # Exemple avance
+│   ├── pro_inventory.yml         # Exemple pro
+│   ├── animated_title_inventory.yml  # Titre anime (necessite PacketEvents)
+│   ├── example_punish.yml        # Menu utilise par /punish
+│   └── examples/                 # cookies, playtimes, switch, item_drag
+├── patterns/
+│   ├── pattern_example.yml       # Exemple de pattern
+│   ├── pattern_cookies.yml       # Utilise par examples/cookies.yml
+│   └── playtime_reward.yml       # Utilise par examples/playtimes.yml
+├── items/
+│   └── default-items.yml         # Definitions d'items reutilisables
+├── actions_patterns/
+│   └── default-actions.yml       # Patterns d'actions par defaut
+├── dialogs/                      # Exemples de dialogues (Paper 1.21.7+ uniquement)
+└── bedrock/                      # Exemples de formulaires Bedrock (Geyser/Floodgate uniquement)
+```
+
+Chaque fichier est un exemple fonctionnel, décrit dans [Menus d'exemple](./configurations/example-menus). Les fichiers ne sont créés que s'ils sont absents.
+
+## Dépendances optionnelles
+
+zMenu fonctionne de manière autonome mais s'intègre avec de nombreux plugins populaires pour des fonctionnalités améliorées :
+
+### Plugins recommandés
+
+| Plugin | Objectif |
+|--------|----------|
+| [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) | Afficher des valeurs dynamiques dans les items et messages |
+| [Vault](https://www.spigotmc.org/resources/vault.34315/) | Intégration économique |
+| [LuckPerms](https://luckperms.net/) | Exigences basées sur les permissions |
+
+### Plugins d'items (Optionnel)
+
+Ces plugins vous permettent d'utiliser des items personnalisés dans vos menus :
+
+| Plugin | Intégration |
+|--------|-------------|
+| [ItemsAdder](https://www.spigotmc.org/resources/itemsadder.73355/) | Items et textures personnalisés |
+| [Oraxen](https://www.spigotmc.org/resources/oraxen.72448/) | Items et modèles personnalisés |
+| [HeadDatabase](https://www.spigotmc.org/resources/head-database.14280/) | Têtes de joueurs personnalisées |
+| [Slimefun](https://github.com/Slimefun/Slimefun4) | Items Slimefun |
+| [MythicMobs](https://www.spigotmc.org/resources/mythicmobs.5702/) | Items MythicMobs |
+| [ExecutableItems](https://www.spigotmc.org/resources/executableitems.77578/) | Support ExecutableItems |
+
+### Autres intégrations
+
+| Plugin | Intégration |
+|--------|-------------|
+| Plugins d'économie (Vault, PlayerPoints, CoinsEngine, EcoBits, ExcellentEconomy, ...) | Actions `deposit` / `withdraw` et conditions d'argent, voir les [monnaies supportées](../currenciesapi/currencies) |
+| [Jobs Reborn](https://www.spigotmc.org/resources/jobs-reborn.4216/) | Exigences de niveau de métier |
+| [zHead](https://www.spigotmc.org/resources/zhead.115717/) | Textures de têtes personnalisées |
+| [packetevents](https://www.spigotmc.org/resources/packetevents-api.80279/) | Titres d'inventaire animés (`title-animation`), action de changement de titre et limiteur de clics. **Pas** nécessaire pour les dialogues. |
+| [Geyser](https://geysermc.org/) / [Floodgate](https://geysermc.org/) | Formulaires Bedrock pour les joueurs Bedrock |
+| [ViaVersion](https://viaversion.com/) / ProtocolSupport | Détecter la vraie version client des joueurs (sert à basculer des dialogues vers les inventaires pour les anciens clients) |
+
+:::info Les dialogues ne nécessitent aucun plugin supplémentaire
+Les [dialogues](./configurations/dialogues) utilisent l'API de dialogues native de Paper : Paper 1.21.7+ et `enable-mini-message-format: true` suffisent.
+:::
+
+## Fichiers de configuration
+
+### config.yml
+
+Le fichier de configuration principal contrôle les paramètres globaux du plugin. Voici un aperçu des options clés :
+
+```yaml
+# Activer le mode debug pour le depannage
+enable-debug: false
+
+# Parametres de base de donnees (SQLITE, MYSQL, MARIADB ou NONE)
+storage-type: SQLITE
+
+# Activer le formatage MiniMessage (Paper/Purpur uniquement)
+enable-mini-message-format: true
+
+# Parametres de cache pour les performances
+enable-cache-item-stack: true
+enable-cache-placeholder-api: false
+
+# Protection anti-duplication
+enable-anti-dupe: true
+
+# Delai de clic pour prevenir le spam
+enable-cooldown-click: true
+cooldown-click-milliseconds: 100
+
+# Inventaire par defaut ouvert par le bouton menu principal
+main-menu: "example"
+```
+
+Consultez la [documentation config.yml](./configurations/config-yml) pour toutes les options disponibles.
+
+## Dépannage
+
+### Le plugin ne se charge pas
+
+Si zMenu n'apparaît pas dans `/plugins` :
+
+1. Vérifiez la console pour des erreurs au démarrage
+2. Vérifiez que le fichier JAR n'est pas corrompu (re-téléchargez si nécessaire)
+3. Assurez-vous d'utiliser une version de serveur compatible
+
+### Erreurs de configuration
+
+Si vous voyez des erreurs d'analyse YAML :
+
+1. Utilisez un validateur YAML comme [YAML Lint](http://www.yamllint.com/)
+2. Vérifiez l'indentation incorrecte (utilisez des espaces, pas des tabulations)
+3. Assurez-vous que les caractères spéciaux sont correctement entre guillemets
+
+### Les placeholders ne fonctionnent pas
+
+Si les placeholders PlaceholderAPI ne fonctionnent pas :
+
+1. Assurez-vous que PlaceholderAPI est installé
+2. Installez l'expansion requise : `/papi ecloud download <expansion>`
+3. Rechargez PlaceholderAPI : `/papi reload`
+
+## Mise à jour de zMenu
+
+Pour mettre à jour zMenu :
+
+1. Téléchargez la dernière version
+2. Arrêtez votre serveur
+3. Remplacez l'ancien `zMenu.jar` par le nouveau
+4. Démarrez votre serveur
+5. Exécutez `/zm reload` si les configurations n'ont pas changé
+
+:::warning Sauvegardez d'abord
+Sauvegardez toujours votre dossier `plugins/zMenu/` avant la mise à jour, surtout si vous avez personnalisé les configurations.
+:::
+
+## Prochaines étapes
+
+Maintenant que zMenu est installé, apprenez comment :
+
+1. [Comprendre le système de configuration](./configurations/informations)
+2. [Créer votre premier inventaire](./configurations/inventories/create-inventory)
+3. [Utiliser les commandes et permissions](./configurations/commands-permissions)

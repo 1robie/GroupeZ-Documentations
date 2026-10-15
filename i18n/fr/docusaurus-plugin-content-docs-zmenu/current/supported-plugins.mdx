@@ -1,0 +1,583 @@
+---
+sidebar_position: 3
+title: Plugins supportés
+description: Liste de tous les plugins officiellement supportés par zMenu
+---
+
+# Plugins supportés {#plugins-supportes}
+
+zMenu s'intègre avec de nombreux plugins Minecraft populaires pour étendre ses fonctionnalités. Cette page liste tous les plugins officiellement supportés et les fonctionnalités qu'ils activent.
+
+## Plugins de placeholders
+
+### PlaceholderAPI
+
+**Téléchargement** : [SpigotMC](https://www.spigotmc.org/resources/placeholderapi.6245/)
+
+PlaceholderAPI est fortement recommandé pour zMenu. Il vous permet d'afficher des valeurs dynamiques dans vos inventaires, comme les statistiques des joueurs, les soldes économiques et bien plus encore.
+
+**Fonctionnalités activées :**
+- Utilisation de la syntaxe `%placeholder%` dans les noms d'items, lore et messages
+- Des milliers d'expansions disponibles
+- Analyse des placeholders en cache pour les performances
+
+**Exemple :**
+```yaml
+item:
+  material: DIAMOND
+  name: "&6Menu de %player_name%"
+  lore:
+    - "&7Solde : &a$%vault_eco_balance%"
+    - "&7Temps de jeu : &e%statistic_hours_played%h"
+```
+
+---
+
+## Plugins d'économie {#plugins-deconomie}
+
+### Vault
+
+**Téléchargement** : [SpigotMC](https://www.spigotmc.org/resources/vault.34315/)
+
+Vault fournit une API d'économie unifiée que zMenu utilise pour les actions basées sur la monnaie.
+
+**Fonctionnalités activées :**
+- Action `deposit`
+- Action `withdraw`
+- Placeholders d'économie
+
+---
+
+### ExcellentEconomy
+
+**Téléchargement** : [SpigotMC](https://www.spigotmc.org/resources/excellenteconomy-%E2%AD%90-economy-and-custom-currencies.84121/)
+
+ExcellentEconomy fournit un système d'économie multi-devises avec support de monnaies personnalisées.
+
+**Fonctionnalités activées :**
+- Action `deposit`
+- Action `withdraw`
+- Support multi-devises via le paramètre `economy`
+
+---
+
+### Autres plugins d'économie {#autres-plugins-deconomie}
+
+zMenu lit les monnaies via [CurrenciesAPI](../currenciesapi/introduction) et est déclaré en dépendance optionnelle de Vault, PlayerPoints, BeastTokens, ElementalTokens, ElementalGems, zEssentials, EcoBits, CoinsEngine, ExcellentEconomy, VotingPlugin, RedisEconomy et RoyaleEconomy afin qu'ils soient chargés en premier. Choisissez le plugin avec l'option `currency` (par défaut `vault`), et une monnaie précise avec `economy` pour les plugins qui en proposent plusieurs :
+
+```yaml
+actions:
+  - type: deposit
+    currency: playerpoints
+    amount: 50
+```
+
+Consultez la [liste complète des monnaies supportées](../currenciesapi/currencies) pour les noms exacts de `currency`.
+
+---
+
+## Plugins de permissions
+
+### LuckPerms
+
+**Téléchargement** : [https://luckperms.net/](https://luckperms.net/)
+
+L'intégration LuckPerms permet des fonctionnalités avancées basées sur les permissions.
+
+**Fonctionnalités activées :**
+- Type d'exigence `luckperm`
+- Action `luckperm-set` pour modifier les groupes des joueurs
+- Exigences de vue basées sur les groupes
+
+**Exemple :**
+```yaml
+click-requirement:
+  verification-vip:
+    clicks:
+      - ALL
+    requirements:
+      - type: luckperm
+        group: vip
+        deny:
+         - type: message
+           messages:
+             - "&cVous avez besoin du rang VIP pour utiliser ceci !"
+```
+
+---
+
+## Plugins d'items personnalisés {#plugins-ditems-personnalises}
+
+### ItemsAdder
+
+**Téléchargement** : [SpigotMC](https://www.spigotmc.org/resources/itemsadder.73355/)
+
+ItemsAdder vous permet d'utiliser des items personnalisés avec textures dans vos menus.
+
+**Utilisation :**
+```yaml
+item:
+  material: itemsadder:namespace:item_id
+```
+
+---
+
+### Oraxen
+
+**Téléchargement** : [SpigotMC](https://www.spigotmc.org/resources/oraxen.72448/)
+
+Support Oraxen pour les items et modèles personnalisés.
+
+**Utilisation :**
+```yaml
+item:
+  material: oraxen:item_id
+```
+
+---
+
+### HeadDatabase
+
+**Téléchargement** : [SpigotMC](https://www.spigotmc.org/resources/head-database.14280/)
+
+HeadDatabase fournit des milliers de textures de têtes de joueurs personnalisées.
+
+**Utilisation :**
+```yaml
+item:
+  material: hdb:12345
+```
+
+---
+
+### Slimefun
+
+**Téléchargement** : [GitHub](https://github.com/Slimefun/Slimefun4)
+
+Utilisez les items Slimefun dans vos menus.
+
+**Utilisation :**
+```yaml
+item:
+  material: slimefun:ITEM_ID
+```
+
+---
+
+### MythicMobs
+
+**Téléchargement** : [SpigotMC](https://www.spigotmc.org/resources/mythicmobs.5702/)
+
+Intégration MythicMobs pour les items personnalisés.
+
+**Utilisation :**
+```yaml
+item:
+  material: mythicmobs:item_id
+```
+
+---
+
+### MMOItems
+
+Intégration MMOItems pour les items RPG.
+
+**Utilisation :**
+```yaml
+item:
+  material: mmoitems:<type>:<item_id>
+```
+
+---
+
+### Nexo
+
+Intégration Nexo pour les items personnalisés (successeur d'Oraxen).
+
+**Utilisation :**
+```yaml
+item:
+  material: nexo:<item_name>
+```
+
+---
+
+### CraftEngine
+
+Intégration CraftEngine pour les items personnalisés.
+
+**Utilisation :**
+```yaml
+item:
+  material: craftengine:<item_id>
+```
+
+---
+
+### Nova
+
+Intégration Nova pour les items personnalisés.
+
+**Utilisation :**
+```yaml
+item:
+  material: nova:<item_or_block_name>
+```
+
+---
+
+### NextGens
+
+Intégration des générateurs NextGens.
+
+**Utilisation :**
+```yaml
+item:
+  material: nextgens_generators:<generator_id>
+```
+
+---
+
+### zItems
+
+**Téléchargement** : [SpigotMC](https://www.spigotmc.org/resources/zitems.118638/)
+
+Intégration zItems par le même développeur que zMenu.
+
+**Utilisation :**
+```yaml
+item:
+  material: zitems:<item_id>
+```
+
+---
+
+### ExecutableItems
+
+**Téléchargement** : [SpigotMC](https://www.spigotmc.org/resources/executableitems.77578/)
+
+Support ExecutableItems pour les items spéciaux.
+
+**Utilisation :**
+```yaml
+item:
+  material: ei:item_id
+```
+
+:::caution Préfixe correct
+Le préfixe de matériau est `ei:` (insensible à la casse). L'ancien préfixe documenté `EXECUTABLE_ITEM:` est **incorrect** et ne sera pas résolu.
+:::
+
+---
+
+### ExecutableBlocks
+
+**Téléchargement** : [SpigotMC](https://www.spigotmc.org/resources/executableblocks.96914/)
+
+Support ExecutableBlocks pour les blocs spéciaux en tant qu'items.
+
+**Utilisation :**
+```yaml
+item:
+  material: eb:block_id
+```
+
+---
+
+### BreweryX
+
+**Téléchargement** : [SpigotMC](https://www.spigotmc.org/resources/breweryx.114777/)
+
+Intégration BreweryX pour les items du système de brassage.
+
+**Utilisation :**
+```yaml
+item:
+  material: breweryx:recipe_name
+  # avec une qualite (defaut : 1)
+  material: breweryx:recipe_name:5
+```
+
+---
+
+### Eco
+
+**Téléchargement** : [Auxilor](https://plugins.auxilor.io/)
+
+Intégration Eco. La valeur après le préfixe utilise le [système de recherche d'items d'eco](https://plugins.auxilor.io/all-plugins/the-item-lookup-system).
+
+**Utilisation :**
+```yaml
+item:
+  material: eco:<item_lookup_key>
+```
+
+---
+
+### Denizen
+
+**Téléchargement** : [SpigotMC](https://www.spigotmc.org/resources/denizen.21039/)
+
+L'intégration Denizen est disponible via le [système de règles d'items](./configurations/item-rules). Vous pouvez faire correspondre les items Denizen par leur nom de script grâce au type de règle `denizen` (par exemple avec le bouton `item_drag`).
+
+**Utilisation :**
+```yaml
+rule:
+  type: denizen
+  items:
+    - "my_denizen_item"
+```
+
+---
+
+## Plugins de têtes {#plugins-de-tetes}
+
+### zHead
+
+**Téléchargement** : [SpigotMC](https://www.spigotmc.org/resources/zhead.115717/)
+
+Un autre plugin de textures de têtes par le même développeur.
+
+**Utilisation :**
+```yaml
+item:
+  material: zhd:category:head_name
+```
+
+:::caution Préfixe correct
+Le préfixe de matériau est `zhd:` (insensible à la casse). L'ancien préfixe documenté `ZHEAD:` est **incorrect** et ne sera pas résolu.
+:::
+
+---
+
+### HMCCosmetics
+
+**Téléchargement** : [SpigotMC](https://www.spigotmc.org/resources/hmccosmetics.100107/)
+
+Intégration HMCCosmetics pour les items cosmétiques.
+
+**Utilisation :**
+```yaml
+item:
+  material: hmc_cosmetics:<slot>
+  # ou pour le cosmetique d'un joueur precis :
+  material: hmc_cosmetics:<player>-<slot>
+```
+
+---
+
+### MagicCosmetics
+
+Intégration MagicCosmetics pour les items cosmétiques.
+
+---
+
+## Plugins de métiers {#plugins-de-metiers}
+
+### Jobs Reborn
+
+**Téléchargement** : [SpigotMC](https://www.spigotmc.org/resources/jobs-reborn.4216/)
+
+Intégration Jobs Reborn pour les exigences basées sur les métiers.
+
+**Fonctionnalités activées :**
+- Type d'exigence `job` pour vérifier les niveaux de métier
+
+**Exemple :**
+```yaml
+click-requirement:
+  verification-metier:
+    clicks:
+      - ALL
+    requirements:
+      - type: job
+        job: Miner
+        level: 10
+```
+
+---
+
+## Plugins de marchands
+
+### Shopkeepers
+
+Intégration avec le plugin Shopkeepers.
+
+**Fonctionnalités activées :**
+- Type d'action `shopkeeper`, ouvre la boutique d'un marchand. Option : `name` (le nom du marchand).
+
+```yaml
+actions:
+  - type: shopkeeper
+    name: "my-shopkeeper"
+```
+
+---
+
+## Compatibilité Bedrock {#compatibilite-bedrock}
+
+### Geyser / Floodgate
+
+**Téléchargement** : [GeyserMC](https://geysermc.org/)
+
+Geyser et Floodgate permettent aux joueurs Bedrock Edition de rejoindre les serveurs Java Edition. Lorsqu'ils sont détectés, zMenu active le système de formulaires Bedrock, qui fournit des formulaires natifs Bedrock au lieu d'inventaires à base de coffres.
+
+**Fonctionnalités activées :**
+- Formulaires Bedrock natifs (Simple, Modal, Custom)
+- Type d'action `bedrock` pour ouvrir les formulaires
+- Remplacement automatique d'inventaire pour les joueurs Bedrock
+- Commandes `/zm bedrock`
+- Permissions `zmenu.open.bedrock` et `zmenu.reload.bedrock`
+
+**Exemple :**
+```yaml
+# Dans une action de bouton
+actions:
+  - type: bedrock
+    bedrock: "feedback-form"
+```
+
+Voir [Formulaires Bedrock](./configurations/bedrock) pour la documentation complète.
+
+---
+
+## Plugins de paquets
+
+### PacketEvents
+
+**Téléchargement** : [SpigotMC](https://www.spigotmc.org/resources/packetevents-api.80279/)
+
+PacketEvents est optionnel. Il n'est **pas** nécessaire pour les [dialogues](./configurations/dialogues), qui utilisent l'API de dialogues native de Paper.
+
+**Fonctionnalités activées :**
+- Titres d'inventaire animés ([`title-animation`](./configurations/inventories/inventory#title-animation), identifiant de fournisseur `packet-events`)
+- L'action [`change-title`](./configurations/buttons/actions#change-title) (renommer l'inventaire ouvert)
+- Le limiteur de clics par paquets (`enable-packet-event-click-limiter` dans `config.yml`)
+
+---
+
+## Détection de la version du client {#detection-de-la-version-du-client}
+
+### ViaVersion / ProtocolSupport
+
+**Téléchargement** : [ViaVersion](https://viaversion.com/)
+
+Quand un serveur laisse des clients plus anciens ou plus récents se connecter via ViaVersion ou ProtocolSupport, la version qu'un client annonce à Paper n'est pas celle qu'il utilise réellement. zMenu interroge ces plugins pour connaître la vraie version du client, ce qui détermine si un joueur peut voir un [dialogue](./configurations/dialogues). Les clients qui ne peuvent pas ouvrir les dialogues reçoivent l'inventaire de secours.
+
+**Fonctionnalités activées :**
+- Vérification précise du support des dialogues par joueur
+- Rien à configurer : la détection démarre automatiquement
+
+---
+
+## Loaders de matériaux intégrés {#loaders-de-materiaux-integres}
+
+Ces loaders sont intégrés à zMenu et ne nécessitent aucun plugin externe.
+
+### armor
+
+Retourne l'item que le joueur porte actuellement dans l'emplacement indiqué (`HEAD`, `CHEST`, `LEGS`, `FEET`, `HAND`, `OFF_HAND`).
+
+```yaml
+item:
+  material: armor:HEAD
+```
+
+### base64
+
+Désérialise un `ItemStack` encodé en Base64 (format de sérialisation Bukkit).
+
+```yaml
+item:
+  material: base64:<base64_encoded_itemstack>
+```
+
+---
+
+## Tableau récapitulatif des plugins supportés {#tableau-recapitulatif-des-plugins-supportes}
+
+| Plugin | Catégorie | Préfixe material | Fonctionnalité |
+|--------|-----------|------------------|----------------|
+| PlaceholderAPI | Placeholders | - | Valeurs dynamiques |
+| Vault | Économie | - | Actions de monnaie |
+| ExcellentEconomy | Économie | - | Actions multi-devises |
+| LuckPerms | Permissions | - | Exigences de groupe |
+| ItemsAdder | Items personnalisés | `itemsadder:` | Items/textures personnalisés |
+| Oraxen | Items personnalisés | `oraxen:` | Items/modèles personnalisés |
+| Nexo | Items personnalisés | `nexo:` | Items/modèles personnalisés |
+| CraftEngine | Items personnalisés | `craftengine:` | Items personnalisés |
+| HeadDatabase | Têtes | `hdb:` | Têtes personnalisées |
+| Slimefun | Items personnalisés | `slimefun:` | Items Slimefun |
+| MythicMobs | Items personnalisés | `mythicmobs:` | Items MythicMobs |
+| MMOItems | Items personnalisés | `mmoitems:` | Items RPG |
+| ExecutableItems | Items personnalisés | `ei:` | Items EI |
+| ExecutableBlocks | Items personnalisés | `eb:` | Items EB |
+| BreweryX | Items personnalisés | `breweryx:` | Items de brassage |
+| Eco | Items personnalisés | `eco:` | Recherche d'items Eco |
+| Denizen | Règles d'items | - | Règle d'item `denizen` |
+| zHead | Têtes | `zhd:` | Têtes personnalisées |
+| zItems | Items personnalisés | `zitems:` | Items personnalisés |
+| Nova | Items personnalisés | `nova:` | Items Nova |
+| NextGens | Items personnalisés | `nextgens_generators:` | Items générateurs |
+| HMCCosmetics | Cosmétiques | `hmc_cosmetics:` | Items cosmétiques |
+| MagicCosmetics | Cosmétiques | `magic_cosmetics:` | Items cosmétiques |
+| Jobs Reborn | Métiers | - | Exigences de métier |
+| Geyser/Floodgate | Bedrock | - | Formulaires Bedrock natifs |
+| PacketEvents | Paquets | - | Titres animés, action change-title, limiteur de clics |
+| ViaVersion / ProtocolSupport | Version client | - | Vérification du support des dialogues par joueur |
+| PlayerPoints, CoinsEngine, EcoBits, ... | Économie | - | Autres monnaies pour `deposit` / `withdraw` |
+| *(intégré)* | Material | `armor:` | Item équipé par le joueur |
+| *(intégré)* | Material | `base64:` | ItemStack encodé en Base64 |
+
+## Utilisation des matériaux personnalisés {#utilisation-des-materiaux-personnalises}
+
+Lors de l'utilisation de plugins d'items personnalisés, le format de matériau suit généralement ce modèle :
+
+```yaml
+item:
+  material: PREFIXE_PLUGIN:identifiant_item
+```
+
+### Exemples :
+
+```yaml
+# ItemsAdder
+item:
+  material: itemsadder:my_namespace:ruby
+
+# Oraxen / Nexo
+item:
+  material: oraxen:emerald_sword
+  # material: nexo:emerald_sword
+
+# HeadDatabase
+item:
+  material: hdb:1234
+
+# Slimefun
+item:
+  material: slimefun:ELECTRIC_MOTOR
+
+# MythicMobs
+item:
+  material: mythicmobs:SkeletonKingSword
+
+# MMOItems
+item:
+  material: mmoitems:SWORD:LEGENDARY_BLADE
+
+# ExecutableItems / ExecutableBlocks
+item:
+  material: ei:my_custom_item
+  # material: eb:my_custom_block
+
+# Item equipe par le joueur (integre)
+item:
+  material: armor:HEAD
+```
+
+## Détection des plugins {#detection-des-plugins}
+
+zMenu détecte automatiquement les plugins installés et active leurs fonctionnalités. Vous n'avez rien à configurer - installez simplement les plugins et redémarrez votre serveur.
+
+Pour vérifier quels plugins zMenu a détectés, consultez la sortie de la console au démarrage du serveur ou utilisez la commande `/zm version`.

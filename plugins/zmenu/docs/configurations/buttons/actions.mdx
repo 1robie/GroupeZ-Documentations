@@ -64,8 +64,9 @@ actions:
 | Option                | Type    | Description                                           |
 |-----------------------|---------|-------------------------------------------------------|
 | `delay`               | Integer | Delay in ticks before execution (20 ticks = 1 second) |
-| `chance`              | Integer | Percentage chance (0-100) for the action to execute   |
+| `chance`              | Number  | Percentage chance (0-100) for the action to execute. Default `100` |
 | `deny-chance-actions` | List    | Actions to execute if the chance check fails          |
+| `debug`               | Boolean | Log debug information when the action runs. Default `false` |
 
 **Example with both options:**
 
@@ -90,8 +91,10 @@ actions:
           messages:
           - "&aLine 1"
           - "&bLine 2"
-          minimessage: true  # Optional: Use MiniMessage format default: true
+          minimessage: true  # Optional: Use MiniMessage format default: true (alias: mini-message)
         ```
+
+        A single line can also be written with the `message` key: `message: "&aHello!"`.
 
     </TabItem>
     <TabItem value="messages" label="messages (Alias)">
@@ -112,12 +115,34 @@ actions:
 
 Send a message to a specific player.
 
-```yaml
-- type: message-to
-  target-player: "Notch"
-  messages:
-    - "&aHello from %player%!"
-```
+<Tabs>
+    <TabItem value="message-to" label="message-to">
+
+        ```yaml
+        - type: message-to
+          target-player: "Notch"
+          messages:
+            - "&aHello from %player%!"
+          minimessage: true  # Optional, default: true (alias: mini-message)
+        ```
+
+    </TabItem>
+    <TabItem value="messages-to" label="messages-to (Alias)">
+
+        ```yaml
+        - type: messages-to
+          target-player: "Notch"
+          message: "&aHello from %player%!"
+        ```
+
+    </TabItem>
+</Tabs>
+
+| Option          | Type    | Default | Description                                                                 |
+|-----------------|---------|---------|-----------------------------------------------------------------------------|
+| `target-player` | String  | `""`    | Name of the player who receives the message                                 |
+| `messages`      | List    | -       | Lines to send. A single `message` string is also accepted                   |
+| `minimessage`   | Boolean | `true`  | Parse the lines as MiniMessage. Alias: `mini-message`                       |
 
 ---
 
@@ -129,7 +154,10 @@ Send a message to all online players.
 - type: broadcast
   messages:
     - "&6[Announcement] &f%player% purchased a special item!"
-  minimessage: true  # Optional: Use MiniMessage format (default: true)
+  minimessage: true  # Optional: Use MiniMessage format (default: true, alias: mini-message)
+  requirements:      # Optional: only players who pass these requirements receive the message
+    - type: permission
+      permission: "server.vip"
 ```
 
 ---
@@ -191,6 +219,7 @@ Display an action bar message.
         ```yaml
         - type: action
           message: "&aWelcome to the shop!"
+          minimessage: true  # Optional, default: true
         ```
 
     </TabItem>
@@ -203,6 +232,13 @@ Display an action bar message.
 
     </TabItem>
 </Tabs>
+
+| Option        | Type    | Default | Description                       |
+|---------------|---------|---------|-----------------------------------|
+| `message`     | String  | -       | The action bar text               |
+| `minimessage` | Boolean | `true`  | Parse the text as MiniMessage     |
+
+Available aliases: `action`, `actionbar`.
 
 ---
 
@@ -218,6 +254,14 @@ Display a title and subtitle.
   duration: 60   # Ticks
   end: 20        # Ticks
 ```
+
+| Option     | Type   | Default | Description                              |
+|------------|--------|---------|------------------------------------------|
+| `title`    | String | -       | The title line                           |
+| `subtitle` | String | -       | The subtitle line                        |
+| `start`    | Number | `0`     | Fade-in duration, in ticks               |
+| `duration` | Number | `0`     | Time the title stays on screen, in ticks |
+| `end`      | Number | `0`     | Fade-out duration, in ticks              |
 
 ---
 
@@ -301,7 +345,7 @@ This action is only available when the [PacketEvents](https://github.com/retroop
 
 | Option           | Type   | Required | Description                        |
 |------------------|--------|----------|------------------------------------|
-| `inventory-name` | String | Yes      | The new inventory title to display |
+| `inventory-name` | String | No       | The new inventory title to display. Default `menu` |
 
 Available aliases: `change-title`, `change-title-name`.
 
@@ -359,6 +403,13 @@ Play a sound to the player.
   volume: 1.0   # Distance
   sound-category: MASTER  # Optional sound category
 ```
+
+| Option           | Type   | Default  | Description                                                  |
+|------------------|--------|----------|--------------------------------------------------------------|
+| `sound`          | String | -        | The sound name                                               |
+| `pitch`          | Float  | `1.0`    | Sound pitch                                                  |
+| `volume`         | Float  | `1.0`    | Sound volume                                                 |
+| `sound-category` | String | `MASTER` | Sound category. Alias: `category`                            |
 
 **Common Sounds:**
 - `UI_BUTTON_CLICK`
@@ -438,7 +489,7 @@ Execute a command as the player.
         | Option            | Type    | Required | Description                                           |
         |-------------------|---------|----------|-------------------------------------------------------|
         | `commands`        | List    | Yes      | List of commands to execute                         |
-        | `command-in-chat` | Boolean | No       | Execute via chat instead of dispatch (default: false)|
+        | `command-in-chat` | Boolean | No       | Execute via chat instead of dispatch (default: false). Alias: `commandInChat` |
 
         **Note:** This action supports multiple aliases for flexibility.
 
@@ -596,7 +647,7 @@ Execute a random selection of commands as the player from a list. The commands a
 | `amount` | Integer | `1` | Number of random commands to execute |
 | `command-in-chat` | Boolean | `false` | If `true`, sends via `player.chat()`; if `false`, dispatches as command |
 
-**Aliases:** `random_player_command`, `random_player_commands`, `random-player-command`, `random-player-commands`
+<Aliases keys={['random_player_command', 'random_player_commands', 'random-player-command', 'random-player-commands']} />
 
 ---
 
@@ -625,7 +676,7 @@ Execute a random selection of console commands from a list. The commands are sel
 | `commands` | List | Required | List of console commands to randomly select from |
 | `amount` | Integer | `1` | Number of random commands to execute |
 
-**Aliases:** `random_console_command`, `random_console_commands`, `random-console-command`, `random-console-commands`, `random-command`, `random-commands`
+<Aliases keys={['random_console_command', 'random_console_commands', 'random-console-command', 'random-console-commands', 'random-command', 'random-commands']} />
 
 ## Inventory Actions
 
@@ -636,10 +687,20 @@ Open another inventory.
 ```yaml
 - type: inventory
   inventory: "shop"
-  page: 1          # Optional: specific page
+  plugin: "MyPlugin"  # Optional: plugin that owns the inventory
+  page: 1          # Optional: specific page (default: 1)
   arguments:       # Optional: pass arguments
     - "arg1"
 ```
+
+| Option      | Type   | Default | Description                                  |
+|-------------|--------|---------|----------------------------------------------|
+| `inventory` | String | -       | Name of the inventory to open                |
+| `plugin`    | String | none    | Plugin name if the inventory comes from another plugin |
+| `page`      | String | `1`     | Page to open                                 |
+| `arguments` | List   | empty   | Arguments passed to the inventory            |
+
+Available aliases: `inventory`, `inv`.
 
 ---
 
@@ -722,6 +783,8 @@ Teleport the player to coordinates.
           pitch: 0     # Optional
         ```
 
+        Defaults: `world` = `world`, `x`, `y`, `z`, `yaw` and `pitch` = `0.0`.
+
     </TabItem>
     <TabItem value="tp" label="tp (Alias)">
 
@@ -746,7 +809,7 @@ Connect the player to another server (BungeeCord/Velocity).
 
 ```yaml
 - type: connect
-  server: "lobby"
+  server: "lobby"   # Optional, default: hub
 ```
 
 ## Data Actions
@@ -757,7 +820,7 @@ Modify player data values.
 
 ```yaml
 - type: data
-  action: SET       # SET, ADD, SUBTRACT, MULTIPLY, DIVIDE, REMOVE
+  action: SET       # SET, ADD, SUBTRACT, REMOVE (default: SET)
   key: "coins"
   value: "100"
   math: true        # Optional: enable math expressions
@@ -767,7 +830,7 @@ Modify player data values.
 
 | Option | Type | Description |
 |--------|------|-------------|
-| `action` | String | The operation to perform (see table below) |
+| `action` | String | The operation to perform (see table below). Default `SET` |
 | `key` | String | The player data key to operate on |
 | `value` | String | The value to use (supports placeholders) |
 | `math` | Boolean | Enable math expression evaluation in `value` (default: `false`) |
@@ -780,8 +843,6 @@ Modify player data values.
 | `SET` | Set to specific value | `value: "100"` |
 | `ADD` | Add to current value | `value: "50"` |
 | `SUBTRACT` | Subtract from current | `value: "25"` |
-| `MULTIPLY` | Multiply current value | `value: "2"` |
-| `DIVIDE` | Divide current value | `value: "2"` |
 | `REMOVE` | Remove the key entirely | - |
 
 **Math expressions:**
@@ -813,10 +874,10 @@ Add money to player's balance.
 
         ```yaml
         - type: deposit
-          currency: "vault"  # Optional: specify currency plugin
+          currency: "vault"  # Optional: specify currency plugin (default: vault)
           #economy:   # When a economy plugin allows multiple currencies, you can specify which one to use.
           amount: 50
-          reason: "Purchase"  # Optional
+          reason: "Purchase"  # Optional (default: "no reason")
         ```
 
     </TabItem>
@@ -846,10 +907,10 @@ Remove money from player's balance.
 
         ```yaml
         - type: withdraw
-          currency: "vault"  # Optional: specify currency plugin
+          currency: "vault"  # Optional: specify currency plugin (default: vault)
           #economy:   # When a economy plugin allows multiple currencies, you can specify which one to use.
           amount: 50
-          reason: "Purchase"  # Optional
+          reason: "Purchase"  # Optional (default: "no reason")
         ```
 
     </TabItem>
@@ -867,6 +928,18 @@ Remove money from player's balance.
 </Tabs>
 
 [See the full list of supported currencies here.](../../../currenciesapi/currencies)
+
+**Options (`deposit` and `withdraw`):**
+
+| Option     | Type   | Default     | Description                                                       |
+|------------|--------|-------------|-------------------------------------------------------------------|
+| `amount`   | String | -           | Amount to add/remove (supports placeholders)                      |
+| `currency` | String | `VAULT`     | Currency plugin (case-insensitive)                                |
+| `economy`  | String | none        | Economy name, for plugins that provide several currencies         |
+| `reason`   | String | `no reason` | Reason passed to the economy plugin                               |
+
+Aliases: `deposit` / `money add`, `withdraw` / `money remove`.
+
 ## Book Action
 
 ### book
@@ -886,6 +959,12 @@ Open a written book for the player.
       - "&6Page 2"
       - "&7More content here."
 ```
+
+| Option   | Type | Description                                                                  |
+|----------|------|------------------------------------------------------------------------------|
+| `title`  | String | The book title                                                             |
+| `author` | String | The book author                                                            |
+| `lines`  | Map  | Pages: each key is a page, each value is a list of lines (joined with a new line) |
 
 ## Dialog Action
 
@@ -1065,6 +1144,15 @@ Send a Discord message with buttons/components.
               color: "#00FF00"
         ```
 
+        **Options:**
+
+        | Option       | Type   | Required | Description                                                         |
+        |--------------|--------|----------|---------------------------------------------------------------------|
+        | `webhook`    | String | Yes      | Webhook URL for the Discord server. The action is skipped if missing |
+        | `component`  | List   | No       | Discord component objects to send                                   |
+        | `username`   | String | No       | Override the webhook's display name                                 |
+        | `avatar-url` | URL    | No       | Override the webhook's avatar URL. Alias: `avatar_url`              |
+
         Available aliases: `discord_component`, `discord component`, `discord webhook component`, `discordwebhookcomponent`.
 
     </TabItem>
@@ -1125,7 +1213,9 @@ Modify LuckPerms permissions.
 | `permission` | String | — | The LuckPerms permission node to grant or revoke |
 | `value` | Boolean | `true` | `true` to grant, `false` to revoke |
 | `expiration` | Long | `-1` | Duration before the permission expires; `-1` = permanent |
-| `time-unit` | String | `SECONDS` | Unit for `expiration`: `SECONDS`, `MINUTES`, `HOURS`, `DAYS` |
+| `time-unit` | String | `SECONDS` | Unit for `expiration`: any Java `TimeUnit` (`SECONDS`, `MINUTES`, `HOURS`, `DAYS`, ...). Invalid values fall back to `SECONDS` |
+
+This action is only registered when the LuckPerms plugin is installed.
 
 Available aliases: `permission-set`, `permission set`, `set permission`, `set-permission`.
 
@@ -1139,6 +1229,12 @@ Interact with Shopkeepers plugin.
 - type: shopkeeper
   name: "shop_name"
 ```
+
+| Option | Type   | Default      | Description                  |
+|--------|--------|--------------|------------------------------|
+| `name` | String | `error_name` | Name of the shopkeeper       |
+
+This action is only registered when the Shopkeepers plugin is installed.
 
 ## Item Actions
 
@@ -1199,7 +1295,7 @@ Remove a number of matching items from the player's inventory.
         ```yaml
         - type: take_item
           amount: 1
-          verification: SIMILAR  # SIMILAR (default) or MODELID
+          verification: SIMILAR  # SIMILAR (default), MODELID or MATERIAL
           use-cache: false       # default: false
           item:
             material: DIAMOND
@@ -1223,7 +1319,7 @@ Remove a number of matching items from the player's inventory.
 | Option         | Type    | Default   | Description                                                            |
 |----------------|---------|-----------|------------------------------------------------------------------------|
 | `amount`       | Integer | `1`       | Number of items to remove from the player                              |
-| `verification` | String  | `SIMILAR` | How items are matched: `SIMILAR` or `MODELID` (custom model data)      |
+| `verification` | String  | `SIMILAR` | How items are matched: `SIMILAR`, `MODELID` (custom model data) or `MATERIAL` (material only). Must be uppercase |
 | `use-cache`    | Boolean | `false`   | Use the cached item stack when building the target item                |
 | `item`         | Item    | -         | The item to match and remove (can also be defined inline)              |
 
@@ -1255,11 +1351,11 @@ Available aliases: `item_give`, `item-give`.
 
 ### item_edit
 
-Replace or modify an item at a specific slot in the player's inventory.
+Modify the item that already sits in a given slot. The properties written under `item` are applied **on top of the existing item** (for example `durability: 0` repairs it, `name` renames it); everything you do not write is kept.
 
 ```yaml
 - type: item_edit
-  slot: "5"
+  slot: "player:5"
   item:
     material: DIAMOND_SWORD
     name: "&6Upgraded Sword"
@@ -1269,8 +1365,18 @@ Replace or modify an item at a specific slot in the player's inventory.
 
 | Option | Type   | Required | Description                               |
 |--------|--------|----------|-------------------------------------------|
-| `slot` | String | Yes      | The inventory slot to edit                |
-| `item` | Item   | Yes      | The replacement item                      |
+| `slot` | String | Yes      | The item to edit, written `<source>:<slot>` (see below) |
+| `item` | Item   | Yes      | The properties to apply to that item      |
+
+The `slot` uses the same syntax as the [item placeholders](../placeholders#item-inspection-placeholders):
+
+| Value | Item edited |
+|-------|-------------|
+| `inventory:<n>` | Slot `n` of the **menu** the player has open (for example the slot of an `item_drag` button) |
+| `player:<n>` | Slot `n` of the player's own inventory |
+| `armor:helmet` / `chestplate` / `leggings` / `boots` | An armor piece |
+
+A plain number such as `"5"` is not recognised.
 
 Available aliases: `item_edit`, `item-edit`.
 
@@ -1283,21 +1389,21 @@ Reset the pagination state for one or more pagination context IDs, or for all co
 ```yaml
 # Reset specific context(s)
 - type: reset-pagination
-  type: context
+  reset-type: context
   context-id: "my_list"        # single context
   # context-ids: ["list1", "list2"]  # or multiple
 
 # Reset all contexts for this player
 - type: reset-pagination
-  type: all
+  reset-type: all
 ```
 
 **Options:**
 
 | Option        | Type   | Default     | Description                                                    |
 |---------------|--------|-------------|----------------------------------------------------------------|
-| `type`        | String | `context`   | Reset mode: `context` (specific IDs) or `all` (every context) |
-| `context-id`  | String | —           | Single pagination context ID to reset (`type: context` only)  |
+| `reset-type`  | String | `context`   | Reset mode: `context` (specific IDs) or `all` (every context) |
+| `context-id`  | String | —           | Single pagination context ID to reset (`reset-type: context` only)  |
 | `context-ids` | List   | —           | Multiple pagination context IDs to reset                      |
 
 Available aliases: `reset-pagination`.
@@ -1491,6 +1597,7 @@ click-requirement:
 | `delay` | Delay in ticks before execution |
 | `chance` | Percentage chance to execute |
 | `deny-chance-actions` | Fallback actions if chance fails |
+| `debug` | Log debug information (default `false`) |
 
 ### Action Types
 
@@ -1533,6 +1640,9 @@ click-requirement:
 | `item_give` | Give an item to the player's inventory |
 | `item_edit` | Replace item at a specific slot |
 | `reset-pagination` | Reset pagination context(s) for the player |
+| `player-command-as-op` | Run command as player with OP permissions |
+| `chat` | Make the player send chat message(s) |
+| `bedrock` | Open a Bedrock form |
 
 ## Next Steps
 

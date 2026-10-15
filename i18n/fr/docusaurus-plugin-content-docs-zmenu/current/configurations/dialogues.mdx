@@ -1,0 +1,896 @@
+---
+sidebar_position: 8
+title: Dialogues
+description: Créer des popups de dialogue interactives avec des formulaires, des confirmations et des boutons multi-actions
+---
+
+# Dialogues
+
+Les dialogues sont des fenêtres popup interactives qui apparaissent à l'écran, permettant aux joueurs d'interagir avec des formulaires, des confirmations et des boutons d'action. Ils offrent une expérience d'interface moderne allant au-delà des menus d'inventaire traditionnels.
+
+:::warning Prérequis
+Les dialogues nécessitent **Paper 1.21.7+**.
+:::
+
+## Emplacement des fichiers
+
+Les dialogues sont stockés dans le dossier `plugins/zMenu/dialogs/`. Chaque fichier YAML représente un dialogue.
+
+```
+plugins/zMenu/dialogs/
+├── welcome.yml
+├── confirmation.yml
+├── server-links.yml
+└── feedback-form.yml
+```
+
+## Types de dialogues
+
+zMenu supporte tous les types de dialogues vanilla :
+
+| Type | Description |
+|------|-------------|
+| `notice` | Dialogue informatif simple avec un corps et des saisies optionnelles |
+| `confirmation` | Dialogue de confirmation Oui/Non |
+| `multi_action` | Plusieurs boutons d'action disposés en grille |
+| `server_links` | Affiche les liens du serveur sous forme de boutons cliquables |
+| `dialog_list` | Un hub qui liste d'autres dialogues, un bouton par dialogue |
+
+## Structure de base
+
+```yaml
+name: "&6&lDialog Title"
+external-title: "Window Title"
+type: notice
+
+can-close-with-escape: true
+pause: false
+after-action: CLOSE
+
+body:
+  # Sections du contenu du corps...
+
+inputs:
+  # Champs de saisie...
+```
+
+## Options de configuration
+
+### name
+
+Le nom interne du dialogue, affiché avec la mise en forme des couleurs.
+
+```yaml
+name: "&6&lWelcome Dialog"
+```
+
+### external-title
+
+Le titre de la fenêtre affiché dans l'en-tête du dialogue. L'ancienne écriture `external_title` est aussi acceptée. C'est également le libellé du bouton qui ouvre ce dialogue depuis une [liste de dialogues](#liste-de-dialogues). S'il est vide, rien n'est envoyé et le client utilise le nom du dialogue.
+
+```yaml
+external-title: "Server Information"
+```
+
+### type
+
+Le type de dialogue (défaut : `notice`). Voir [Types de dialogues](#types-de-dialogues) pour plus de détails.
+
+```yaml
+type: notice
+```
+
+### can-close-with-escape
+
+Permet aux joueurs de fermer le dialogue en appuyant sur Échap (défaut : `true`).
+
+```yaml
+can-close-with-escape: true
+```
+
+### pause
+
+Met le jeu en pause pendant que le dialogue est ouvert (comportement de type solo). Défaut : `false`.
+
+```yaml
+pause: false
+```
+
+### after-action
+
+Ce qui se passe après qu'une action est effectuée (défaut : `CLOSE`). Seule la clé `after-action` est lue.
+
+| Valeur | Description |
+|-------|-------------|
+| `CLOSE` | Ferme le dialogue |
+| `NONE` | Ne fait rien, le dialogue reste ouvert |
+| `WAIT_FOR_RESPONSE` | Affiche un écran d'attente jusqu'à ce que le serveur envoie un autre écran |
+
+```yaml
+after-action: CLOSE
+```
+
+### open-requirement
+
+Conditions que le joueur doit remplir pour ouvrir le dialogue. Même format que l'`open-requirement` d'un inventaire.
+
+### inventory-replacement
+
+Redirige le dialogue vers un inventaire zMenu. Mêmes options que le [remplacement d'inventaire](./bedrock#remplacement-dinventaire) d'un inventaire (`name`, `plugin`, `pages`, `mode`).
+
+### fallback-inventory
+
+Inventaire ouvert à la place du dialogue lorsque le client du joueur ne peut pas afficher les dialogues (en dessous de Minecraft 1.21.6).
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `name` | String | aucun (requis) | Nom du fichier d'inventaire, sans `.yml` |
+| `plugin` | String | `zMenu` | Plugin propriétaire de l'inventaire |
+| `page` | Entier | `1` | Page à ouvrir |
+
+```yaml
+fallback-inventory:
+  name: my_menu
+  plugin: zMenu
+  page: 1
+```
+
+### target-player-name-placeholder
+
+Placeholder utilisé pour le nom du joueur cible (défaut : `%player_name%`). L'alias `target_player_name_placeholder` est aussi accepté.
+
+---
+
+## Contenu du corps
+
+La section `body` définit le contenu qui apparaît dans le dialogue. Vous pouvez combiner plusieurs types de contenu.
+
+### plain_message
+
+Affiche des messages texte. Nom de type canonique : `dialog_plain_message` (alias `plain_message`).
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `messages` | Liste de chaînes | vide | Lignes de texte |
+| `width` | Entier | `128` | Largeur du bloc de message |
+| `localized-messages` | Section | aucune | Messages par langue du client, ex. `en_us: [...]` |
+
+```yaml
+body:
+  welcome:
+    type: plain_message
+    messages:
+      - "&6&lWelcome to our server!"
+      - ""
+      - "&7Server IP: &fplay.example.com"
+      - "&7Discord: &fdiscord.gg/example"
+    width: 400
+```
+
+### item
+
+Affiche un item avec une infobulle optionnelle. Nom de type canonique : `dialog_item` (alias `item`).
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `item` | Section | aucune | L'item à afficher (même format que les items zMenu) |
+| `width` | Entier | `128` | Largeur de l'item |
+| `height` | Entier | `128` | Hauteur de l'item |
+| `show-decoration` | Booléen | `true` | Affiche la quantité et la barre de durabilité |
+| `show-tooltip` | Booléen | `true` | Affiche l'infobulle de l'item au survol |
+| `description.messages` | Liste de chaînes | vide | Texte affiché à côté de l'item |
+| `description.width` | Entier | `512` | Largeur de la description |
+
+```yaml
+body:
+  featured-item:
+    type: item
+    item:
+      material: DIAMOND_SWORD
+      name: "&b&lLegendary Sword"
+      lore:
+        - "&7A powerful weapon"
+    show-decoration: true
+    show-tooltip: true
+    width: 200
+    height: 150
+```
+
+---
+
+## Champs de saisie
+
+Les dialogues peuvent inclure des champs de saisie interactifs dans la section `inputs`.
+
+### dialog_text
+
+Un champ de saisie de texte.
+
+```yaml
+inputs:
+  feedback:
+    type: dialog_text
+    label: "&6Share your thoughts:"
+    width: 400
+    max-length: 200
+    multiline:
+      max-lines: 4
+```
+
+**Options :**
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `label` | String | Label affiché au-dessus de la saisie (défaut : vide) |
+| `label-visible` | Boolean | Affiche le label (défaut : `true`) |
+| `width` | Integer | Largeur du champ de saisie (défaut : `200`) |
+| `default-value` | String | Texte pré-rempli (défaut : vide) |
+| `max-length` | Integer | Nombre maximum de caractères (défaut : `32`) |
+| `multiline.max-lines` | Integer | Nombre de lignes pour la saisie multiligne (défaut : `0`, une seule ligne) |
+| `multiline.height` | Integer | Hauteur du champ multiligne (défaut : `20`) |
+
+La valeur soumise est disponible via le placeholder `%<cle-de-saisie>%`.
+
+### dialog_boolean
+
+Un interrupteur Oui/Non.
+
+```yaml
+inputs:
+  subscribe:
+    type: dialog_boolean
+    label: "&eWould you like updates?"
+    text-true: "&a&lYES"
+    text-false: "&c&lNo"
+```
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `label` | String | vide | Label de l'interrupteur |
+| `initial-value` | Booléen | `true` | État initial |
+| `text-true` | String | `True` | Texte affiché lorsqu'il est activé |
+| `text-false` | String | `False` | Texte affiché lorsqu'il est désactivé |
+
+La valeur est disponible via `%<cle-de-saisie>%` (`true`/`false`) et le texte affiché via `%<cle-de-saisie>_text%`.
+
+### dialog_single_option
+
+Une sélection unique parmi plusieurs options.
+
+```yaml
+inputs:
+  gamemode:
+    type: dialog_single_option
+    label: "&6Select your gamemode:"
+    options:
+      survival:
+        id: "survival"
+        display: "&2Survival"
+      creative:
+        id: "creative"
+        display: "&bCreative"
+      adventure:
+        id: "adventure"
+        display: "&6Adventure"
+```
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `label` | String | vide | Label de la saisie |
+| `label-visible` | Booléen | `true` | Affiche le label |
+| `width` | Entier | `200` | Largeur de la saisie |
+| `options.<cle>.id` | String | clé de l'option | Valeur soumise via `%<cle-de-saisie>%` |
+| `options.<cle>.display` | String | vide | Texte affiché pour l'option |
+| `options.<cle>.initial` | Booléen | `false` | Sélectionnée par défaut (seule la première `true` est conservée) |
+
+### dialog_number_range
+
+Un curseur numérique.
+
+```yaml
+inputs:
+  amount:
+    type: dialog_number_range
+    label: "&eSelect amount:"
+    start: 1
+    end: 64
+    step: 1
+```
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `label` | String | vide | Label du curseur |
+| `width` | Entier | `200` | Largeur du curseur |
+| `start` | Nombre | `0` | Valeur minimale |
+| `end` | Nombre | `100` | Valeur maximale |
+| `step` | Nombre | `1` | Pas d'incrémentation |
+| `initial-value` | Nombre | milieu entre `start` et `end` | Valeur initiale |
+| `label-format` | String | `options.generic_value` | Clé de traduction utilisée pour formater le label |
+
+---
+
+## Boutons dynamiques
+
+Les boutons dynamiques génèrent plusieurs sections de corps ou saisies à partir d'un seul modèle, répété sur une plage numérique. Ils sont utiles lorsque le nombre d'éléments dépend de données (un placeholder) ou lorsque vous devriez autrement copier/coller le même bloc de nombreuses fois.
+
+Les deux types dynamiques partagent ces options :
+
+| Option  | Type    | Description                                   |
+|---------|---------|-----------------------------------------------|
+| `start` | Integer | Premier index, inclus. Compatible placeholders. |
+| `end`   | Integer | Dernier index, inclus. Compatible placeholders.  |
+
+À l'intérieur du modèle répété, le placeholder `%index%` est remplacé par le numéro de l'itération en cours.
+
+### dialog-dynamic-body-button
+
+Placé dans la section `body:`. Répète un élément `body:` (par ex. `dialog_plain_message`, `dialog_item`).
+
+```yaml
+body:
+  dynamic_message:
+    type: dialog-dynamic-body-button
+    start: 1
+    end: 5
+    body:
+      type: dialog_plain_message
+      messages:
+        - "&eThis is body section #%index%"
+      width: 300
+```
+
+### dialog-dynamic-input-button
+
+Placé dans la section `inputs:`. Répète un élément `input:` (par ex. `dialog_text`, `dialog_boolean`). Chaque saisie générée a pour clé `<button-name>_<index>`, de sorte que sa valeur soumise est disponible via le placeholder `%<button-name>_<index>%`.
+
+```yaml
+inputs:
+  # Si le joueur tape "Hello" dans le premier champ, %my_input_1% vaudra "Hello"
+  my_input:
+    type: dialog-dynamic-input-button
+    start: 1
+    end: 3
+    input:
+      type: dialog_text
+      label: "&6Enter value #%index%:"
+      width: 300
+      max-length: 50
+```
+
+Consultez le fichier `dialogs/dynamic-dialog-example.yml` fourni pour un exemple complet.
+
+---
+
+## Dialogue Notice
+
+Un dialogue informatif simple avec des saisies optionnelles. La section optionnelle `notice` est son unique [bouton d'action](#options-des-boutons-daction) (`label`/`text`, `tooltip`, `width`, `actions`).
+
+```yaml
+name: "&6&lServer Rules"
+external-title: "Rules"
+type: notice
+
+can-close-with-escape: true
+after-action: CLOSE
+
+body:
+  rules:
+    type: plain_message
+    messages:
+      - "&c&lServer Rules"
+      - ""
+      - "&71. Be respectful to all players"
+      - "&72. No cheating or exploits"
+      - "&73. Follow staff instructions"
+      - "&74. Have fun!"
+    width: 350
+
+inputs:
+  accept:
+    type: dialog_boolean
+    label: "&eI agree to the rules"
+    text-true: "&a&lAccept"
+    text-false: "&c&lDecline"
+```
+
+---
+
+## Dialogue Confirmation
+
+Un dialogue avec des boutons Oui et Non.
+
+```yaml
+name: "&c&lConfirm Purchase"
+external-title: "Confirmation"
+type: confirmation
+
+can-close-with-escape: true
+after-action: CLOSE
+
+body:
+  message:
+    type: plain_message
+    messages:
+      - "&7Are you sure you want to purchase"
+      - "&6Diamond Sword &7for &a$500&7?"
+    width: 300
+
+confirmation:
+  yes-text: "&a&lConfirm Purchase"
+  yes-tooltip: "Click to confirm"
+  yes-width: 200
+  no-text: "&c&lCancel"
+  no-tooltip: "Click to cancel"
+  no-width: 200
+
+yes-actions:
+  1:
+    success:
+      - type: console-command
+        commands:
+          - "give %player% diamond_sword 1"
+      - type: currency-withdraw
+        amount: 500
+      - type: message
+        messages:
+          - "&aPurchase successful!"
+
+no-actions:
+  1:
+    success:
+      - type: message
+        messages:
+          - "&7Purchase cancelled."
+```
+
+### Options de confirmation
+
+| Option | Description |
+|--------|-------------|
+| `yes-text` | Texte du bouton Oui |
+| `yes-tooltip` | Infobulle au survol du bouton Oui |
+| `yes-width` | Largeur du bouton Oui |
+| `no-text` | Texte du bouton Non |
+| `no-tooltip` | Infobulle au survol du bouton Non |
+| `no-width` | Largeur du bouton Non |
+
+Les boutons Oui et Non sont lus depuis `confirmation.yes` et `confirmation.no`, et acceptent toutes les [options des boutons d'action](#options-des-boutons-daction). Les sections racine `yes-actions` et `no-actions` sont l'ancien emplacement de leurs actions.
+
+---
+
+## Dialogue Multi-Action
+
+Un dialogue avec plusieurs boutons d'action disposés en grille.
+
+```yaml
+name: "&6&lTeleport Menu"
+external-title: "Teleport"
+type: multi_action
+
+can-close-with-escape: true
+after-action: CLOSE
+number-of-columns: 2
+
+body:
+  header:
+    type: plain_message
+    messages:
+      - "&7Select a destination:"
+    width: 300
+
+multi-actions:
+  spawn:
+    text: "&a&lSpawn"
+    tooltip: "&7Teleport to spawn"
+    width: 150
+    actions:
+      1:
+        success:
+          - type: close
+          - type: player-command
+            commands:
+              - "spawn"
+          - type: message
+            messages:
+              - "&aTeleporting to spawn..."
+
+  shop:
+    text: "&e&lShop"
+    tooltip: "&7Visit the shop"
+    width: 150
+    actions:
+      1:
+        success:
+          - type: close
+          - type: player-command
+            commands:
+              - "warp shop"
+
+  pvp:
+    text: "&c&lPvP Arena"
+    tooltip: "&7Enter the PvP arena"
+    width: 150
+    actions:
+      1:
+        success:
+          - type: close
+          - type: player-command
+            commands:
+              - "warp pvp"
+
+  home:
+    text: "&b&lHome"
+    tooltip: "&7Teleport home"
+    width: 150
+    actions:
+      1:
+        success:
+          - type: close
+          - type: player-command
+            commands:
+              - "home"
+```
+
+### Options Multi-Action
+
+| Option | Description |
+|--------|-------------|
+| `number-of-columns` | Nombre de boutons par ligne (défaut : `3`) |
+| `multi-actions` | Map des boutons d'action (requis, au moins un) |
+| `exit-button` | Bouton optionnel en bas du dialogue, aussi déclenché par la touche Échap. Accepte toutes les [options des boutons d'action](#options-des-boutons-daction) |
+| `text` | Texte du bouton |
+| `tooltip` | Infobulle du bouton |
+| `width` | Largeur du bouton |
+| `actions` | Actions exécutées au clic |
+
+---
+
+## Dialogue Server Links
+
+Affiche les liens du serveur sous forme de boutons cliquables. La section optionnelle `server-links` est un [bouton d'action](#options-des-boutons-daction) (bouton de sortie) et accepte aussi `number-of-columns` (défaut : `1`).
+
+```yaml
+name: "&6&lServer Links"
+external-title: "Links"
+type: server_links
+
+can-close-with-escape: true
+after-action: CLOSE
+
+server-links:
+  text: "&6&lUseful Links"
+  tooltip: "&7Click to open"
+  width: 300
+  number-of-columns: 2
+  actions:
+    1:
+      success:
+        - type: message
+          messages:
+            - "&aLink opened!"
+```
+
+---
+
+## Liste de dialogues
+
+Un dialogue `dialog_list` est un hub : il affiche un bouton par dialogue listé sous `dialogs:`, chacun avec comme libellé le `external-title` de son dialogue (ou son nom s'il n'en a pas). Cliquer sur un bouton ouvre ce dialogue. Un exemple est généré dans `dialogs/dialog_list-dialog.yml`.
+
+```yaml
+name: "&6&lServer Hub"
+external-title: "&6Server hub"
+type: dialog_list
+
+can-close-with-escape: true
+pause: false
+after-action: CLOSE
+
+number-of-columns: 2
+button-width: 150
+
+dialogs:
+  - "default-dialog"                     # dialogue zMenu, par nom de fichier ou nom
+  - "multi_action-dialog"
+  - dialog: "confirmation-dialog"        # idem, ecrit sous forme de map
+  - registry-key: "minecraft:server_links" # dialogue vanilla ou de datapack
+
+back-button:
+  enabled: true
+  label: "&7« Back"
+  tooltip: "&7Return to the server hub"
+  width: 150
+
+exit-button:
+  label: "&cClose"
+  tooltip: "&7Close the server hub"
+  width: 150
+  actions:
+    1:
+      success:
+        - type: message
+          messages:
+            - "&7See you soon!"
+
+body:
+  welcome:
+    type: dialog_plain_message
+    messages:
+      - "&7Welcome &f%player_name%&7, pick a section below."
+    width: 300
+```
+
+### Options de la liste de dialogues
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `dialogs` | Liste | - | Les dialogues à lister. Chaque entrée est un nom de dialogue zMenu (`nom` ou `plugin:nom`, aussi écrit `dialog: <nom>`), ou un dialogue vanilla/datapack écrit `registry-key: <namespace:cle>` |
+| `number-of-columns` | Entier | `2` | Nombre de boutons par ligne |
+| `button-width` | Entier | `150` | Largeur de chaque bouton (1-1024) |
+| `back-button.enabled` | Booléen | `true` | Ajoute un bouton retour aux dialogues listés |
+| `back-button.label` | Texte | `Back` | Libellé du bouton retour |
+| `back-button.tooltip` | Texte | vide | Infobulle du bouton retour |
+| `back-button.width` | Entier | `150` | Largeur du bouton retour (1-1024) |
+| `exit-button` | Section | aucun | Bouton optionnel en bas de la liste, aussi déclenché par la touche Échap. Supporte `label`, `tooltip`, `width` et `actions` |
+
+**Bon à savoir :**
+- **Bouton retour** : le client ne revient pas à la liste quand un dialogue listé est fermé. Le bouton retour est ajouté aux dialogues listés qui n'ont pas leur propre bouton de sortie (`multi_action`, `server_links` et `dialog_list`) pour que les joueurs puissent revenir. Les dialogues `notice` et `confirmation` n'ont pas d'emplacement de sortie et restent inchangés. Pour écrire votre propre bouton retour, donnez au dialogue un `exit-button` avec l'action [`dialog`](./buttons/actions#dialog).
+- **Prérequis** : les dialogues listés dont le joueur ne remplit pas l'`open-requirement` sont masqués. Le prérequis est vérifié à l'ouverture de la liste, car le client ouvre les dialogues listés lui-même, sans demander au serveur.
+- **Imbrication** : une liste peut contenir d'autres listes. La profondeur maximale est définie par [`dialog-list-max-depth`](./config-yml#dialog-list-max-depth) dans `config.yml` (`4` par défaut).
+
+---
+
+## Options des boutons d'action
+
+Les boutons d'action — les boutons Oui/Non d'une `confirmation`, un bouton de `notice`, chaque entrée d'un `multi_action`, et le bouton `server-links` de `server_links` — partagent un ensemble commun d'options.
+
+### label, tooltip, width
+
+| Option | Type | Défaut | Description |
+|--------|------|--------|-------------|
+| `label` | String | vide | Texte du bouton. `text` est accepté comme alias |
+| `tooltip` | String | vide | Infobulle affichée au survol |
+| `width` | Entier | `100` | Largeur du bouton |
+
+### actions
+
+Les actions zMenu exécutées par un bouton `custom-click`. Elles sont lues depuis `<bouton>.actions`, puis depuis l'ancienne section `<cle>-actions` (par exemple `yes-actions`), puis depuis la section racine `actions`.
+
+### type
+
+Le type d'action effectuée lorsque le bouton est cliqué (défaut : `custom-click`).
+
+| Valeur          | Description                                                                   |
+|----------------|-------------------------------------------------------------------------------|
+| `custom-click` | *(par défaut)* Exécute les `actions:` zMenu définies sur le bouton.           |
+| `static`       | Exécute une action native du client (voir `static-type` ci-dessous), sans aller-retour serveur. |
+
+### static-type
+
+Utilisé uniquement lorsque `type: static`. L'action native du client à effectuer.
+
+| `static-type`       | Champ requis | Description                          |
+|---------------------|----------------|--------------------------------------|
+| `OPEN_URL`          | `url`          | Ouvre une URL dans le navigateur du joueur |
+| `OPEN_FILE`         | `file`         | Ouvre un fichier local               |
+| `RUN_COMMAND`       | `command`      | Exécute une commande en tant que joueur |
+| `SUGGEST_COMMAND`   | `command`      | Pré-remplit la zone de chat avec une commande |
+| `COPY_TO_CLIPBOARD` | `text`         | Copie du texte dans le presse-papiers |
+
+```yaml
+multi-actions:
+  website:
+    text: "&bOur Website"
+    type: static
+    static-type: OPEN_URL
+    url: "https://example.com"
+```
+
+### usage-limit
+
+Nombre maximum de fois que le bouton peut être activé (par défaut : illimité). Utilisé uniquement par les boutons `custom-click`, comme `duration-limit` et `enable-placeholders`.
+
+```yaml
+usage-limit: 1
+```
+
+### duration-limit
+
+Un temps de recharge entre les activations. Soit un simple nombre (secondes), soit une section avec une unité de temps :
+
+```yaml
+duration-limit: 5          # 5 secondes
+```
+
+```yaml
+duration-limit:
+  value: 2
+  type: MINUTES            # SECONDS, MILLISECONDS, MINUTES, HOURS, ...
+```
+
+### enable-placeholders
+
+Par défaut, un `%` saisi par le joueur dans une saisie est échappé pour que les valeurs soumises ne puissent pas injecter de placeholders. Mettez `true` pour conserver les placeholders dans les valeurs soumises. Accepte un booléen (défaut : `false`), ou une section pour l'activer par type de saisie : `text`, `boolean`, `single-option`, `number-range`.
+
+:::info Compatibilité ascendante
+La forme imbriquée (`<key>.label`, `<key>.tooltip`, `<key>.width`, `<key>.actions`, `<key>.type`) est la nouvelle disposition canonique, mais les anciennes clés plates (`yes-text`, `notice.text`, `multi-actions.<key>.text`, ...) fonctionnent toujours, de sorte que les fichiers de dialogue existants n'ont pas besoin d'être réécrits.
+:::
+
+---
+
+## Ouvrir des dialogues
+
+### Depuis les actions de bouton
+
+Utilisez le type d'action `dialog` dans les boutons d'inventaire :
+
+```yaml
+items:
+  open-dialog:
+    slot: 13
+    item:
+      material: BOOK
+      name: "&6Open Dialog"
+    actions:
+      - type: dialog
+        dialog: "welcome"
+```
+
+### Avec des arguments
+
+Passez des arguments au dialogue :
+
+```yaml
+actions:
+  - type: dialog
+    dialog: "confirmation"
+    arguments:
+      - "diamond_sword"
+      - "500"
+```
+
+### Depuis un plugin externe
+
+Ouvrez un dialogue depuis un autre plugin :
+
+```yaml
+actions:
+  - type: dialog
+    dialog: "my-dialog"
+    plugin: "MyPlugin"
+```
+
+---
+
+## Exemples complets
+
+### Formulaire de retour
+
+```yaml
+name: "&6&lFeedback Form"
+external-title: "Share Your Feedback"
+type: notice
+
+can-close-with-escape: true
+after-action: CLOSE
+
+body:
+  header:
+    type: plain_message
+    messages:
+      - "&6&lWe Value Your Feedback!"
+      - ""
+      - "&7Please share your thoughts about the server."
+    width: 400
+
+inputs:
+  rating:
+    type: dialog_single_option
+    label: "&eHow would you rate your experience?"
+    options:
+      excellent:
+        id: "5"
+        display: "&a⭐⭐⭐⭐⭐ Excellent"
+      good:
+        id: "4"
+        display: "&e⭐⭐⭐⭐ Good"
+      average:
+        id: "3"
+        display: "&6⭐⭐⭐ Average"
+      poor:
+        id: "2"
+        display: "&c⭐⭐ Poor"
+
+  comments:
+    type: dialog_text
+    label: "&7Additional comments:"
+    width: 400
+    max-length: 500
+    multiline:
+      max-lines: 5
+
+  subscribe:
+    type: dialog_boolean
+    label: "&eReceive updates about new features?"
+    text-true: "&aYes, keep me updated!"
+    text-false: "&7No thanks"
+```
+
+### Sélection de kit
+
+```yaml
+name: "&6&lSelect Your Kit"
+external-title: "Kit Selection"
+type: multi_action
+
+can-close-with-escape: false
+after-action: CLOSE
+number-of-columns: 3
+
+body:
+  info:
+    type: plain_message
+    messages:
+      - "&7Choose your starting kit wisely!"
+      - "&7This cannot be changed later."
+    width: 400
+
+multi-actions:
+  warrior:
+    text: "&c&lWarrior"
+    tooltip: "&7Iron armor and sword"
+    width: 120
+    actions:
+      1:
+        success:
+          - type: console-command
+            commands:
+              - "kit warrior %player%"
+          - type: message
+            messages:
+              - "&aYou selected the Warrior kit!"
+
+  archer:
+    text: "&a&lArcher"
+    tooltip: "&7Leather armor and bow"
+    width: 120
+    actions:
+      1:
+        success:
+          - type: console-command
+            commands:
+              - "kit archer %player%"
+          - type: message
+            messages:
+              - "&aYou selected the Archer kit!"
+
+  mage:
+    text: "&5&lMage"
+    tooltip: "&7Robes and magic items"
+    width: 120
+    actions:
+      1:
+        success:
+          - type: console-command
+            commands:
+              - "kit mage %player%"
+          - type: message
+            messages:
+              - "&aYou selected the Mage kit!"
+```
+
+---
+
+## Bonnes pratiques
+
+1. **Gardez les dialogues ciblés** - Un seul objectif par dialogue
+2. **Utilisez des labels clairs** - Rendez les saisies faciles à comprendre
+3. **Fournissez des infobulles** - Aidez les joueurs à comprendre les actions des boutons
+4. **Testez sur la version cible** - Assurez-vous que Paper 1.21.4+ et PacketEvents sont installés
+5. **Gérez tous les cas** - Définissez des actions pour tous les choix possibles
+6. **Utilisez les types appropriés** - Choisissez le bon type de dialogue pour votre cas d'usage
+
+## Prochaines étapes {#prochaines-etapes}
+
+- Découvrez les [Actions](./buttons/actions) pour les comportements des boutons de dialogue
+- Configurez les [Exigences](./buttons/button#exigences) pour l'accès conditionnel aux dialogues
+- Consultez les [Inventaires](./inventories/inventory) pour les alternatives de menu traditionnelles

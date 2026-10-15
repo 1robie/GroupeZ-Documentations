@@ -1,0 +1,799 @@
+---
+sidebar_position: 1
+title: Configuration d'item
+description: Référence complète pour la configuration des items dans zMenu
+---
+
+# Configuration d'item
+
+Les items sont les éléments visuels affichés dans les boutons de votre inventaire. Cette page documente toutes les options de configuration d'item disponibles.
+
+## Structure de base d'un item
+
+```yaml
+item:
+  material: DIAMOND
+  name: "&bMon Item"
+  lore:
+    - "&7Ligne 1"
+    - "&7Ligne 2"
+```
+
+## Options de configuration
+
+### material
+
+Le type de matériau Minecraft pour l'item.
+
+```yaml
+item:
+  material: DIAMOND_SWORD
+```
+
+**Matériaux Vanilla :**
+Utilisez n'importe quel nom de matériau Minecraft : `DIAMOND`, `STONE`, `PLAYER_HEAD`, etc.
+
+**Plugins d'items personnalisés :**
+
+| Plugin | Format | Exemple |
+|--------|--------|---------|
+| ItemsAdder | `itemsadder:namespace:id` | `itemsadder:my_items:ruby` |
+| Oraxen | `oraxen:id` | `oraxen:emerald_sword` |
+| Nexo | `nexo:id` | `nexo:emerald_sword` |
+| CraftEngine | `craftengine:id` | `craftengine:my_item` |
+| HeadDatabase | `hdb:id` | `hdb:12345` |
+| Slimefun | `slimefun:id` | `slimefun:ELECTRIC_MOTOR` |
+| MythicMobs | `mythicmobs:id` | `mythicmobs:SkeletonSword` |
+| MMOItems | `mmoitems:type:id` | `mmoitems:SWORD:LEGENDARY_BLADE` |
+| ExecutableItems | `ei:id` | `ei:magic_wand` |
+| ExecutableBlocks | `eb:id` | `eb:my_block` |
+| BreweryX | `breweryx:recipe[:qualite]` | `breweryx:beer:5` |
+| Eco | `eco:cle_de_recherche` | `eco:reforge_stone` |
+| Nova | `nova:id` | `nova:my_item` |
+| NextGens | `nextgens_generators:id` | `nextgens_generators:basic` |
+| zHead | `zhd:category:name` | `zhd:animals:cat` |
+| zItems | `zitems:id` | `zitems:my_item` |
+| HMCCosmetics | `hmc_cosmetics:slot` ou `hmc_cosmetics:joueur-slot` | `hmc_cosmetics:HELMET` |
+| MagicCosmetics | `magic_cosmetics:type` | `magic_cosmetics:HAT` |
+| Armure du joueur | `armor:SLOT` | `armor:HEAD` |
+| Base64 | `base64:itemstack` | `base64:<itemstack encode>` |
+| Tête (texture) | `basehead-<texture base64>` | `basehead-eyJ0ZXh0...` |
+
+---
+
+### name
+
+Le nom d'affichage de l'item.
+
+```yaml
+item:
+  material: DIAMOND
+  name: "&b&lDiamant Brillant"
+```
+
+**Fonctionnalités :**
+- Supporte les codes couleur (`&6`, `&#FF5500`)
+- Supporte MiniMessage (si activé)
+- Supporte les placeholders (`%player%`)
+
+---
+
+### translated-name
+
+Fournit des traductions du nom de l'item par langue. Chaque entrée associe un `locale` à un `name`, et le plugin utilise celle qui correspond à la langue du client du joueur. Si aucun locale ne correspond, la valeur `name` par défaut est utilisée à la place.
+
+```yaml
+item:
+  material: DIAMOND_SWORD
+  name: "&b&lDiamant Brillant"
+  translated-name:
+    - locale: fr-fr
+      name: "Nom en francais"
+    - locale: it-it
+      name: "Nome in italiano"
+```
+
+Le nom est affiché dans la langue du client du joueur. Les joueurs dont le locale n'est pas listé utilisent le `name` par défaut.
+
+<Aliases keys={['translated-name', 'translatedName']} />
+
+---
+
+### lore
+
+Les lignes de description affichées sous le nom de l'item.
+
+```yaml
+item:
+  material: DIAMOND_SWORD
+  name: "&6&lEpee Legendaire"
+  lore:
+    - "&7Une arme puissante"
+    - ""
+    - "&7Degats : &c+50"
+    - "&7Vitesse : &a+10%"
+    - ""
+    - "&eCliquez pour equiper !"
+```
+
+Chaque élément de liste est une nouvelle ligne. Les chaînes vides (`""`) créent des lignes blanches.
+
+---
+
+### lore-type
+
+Définit comment le lore doit interagir avec le lore existant de l'item. C'est particulièrement utile lors de l'utilisation de material loaders (ItemsAdder, Oraxen, etc.) où l'item chargé possède déjà un lore.
+
+```yaml
+item:
+  material: "itemsadder:my_namespace:custom_sword"
+  lore:
+    - "&7Information supplementaire"
+    - "&7Ajoute par zMenu"
+  lore-type: APPEND  # Ajouter apres le lore existant
+```
+
+**Types disponibles :**
+
+| Type | Description |
+|------|-------------|
+| `REPLACE` | Remplacer entièrement le lore existant (par défaut) |
+| `APPEND` | Ajouter des lignes après le lore existant |
+| `PREPEND` | Ajouter des lignes avant le lore existant |
+
+**Exemples :**
+
+```yaml
+# Remplacer le lore existant (comportement par defaut)
+item:
+  material: "oraxen:custom_item"
+  lore:
+    - "&7Ceci remplace tout le lore existant"
+  lore-type: REPLACE
+
+# Ajouter du lore apres l'existant
+item:
+  material: "itemsadder:namespace:item"
+  lore:
+    - ""
+    - "&eCliquez pour utiliser !"
+  lore-type: APPEND
+
+# Ajouter du lore avant l'existant
+item:
+  material: "zitems:legendary_sword"
+  lore:
+    - "&6&lLEGENDAIRE"
+    - ""
+  lore-type: PREPEND
+```
+
+---
+
+### translated-lore
+
+Fournit des traductions du lore de l'item par langue. Chaque entrée associe un `locale` à une liste `lore`, et le plugin utilise celle qui correspond à la langue du client du joueur. Si aucun locale ne correspond, la valeur `lore` par défaut est utilisée à la place.
+
+```yaml
+item:
+  material: DIAMOND_SWORD
+  lore:
+    - "&7Une arme puissante"
+  translated-lore:
+    - locale: fr-fr
+      lore:
+        - "Lore en francais"
+    - locale: it-it
+      lore:
+        - "Lore in italiano"
+```
+
+Le lore est affiché dans la langue du client du joueur. Les joueurs dont le locale n'est pas listé utilisent le `lore` par défaut.
+
+<Aliases keys={['translated-lore', 'translatedLore']} />
+
+---
+
+### amount
+
+La taille de la pile de l'item (1-64).
+
+```yaml
+item:
+  material: DIAMOND
+  amount: 64
+```
+
+Vous pouvez aussi utiliser des placeholders :
+
+```yaml
+item:
+  material: DIAMOND
+  amount: "%zmenu_player_value_coins%"  # Quantite dynamique
+```
+
+---
+
+### durability
+
+Définit la valeur de durabilité/dégâts pour les outils et armures.
+
+```yaml
+item:
+  material: DIAMOND_SWORD
+  durability: 100  # 100 de durabilite utilisee
+```
+
+---
+
+### amount-type
+
+Contrôle comment la valeur `amount` est appliquée à la construction de l'item.
+
+| Valeur | Description |
+|--------|-------------|
+| `SET` | Définit la quantité exactement à la valeur donnée (défaut) |
+| `ADD` | Ajoute la valeur à la quantité actuelle de l'item |
+| `REMOVE` | Soustrait la valeur de la quantité actuelle de l'item |
+
+---
+
+### data
+
+Valeur de donnée de matériau legacy (sous-types d'avant la 1.13). Défaut : `0`.
+
+```yaml
+item:
+  material: WOOL
+  data: 14
+```
+
+---
+
+### target
+
+Définit le joueur cible pour les placeholders du nom et du lore.
+
+```yaml
+item:
+  material: DIAMOND_SWORD
+  target: "%zmenu_argument_player%"
+  name: "&6&lEpee de %player_name%"
+```
+
+---
+
+### center-name / center-lore
+
+Centre le nom (`center-name`) ou chaque ligne du lore (`center-lore`). Défaut : `false`.
+
+```yaml
+item:
+  material: DIAMOND
+  name: "&bTitre centre"
+  center-name: true
+  lore:
+    - "&7Ligne centree"
+  center-lore: true
+```
+
+---
+
+### skip-first-cache
+
+Empêche l'item d'être construit et mis en cache au chargement de l'inventaire. Utile quand l'item dépend d'un contexte joueur indisponible au chargement. Défaut : `false`.
+
+---
+
+### customModelData
+
+Définit les données de modèle personnalisé pour l'intégration des packs de ressources.
+
+```yaml
+item:
+  material: DIAMOND
+  customModelData: 12345
+```
+
+Cela permet aux packs de ressources d'afficher des modèles personnalisés pour les items. Voir [modelId](#modelid) pour la liste des alias.
+
+---
+
+### glow
+
+Ajoute un effet de lueur d'enchantement sans afficher les enchantements.
+
+```yaml
+item:
+  material: NETHER_STAR
+  name: "&6&lItem Special"
+  glow: true
+```
+
+---
+
+### playerHead
+
+Affiche la tête d'un joueur. La clé s'écrit `player-head` (forme canonique) ou `playerHead`, au niveau du bouton ou dans `item`.
+
+```yaml
+item:
+  material: PLAYER_HEAD
+  player-head: "%player%"  # Tete du joueur actuel
+  name: "&aTete de %player%"
+```
+
+Vous pouvez aussi utiliser un nom de joueur spécifique :
+
+```yaml
+item:
+  material: PLAYER_HEAD
+  player-head: "Notch"
+```
+
+---
+
+### url
+
+Utilise une URL de texture de tête personnalisée (texture encodée en base64).
+
+```yaml
+item:
+  material: PLAYER_HEAD
+  url: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUv..."
+  name: "&6Tete personnalisee"
+```
+
+Obtenez des textures de têtes sur des sites comme [minecraft-heads.com](https://minecraft-heads.com/).
+
+---
+
+### enchantments
+
+Ajoute des enchantements à l'item.
+
+```yaml
+item:
+  material: DIAMOND_SWORD
+  enchantments:
+    - SHARPNESS,5
+    - UNBREAKING,3
+    - FIRE_ASPECT,2
+```
+
+La clé `enchants` est aussi acceptée (elle est lue en premier ; `enchantments` sert de repli). Chaque entrée s'écrit `ENCHANTEMENT,niveau` ou `ENCHANTEMENT:niveau`, et les alias d'enchantements sont acceptés (voir la version anglaise pour la liste complète).
+
+Types d'enchantements courants :
+- Épées : `SHARPNESS`, `SMITE`, `FIRE_ASPECT`, `KNOCKBACK`
+- Armures : `PROTECTION`, `THORNS`, `UNBREAKING`
+- Outils : `EFFICIENCY`, `FORTUNE`, `SILK_TOUCH`
+- Arcs : `POWER`, `PUNCH`, `INFINITY`, `FLAME`
+
+---
+
+### flags
+
+Masque certains attributs d'item en utilisant les drapeaux d'item.
+
+```yaml
+item:
+  material: DIAMOND_SWORD
+  enchantments:
+    - SHARPNESS,5
+  flags:
+    - HIDE_ENCHANTS
+    - HIDE_ATTRIBUTES
+```
+
+**Drapeaux disponibles :**
+
+| Drapeau | Description |
+|---------|-------------|
+| `HIDE_ENCHANTS` | Masquer la liste des enchantements |
+| `HIDE_ATTRIBUTES` | Masquer les modificateurs d'attributs (1.21.5+ uniquement) |
+| `HIDE_UNBREAKABLE` | Masquer le tag "Incassable" |
+| `HIDE_DESTROYS` | Masquer la liste "Peut détruire" |
+| `HIDE_PLACED_ON` | Masquer la liste "Peut être placé sur" |
+| `HIDE_POTION_EFFECTS` | Masquer les effets de potion |
+| `HIDE_DYE` | Masquer la couleur de teinture des armures en cuir |
+| `HIDE_ARMOR_TRIM` | Masquer le motif de garniture d'armure |
+
+---
+
+### unbreakable
+
+Rend l'item incassable.
+
+```yaml
+item:
+  material: DIAMOND_PICKAXE
+  unbreakable: true
+  flags:
+    - HIDE_UNBREAKABLE
+```
+
+---
+
+### attributes
+
+Ajoute des modificateurs d'attributs à l'item.
+
+```yaml
+item:
+  material: DIAMOND_SWORD
+  attributes:
+    - attribute: ATTACK_DAMAGE
+      amount: 10
+      operation: ADD_NUMBER
+      slot: MAINHAND
+    - attribute: ATTACK_SPEED
+      amount: -2.4
+      operation: ADD_NUMBER
+      slot: MAINHAND
+```
+
+Chaque entrée utilise les clés `attribute`, `amount`, `operation` et `slot`.
+
+Deux options complémentaires existent : `attribute-merge-strategy` (`REPLACE`, `ADD` par défaut, `KEEP_HIGHEST`, `KEEP_LOWEST`, `SUM`) pour fusionner avec les attributs existants, et `clear-default-attributes` (`false` par défaut) pour retirer les attributs par défaut de l'item.
+
+**Types d'attributs :**
+- `ATTACK_DAMAGE` - Bonus de dégâts d'attaque
+- `ATTACK_SPEED` - Modificateur de vitesse d'attaque
+- `MAX_HEALTH` - Santé maximum
+- `MOVEMENT_SPEED` - Vitesse de déplacement
+- `ARMOR` - Points d'armure
+- `ARMOR_TOUGHNESS` - Solidité d'armure
+- `KNOCKBACK_RESISTANCE` - Résistance au recul
+- `LUCK` - Modificateur de chance
+
+**Opérations :**
+- `ADD_NUMBER` - Ajouter une valeur fixe
+- `ADD_SCALAR` - Ajouter un pourcentage
+- `MULTIPLY_SCALAR_1` - Multiplier par (1 + valeur)
+
+**Emplacements (`EquipmentSlotGroup`) :**
+- `ANY`, `MAINHAND`, `OFFHAND`, `HAND`
+- `HEAD`, `CHEST`, `LEGS`, `FEET`, `ARMOR`, `BODY`
+
+---
+
+### potion
+
+Configure les items de potion.
+
+```yaml
+item:
+  material: POTION
+  potion: STRENGTH
+  level: 2
+  splash: false
+  extended: false
+```
+
+| Clé | Type | Défaut | Description |
+|-----|------|--------|-------------|
+| `potion` | String | - | Type de potion (`PotionType` Bukkit : `SPEED`, `STRENGTH`, `HEALING`...) |
+| `level` | Entier | `1` | Niveau de l'effet |
+| `splash` | Booléen | `false` | Potion à éclabousser |
+| `extended` | Booléen | `false` | Durée étendue |
+| `arrow` | Booléen | `false` | Flèche imbibée au lieu d'une potion |
+| `color` | String | - | Couleur de la potion, format `R,G,B` ou `A,R,G,B` |
+
+---
+
+### banner
+
+Configure les motifs de bannière.
+
+```yaml
+item:
+  material: WHITE_BANNER
+  banner: WHITE            # Couleur de base (DyeColor)
+  patterns:
+    - "RED:STRIPE_BOTTOM"  # COULEUR:MOTIF
+    - "BLUE:STRIPE_TOP"
+    - "BLACK:CROSS"
+```
+
+**Types de motifs :**
+`STRIPE_BOTTOM`, `STRIPE_TOP`, `STRIPE_LEFT`, `STRIPE_RIGHT`, `STRIPE_CENTER`, `STRIPE_MIDDLE`, `STRIPE_DOWNRIGHT`, `STRIPE_DOWNLEFT`, `CROSS`, `STRAIGHT_CROSS`, `DIAGONAL_LEFT`, `DIAGONAL_RIGHT`, `DIAGONAL_LEFT_MIRROR`, `DIAGONAL_RIGHT_MIRROR`, `CIRCLE_MIDDLE`, `RHOMBUS_MIDDLE`, `HALF_VERTICAL`, `HALF_HORIZONTAL`, `TRIANGLE_BOTTOM`, `TRIANGLE_TOP`, `TRIANGLES_BOTTOM`, `TRIANGLES_TOP`, `BORDER`, `CURLY_BORDER`, `GRADIENT`, `GRADIENT_UP`, `BRICKS`, `GLOBE`, `CREEPER`, `SKULL`, `FLOWER`, `MOJANG`, `PIGLIN`
+
+---
+
+### firework
+
+Configure les fusées de feu d'artifice.
+
+```yaml
+item:
+  material: FIREWORK_ROCKET
+  firework:
+    star: false
+    type: BALL_LARGE
+    flicker: true
+    trail: true
+    colors:
+      - "255,0,0"      # R,G,B ou A,R,G,B
+    fadeColors:
+      - "255,255,0"
+```
+
+| Clé | Type | Défaut | Description |
+|-----|------|--------|-------------|
+| `star` | Booléen | `false` | Étoile de feu d'artifice |
+| `type` | String | `BALL` | Forme de l'effet |
+| `flicker` | Booléen | `false` | Effet de scintillement |
+| `trail` | Booléen | `false` | Traînée de particules |
+| `colors` | Liste | - | Couleurs de départ |
+| `fadeColors` | Liste | - | Couleurs de fondu |
+
+**Types de feu d'artifice :**
+`BALL`, `BALL_LARGE`, `BURST`, `CREEPER`, `STAR`
+
+---
+
+### color
+
+Colore les armures en cuir. La valeur s'écrit `R,G,B` ou `A,R,G,B` (entiers de 0 à 255). Défaut : `160,101,64`.
+
+```yaml
+item:
+  material: LEATHER_CHESTPLATE
+  color: "255,85,85"
+```
+
+La même clé `color` colore aussi les potions (voir [potion](#potion)).
+
+---
+
+### modelId
+
+Alternative à customModelData (même fonctionnalité).
+
+```yaml
+item:
+  material: PAPER
+  model-id: 1001
+```
+
+**Alias :** `model-id`, `modelID`, `modelId`, `customModelId`, `customModelData`, `model_data`, `custom-model-id`, `custom-model-data`, `model-data`. Défaut : `0`.
+
+---
+
+### trim
+
+Motif d'armure (Minecraft 1.20+). Appliqué seulement si `enable` vaut `true` (défaut `false`) et que `pattern` et `material` sont des clés valides.
+
+```yaml
+item:
+  material: DIAMOND_CHESTPLATE
+  trim:
+    enable: true
+    pattern: "coast"
+    material: "iron"
+```
+
+---
+
+### Options 1.21+
+
+Ces options sont lues sur Minecraft 1.21 et supérieur. Les valeurs booléennes ne sont appliquées que si elles sont définies.
+
+| Clé | Type | Défaut | Description |
+|-----|------|--------|-------------|
+| `max-stack-size` | Entier | `0` | Taille maximum de la pile |
+| `max-damage` | Entier | `0` | Durabilité maximum |
+| `damage` | Entier | `0` | Dégâts de durabilité actuels |
+| `repair-cost` | Entier | `0` | Coût de réparation à l'enclume |
+| `unbreakable` | Booléen | - | Item incassable |
+| `unbreakable-show-in-tooltip` | Booléen | - | Afficher "Incassable" dans le tooltip |
+| `fire-resistant` | Booléen | - | Résistant au feu |
+| `hide-tooltip` | Booléen | - | Masquer tout le tooltip |
+| `hide-additional-tooltip` | Booléen | - | Masquer les lignes additionnelles |
+| `enchantment-glint` | Booléen | - | Forcer l'effet de lueur |
+| `enchantment-show-in-tooltip` | Booléen | - | Afficher les enchantements dans le tooltip |
+| `attribute-show-in-tooltip` | Booléen | - | Afficher les attributs dans le tooltip |
+| `item-rarity` | String | - | `COMMON`, `UNCOMMON`, `RARE` ou `EPIC` |
+| `tooltip-style` | String | - | Style de tooltip (clé namespacée) |
+| `equipped-model` | String | - | Modèle affiché quand l'item est équipé |
+| `item-model` | String | - | Modèle de l'item (1.21.4+) |
+
+---
+
+## Components (1.20.5+)
+
+À partir de Minecraft 1.20.5, les items utilisent un nouveau système de composants. zMenu fournit un support complet pour plus de 40 types de composants incluant food, tools, weapons, attributes, et plus encore.
+
+```yaml
+item:
+  material: DIAMOND_SWORD
+  components:
+    custom-name: "&6&lEpee Legendaire"
+    rarity: EPIC
+    enchantments:
+      - enchantment: sharpness
+        level: 5
+    fire-resistant: true
+```
+
+Pour la référence complète des composants, consultez la page dédiée [Components](./components).
+
+---
+
+## Exemples complets
+
+### Item simple
+
+```yaml
+item:
+  material: DIAMOND
+  name: "&b&lDiamant"
+  lore:
+    - "&7Une gemme precieuse"
+```
+
+### Tête de joueur avec texture {#tete-de-joueur-avec-texture}
+
+```yaml
+item:
+  material: PLAYER_HEAD
+  url: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA..."
+  name: "&6&lCoffre au tresor"
+  lore:
+    - "&7Cliquez pour ouvrir !"
+  glow: true
+```
+
+### Outil enchanté {#outil-enchante}
+
+```yaml
+item:
+  material: DIAMOND_PICKAXE
+  name: "&a&lReve du mineur"
+  lore:
+    - "&7L'outil de minage ultime"
+    - ""
+    - "&7Efficacite V"
+    - "&7Fortune III"
+    - "&7Solidite III"
+  enchantments:
+    - EFFICIENCY,5
+    - FORTUNE,3
+    - UNBREAKING,3
+  flags:
+    - HIDE_ENCHANTS
+  glow: true
+```
+
+### Item dynamique avec placeholders
+
+```yaml
+item:
+  material: PLAYER_HEAD
+  playerHead: "%player%"
+  name: "&6&lProfil de %player%"
+  lore:
+    - "&8&m─────────────────"
+    - ""
+    - "&7Niveau : &a%player_level%"
+    - "&7Sante : &c%player_health%/%player_max_health%"
+    - "&7Solde : &6$%vault_eco_balance_formatted%"
+    - ""
+    - "&7Kills : &a%statistic_player_kills%"
+    - "&7Morts : &c%statistic_deaths%"
+    - ""
+    - "&8&m─────────────────"
+```
+
+### Item potion
+
+```yaml
+item:
+  material: SPLASH_POTION
+  name: "&d&lPotion de soin"
+  lore:
+    - "&7Guerit instantanement 4 coeurs"
+  potion:
+    type: INSTANT_HEAL
+    amplifier: 1
+  flags:
+    - HIDE_POTION_EFFECTS
+```
+
+### Item avec modèle personnalisé {#item-avec-modele-personnalise}
+
+```yaml
+item:
+  material: PAPER
+  name: "&e&lBaguette magique"
+  lore:
+    - "&7Lancez des sorts puissants !"
+  customModelData: 10001
+  glow: true
+```
+
+## Utiliser ItemsAdder/Oraxen
+
+Pour les items personnalisés d'ItemsAdder :
+
+```yaml
+item:
+  material: itemsadder:my_namespace:ruby_gem
+  name: "&c&lGemme de rubis"
+```
+
+Pour les items Oraxen :
+
+```yaml
+item:
+  material: oraxen:amethyst_sword
+  name: "&d&lEpee d'amethyste"
+```
+
+## Sauvegarder un item tenu en main (`/zm save`)
+
+Au lieu d'écrire un item à la main, vous pouvez le construire en jeu puis l'exporter :
+
+```
+/zm save <nom> [yml|base64]
+```
+
+- Permission : `zmenu.save`, joueur uniquement, l'item doit être dans la main principale.
+- Le résultat est écrit dans `plugins/zMenu/save_items.yml` sous `items.<nom>`. Le nom doit être inutilisé, sinon la commande refuse d'écraser.
+- `base64` (par défaut) stocke `material: "base64:<donnees>"`, une copie exacte de l'item.
+- `yml` convertit l'item au format d'item normal décrit sur cette page (`name`, `lore`, `enchantments`, `flags`, `attributes`, `components`, ...). Copiez le bloc dans un menu ou dans le dossier `items/`.
+
+Avec `yml`, zMenu reconstruit l'item converti et le compare à l'original. Si quelque chose diffère, ou si un réglage n'a pas de component correspondant, l'item entier est sauvegardé en `base64:` et le message en chat liste les components qui n'ont pas pu être écrits en YAML.
+
+Comportement selon la version :
+
+- Paper 1.21.3+ : chaque data component modifié sur l'item est converti en [component](./components) zMenu (y compris `custom-data` depuis le persistent data container).
+- Serveurs plus anciens : l'`ItemMeta` de l'item est lue à la place, et des réglages comme les flags, `hide-tooltip` et `fire-resistant` sont exportés comme options d'item.
+
+Seules les valeurs non par défaut sont écrites : par exemple `amount` est omis s'il vaut 1, `lore-type` s'il vaut `REPLACE`, et `model-id` s'il vaut 0. Les couleurs des potions, armures en cuir et effets de feu d'artifice sont écrites en `alpha,rouge,vert,bleu`, et les enchantements en `nom,niveau`.
+
+## Dépannage / FAQ {#depannage--faq}
+
+| Message en console | Cause et solution |
+|--------------------|-------------------|
+| `Amount type X is not valid at ...amount-type` | `amount-type` inconnu. Utilisez une des valeurs listées dans le message. La valeur par défaut est utilisée. |
+| `Lore type X is not valid at ...lore-type` | `lore-type` inconnu. Utilisez une des valeurs listées dans le message. |
+| `Item rarity X is not valid at ...item-rarity` | Rareté inconnue. Utilisez une des valeurs listées dans le message. |
+| `an error occurred while loading the enchantment X` | L'enchantement est mal écrit. Chaque entrée doit être `nom,niveau` ou `nom:niveau` (par exemple `sharpness,5`), avec un niveau entier et un nom d'enchantement existant sur la version de votre serveur. L'entrée fautive est ignorée, les autres sont chargées. |
+| `Trim pattern 'X' was not found ...` / `Trim material 'X' was not found ...` | La clé de trim n'existe pas. Le message liste celles disponibles. |
+| `Invalid namespace for trim pattern/material` | La clé de trim n'est pas une clé namespacée valide (par exemple `minecraft:coast`). |
+| `Color X is not valid ..., expected numbers between 0 and 255` | Une valeur `color` est mal formée. Utilisez trois nombres de 0 à 255. |
+| `Leather material X has no armor type ..., its color will be ignored` | `color` a été défini sur un item qui n'est pas une armure en cuir. Retirez-le ou changez le matériau. |
+| `Equipment slot X is not valid` | Le loader de matériau `armor` a reçu un slot inconnu. Utilisez un des slots listés dans le message. |
+| `Error while applying ItemComponent 'X' for item ...` | Le component a bien été lu mais n'a pas pu être appliqué à la construction de l'item (souvent une valeur inexistante sur votre version). L'item est créé sans ce component. |
+| `Error with update display name for item ...` | Le `name` n'a pas pu être traité, souvent à cause d'un placeholder ou d'une balise MiniMessage cassée. |
+
+:::warning Échecs silencieux
+Certaines erreurs ne produisent **aucun message** :
+
+- Une erreur levée pendant le *chargement* d'un component dans `components:` n'est affichée que si `enable-debug: true` est activé dans `config.yml`. Sinon le component est ignoré silencieusement.
+- Une clé de component inexistante (faute de frappe, ou component plus récent que votre serveur) est ignorée silencieusement.
+- Les entrées inconnues dans `flags` sont ignorées silencieusement.
+- Toute la section `components:` est ignorée sur les serveurs antérieurs à la 1.20.5.
+
+Quand un component n'apparaît pas sur l'item, activez `enable-debug`, faites `/zmenu reload` et regardez la console.
+:::
+
+:::tip Cache
+`enable-cache-item-stack` (dans `config.yml`, `true` par défaut) pré-construit chaque item une fois au chargement du menu. Les items qui utilisent des placeholders PlaceholderAPI ou un matériau dynamique ne sont jamais pré-construits, et `skip-first-cache: true` exclut un item précis. Si un item paraît figé ou si le chargement signale un joueur manquant, mettez `skip-first-cache: true` sur cet item.
+:::
+
+## Bonnes pratiques
+
+1. **Utilisez des noms significatifs** - Rendez les noms d'items clairs et descriptifs
+2. **Formatez le lore de manière cohérente** - Utilisez des séparateurs et des espacements pour la lisibilité
+3. **Masquez les infos inutiles** - Utilisez des drapeaux pour masquer les enchantements/attributs quand ce n'est pas nécessaire
+4. **Utilisez des placeholders** - Rendez les items dynamiques avec PlaceholderAPI
+5. **Testez avec les packs de ressources** - Si vous utilisez customModelData, vérifiez que les modèles s'affichent correctement
+
+## Prochaines étapes {#prochaines-etapes}
+
+- Apprenez à utiliser les items dans les [Boutons](../buttons/button)
+- Définissez des items autonomes que les joueurs peuvent tenir avec [Items personnalisés](./custom-items)
+- Ajoutez des [Actions](../buttons/actions) pour rendre les items interactifs
+- Créez des [Patterns](../patterns) pour des modèles d'items réutilisables

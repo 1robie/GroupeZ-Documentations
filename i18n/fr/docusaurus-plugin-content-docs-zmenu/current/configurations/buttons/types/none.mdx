@@ -1,0 +1,154 @@
+---
+sidebar_position: 1
+title: Bouton NONE
+description: Le type de bouton par défaut sans comportement spécial
+---
+
+# Type de bouton NONE
+
+Le type `NONE` est le type de bouton par défaut. Il affiche un item et exécute des actions lorsqu'il est cliqué, sans comportement spécial intégré.
+
+## Utilisation
+
+```yaml
+items:
+  my-button:
+    type: NONE  # Optionnel - NONE est la valeur par defaut
+    slot: 13
+    item:
+      material: DIAMOND
+      name: "&b&lMon Bouton"
+    actions:
+      - type: message
+        messages:
+          - "&aVous avez clique sur le bouton !"
+```
+
+Puisque `NONE` est la valeur par défaut, vous pouvez omettre la propriété `type` :
+
+```yaml
+items:
+  my-button:
+    slot: 13
+    item:
+      material: DIAMOND
+      name: "&b&lMon Bouton"
+```
+
+## Quand l'utiliser
+
+Utilisez les boutons `NONE` pour :
+- Afficher des informations
+- Exécuter des commandes
+- Ouvrir des liens
+- Envoyer des messages
+- Jouer des sons
+- Toute action personnalisée
+
+## Exemples
+
+### Affichage d'informations
+
+```yaml
+items:
+  info:
+    slot: 4
+    item:
+      material: BOOK
+      name: "&6&lInformations du serveur"
+      lore:
+        - "&7Bienvenue sur notre serveur !"
+        - ""
+        - "&7Joueurs en ligne : &a%server_online%"
+        - "&7Votre rang : &e%luckperms_primary_group_name%"
+```
+
+### Exécuteur de commande
+
+```yaml
+items:
+  spawn:
+    slot: 11
+    item:
+      material: RED_BED
+      name: "&c&lSpawn"
+      lore:
+        - "&7Teleportation au spawn"
+    actions:
+      - type: close
+      - type: player-command
+        commands:
+          - "spawn"
+```
+
+### Bouton lien
+
+```yaml
+items:
+  website:
+    slot: 15
+    open-link: "https://myserver.com"
+    item:
+      material: PAPER
+      name: "&a&lSite Web"
+      lore:
+        - "&7Cliquez pour visiter notre site"
+```
+
+### Bouton interactif avec retour
+
+```yaml
+items:
+  reward:
+    slot: 22
+    item:
+      material: CHEST
+      name: "&e&lRecompense quotidienne"
+      lore:
+        - "&7Cliquez pour recuperer votre recompense quotidienne !"
+    click-requirement:
+      requirements:
+        - type: placeholder
+          value: "%dailyreward_claimed%"
+          action: EQUALS_STRING
+          target: "false"
+          deny:
+            - type: message
+              messages:
+                - "&cVous avez deja recupere la recompense d'aujourd'hui !"
+      success:
+        - type: console-command
+          commands:
+            - "dailyreward claim %player%"
+        - type: sound
+          sound: ENTITY_PLAYER_LEVELUP
+        - type: message
+          messages:
+            - "&aRecompense recuperee !"
+```
+
+## Propriétés
+
+Toutes les propriétés standard des boutons fonctionnent avec les boutons `NONE` :
+
+| Propriété | Description |
+|-----------|-------------|
+| `slot` / `slots` | Position(s) dans l'inventaire |
+| `item` | Apparence visuelle |
+| `actions` | Actions au clic |
+| `click-requirement` | Conditions pour cliquer |
+| `view-requirement` | Conditions pour voir |
+| `sound` | Son au clic |
+| `messages` | Messages au clic |
+| `close-inventory` | Fermer après le clic |
+| `refresh-on-click` | Rafraîchir l'inventaire |
+| `update-on-click` | Mettre à jour le bouton |
+| `is-permanent` | Afficher sur toutes les pages |
+| `page` | Afficher sur une page spécifique |
+| `else` | Alternative quand masqué |
+
+## Prochaines étapes
+
+- Découvrez les boutons [INVENTORY](./inventory) pour ouvrir d'autres menus
+- Explorez les boutons [BACK](./back) pour la navigation
+- Consultez toutes les [Actions](../actions) disponibles

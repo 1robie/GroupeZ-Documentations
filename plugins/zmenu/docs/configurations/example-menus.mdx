@@ -1,0 +1,350 @@
+---
+sidebar_position: 2
+title: Example Menus
+description: Walk through the example menus, commands and patterns that zMenu creates on first start
+---
+
+# Example Menus
+
+On the first start, zMenu copies a set of example files into `plugins/zMenu/`. They are **working recipes**: open them in game, read the YAML, copy what you need. This page explains what each one demonstrates.
+
+Files are only created when they are missing, so you can edit or delete them freely.
+
+| File | What it shows | Open it with |
+|------|---------------|--------------|
+| `inventories/basic_inventory.yml`, `advanced_inventory.yml`, `pro_inventory.yml` | Progressive examples of titles, buttons, requirements and actions | `/basic_command`, `/advanced_command`, `/pro_command` |
+| `inventories/examples/cookies.yml` + `patterns/pattern_cookies.yml` | A clicker game: player data, math, patterns | `/zm open cookies` |
+| `inventories/examples/playtimes.yml` + `patterns/playtime_reward.yml` | Rewards unlocked by playtime, chained `else` buttons | `/zm open playtimes` |
+| `inventories/examples/switch.yml` | A `SWITCH` button that cycles through several states | `/zm open switch` |
+| `inventories/examples/item_drag.yml` | A drag-and-drop slot (repair station) | `/zm open item_drag` |
+| `inventories/animated_title_inventory.yml` | An animated title | `/zm open animated_title_inventory` |
+| `inventories/example_punish.yml` + `commands/punish/punish.yml` | A command with arguments feeding a menu | `/punish <player> <reason>` |
+| `commands/commands.yml` | Commands bound to menus, and a command that opens a book | see below |
+| `default_values.yml` | Default values for [player data](./player-data) placeholders | - |
+| `actions_patterns/default-actions.yml` | An [action pattern](./inventories/inventory#action-patterns) | - |
+| `items/default-items.yml` | A [custom item](./items/custom-items) definition | - |
+| `dialogs/*.yml` | One example per dialog type (see [Dialogues](./dialogues)) | `/zm dialog open <name>` |
+| `bedrock/*.yml` | Simple, modal and custom Bedrock forms (see [Bedrock](./bedrock)) | `/zm bedrock open <name>` |
+
+:::note
+The dialog files are only copied on a dialog-capable server (Paper 1.21.7+ with `enable-mini-message-format: true`), and the Bedrock files only when Geyser or Floodgate is installed. The repository also contains `dialogs/dynamic-dialog-example.yml`, `dialogs/dialog_list-dialog.yml`, `bedrock/dynamic-bedrock-example.yml` and `bedrock/dynamic-simple-bedrock-example.yml`; the dynamic Bedrock examples are not copied automatically, so create them from the [Bedrock](./bedrock#dynamic-buttons) documentation if you want them.
+:::
+
+## Cookie Clicker: player data, math and patterns
+
+`inventories/examples/cookies.yml` is a small idle game. It combines three features:
+
+- **Player data** stores the score and the level of each upgrade (`cookie`, `grandma`, `factory`, `mine`).
+- **Math** (`math: true`) computes the gain per click and the price of an upgrade.
+- A **pattern** (`patterns/pattern_cookies.yml`) is reused for the three upgrade buttons, each one passing its own `slot`, `material`, `name`, `key` and `price`.
+
+The central button adds to the counter, then redraws itself:
+
+```yaml
+cookie:
+  slot: 13
+  item:
+    material: COOKIE
+    name: "#77ff77Cookies#353535: &f%zmenu_player_value_cookie%"
+    lore:
+      - "&fCookie per click&8: &b%zmenu_formatted_math_1+({zmenu_player_value_grandma}*2)+({zmenu_player_value_factory}*5)+({zmenu_player_value_mine}*10)%"
+  actions:
+    - type: data
+      action: ADD
+      key: cookie
+      value: "1+(%zmenu_player_value_grandma%*2)+(%zmenu_player_value_factory%*5)+(%zmenu_player_value_mine%*10)"
+      math: true
+    - type: refresh
+```
+
+`default_values.yml` gives every key a starting value, so `%zmenu_player_value_cookie%` shows `0` instead of an error text for a new player:
+
+```yaml
+values:
+  playtime_level: 0
+  grandma: 0
+  factory: 0
+  mine: 0
+  cookie: 0
+```
+
+The pattern builds each upgrade button: a `click-requirement` with a `placeholder` requirement and `math: true` checks that the player can afford the price, `success` subtracts it and levels the upgrade up, `deny` tells the player they are too poor. See [Patterns](./patterns#example-cookie-clicker) for the line by line walkthrough, and [Player data](./player-data) for the `data` action.
+
+## Playtime Rewards: chained `else` buttons
+
+`inventories/examples/playtimes.yml` shows seven reward tiers built from one pattern. Each tier displays a different item depending on the player's state, using nested `else` blocks:
+
+1. `view-requirement`: the reward is already claimed (`%zmenu_player_value_playtime_level%` >= tier);
+2. `else` + `view-requirement`: not enough playtime (`%zmenu_statistic_hours_played%` lower than the required hours);
+3. `else` + `view-requirement`: the previous tier was not claimed yet;
+4. last `else`: claimable, with a `click-requirement` that runs the reward commands and stores the new level.
+
+Other details worth copying from this file:
+
+```yaml
+updateInterval: 1000        # re-render the menu every second (milliseconds)
+
+items:
+  decoration:
+    isPermanent: true       # shown on every page
+    slots:
+      - 0-26                # a range of slots
+    item:
+      material: GRAY_STAINED_GLASS_PANE
+      name: ""
+
+  informations:
+    isPermanent: true
+    slot: 22
+    update: true            # this item is refreshed on every update tick
+    item:
+      playerHead: "%player%"   # the head of the viewer
+```
+
+The reward buttons use `item.url` (a Base64 head texture), `updateOnClick`, and the `console_command` action with a `%commands%` pattern variable that receives the list of commands from the inventory file. See [Patterns](./patterns#example-playtime-rewards).
+
+## Switch: a button with several states
+
+`inventories/examples/switch.yml` is a three-page tutorial in a single slot. A [`SWITCH`](./buttons/types/switch) button evaluates the placeholder in `key` and shows the sub-button whose name matches the result; clicking stores the next value and redraws.
+
+```yaml
+name: "&8Test"
+size: 9
+
+items:
+  switch:
+    type: SWITCH
+    slot: 4
+    key: "%zmenu_player_value_switch_value%"
+
+    # Default state: used while the value matches none of the keys below
+    item:
+      material: PAPER
+      name: "&fTuto &7#1"
+      lore:
+        - "&7Click for the next page"
+    actions:
+      - type: data
+        action: SET
+        key: switch_value
+        value: 2
+      - type: refresh inventory
+
+    buttons:
+      "2":
+        slot: 4
+        item:
+          material: PAPER
+          name: "&fTuto &7#2"
+        actions:
+          - type: data
+            action: SET
+            key: switch_value
+            value: 3
+          - type: refresh inventory
+
+      "3":
+        slot: 4
+        item:
+          material: PAPER
+          name: "&fTuto &7#3"
+        actions:
+          - type: data
+            action: SET
+            key: switch_value
+            value: 1        # "1" matches nothing, so the default state comes back
+          - type: refresh inventory
+```
+
+How it works:
+
+- The state is a [player data](./player-data) value, so it is remembered per player (and survives restarts).
+- A `data` action with `action: SET` moves to the next state, `refresh inventory` redraws the whole menu so the `SWITCH` is evaluated again (`refresh` only redraws the clicked button).
+- The first state is the **default** one: before the player ever clicked, `%zmenu_player_value_switch_value%` has no value and matches no sub-button. Adding `switch_value: 1` to `default_values.yml` does not change that, because `"1"` is not a key of `buttons`.
+- Every sub-button inherits the properties it does not redefine (here only the item and actions change).
+
+The same pattern gives you toggles (`"true"` / `"false"`), tabs, language selectors, sort modes...
+
+## Drag and Drop: a repair station
+
+`inventories/examples/item_drag.yml` lets the player drop an item in the menu and repair it. It uses three buttons:
+
+```yaml
+items:
+  itemDrag:
+    type: ITEM_DRAG            # the slot that accepts a dragged item
+    slot: 22
+    item:                      # shown while the slot is empty
+      material: ANVIL
+      name: "You can drag a item here"
+    check-item:
+      type: MATERIAL           # how to compare: full, material, name, lore, modelId, itemModel
+      item:
+        material: STONE_PICKAXE   # only a stone pickaxe is accepted
+    error-item:                # flashed when a refused item is dropped
+      duration: 30             # ticks
+      item:
+        material: BARRIER
+        name: "&cError"
+
+  repair:
+    slot: 14
+    refreshOnDrag: true        # redraw this button when an item enters or leaves the drag slot
+    view_requirement:
+      requirements:
+        - type: placeholder
+          placeholder: "%zmenu_item_inventory:22_is_player_item%"
+          value: true
+          action: BOOLEAN
+    item:
+      material: ANVIL
+      name: "You can repair your item"
+      lore:
+        - "Dura repair: %zmenu_item_inventory:22_max_dura%"
+    actions:
+      - type: item_edit
+        slot: "inventory:22"   # the item currently in the drag slot
+        item:
+          durability: 0
+    else:                      # shown while the drag slot is empty
+      item:
+        material: BARRIER
+        name: "You need to drag a item"
+```
+
+- `check-item.type` selects an `ItemStackSimilar` (see [Item rules](./item-rules#the-item_drag-button) for rule-based validation, which is more flexible than `check-item`).
+- `%zmenu_item_inventory:22_is_player_item%` is one of the [item inspection placeholders](./placeholders#item-inspection-placeholders): it is `true` when slot 22 holds a real item (not a zMenu decoration item).
+- `item_edit` with `slot: "inventory:22"` modifies the dragged item **in place**: only the keys written under `item` change, so the repaired pickaxe keeps its name and enchantments.
+- `refreshOnDrag: true` is what makes the `repair` button switch between its normal item and its `else` item as soon as the player drops or removes the item.
+- The third button of the file (`itemGive`) uses the `item_give` action to hand the player a damaged pickaxe to test with.
+- The file writes the keys `view_requirement`, `refreshOnDrag` and `check-item` in different styles; zMenu accepts both the camelCase / underscore and the kebab-case spelling of these keys.
+
+## Animated Title
+
+`inventories/animated_title_inventory.yml` shows the `title-animation` section:
+
+```yaml
+size: 27
+name: "&bAnimated &6Inventory"      # static fallback title
+
+title-animation:
+  titles:
+    - "&bWelcome to &aMenu!"
+    - "&eEnjoy &four &9Features!"
+    - "&cRotating &6Animated &2Title!"
+  cycles: 5              # -1 = forever
+  initial-delay: 1       # before the first frame
+  interval: 2            # between two frames
+  time-unit: SECONDS     # NANOSECONDS ... DAYS
+  show-items-after-animation: true   # the items appear when the animation ends
+  item-update-interval: 1
+```
+
+It needs [PacketEvents](https://github.com/retrooper/packetevents) installed; without it the menu simply keeps its static `name`. See [`title-animation`](./inventories/inventory#title-animation) for every option.
+
+:::tip
+`initial-delay` and `interval` are expressed in the `time-unit`. With the default `SECONDS` unit an `interval` of `2` is two seconds; use `time-unit: MILLISECONDS` and `interval: 500` for a fast animation.
+:::
+
+## Commands: arguments and books
+
+### A command that opens a menu with arguments
+
+`commands/punish/punish.yml` registers `/punish` (alias `/sanction`). The arguments are typed, can have tab completion and run their own actions, and their value is available in the menu as `%zmenu_argument_<name>%`:
+
+```yaml
+commands:
+  punish:
+    command: punish
+    permission: "admin.punish"
+    aliases:
+      - sanction
+    inventory: example_punish
+    arguments:
+      - name: target
+        type: online-player        # validated and tab completed
+      - name: reason
+        auto-completion:           # suggestions
+          - cheat
+          - chat
+          - skin
+          - other
+        actions:                   # run when the command is typed
+          - type: message
+            messages:
+              - "&7You will put a punishment to the player &f&n%target%&r &7with the reason&8: &f%reason%"
+```
+
+`inventories/example_punish.yml` reads the arguments to build the sanction. Each duration button closes the menu and runs the ban command:
+
+```yaml
+'10':
+  slot: 10
+  closeInventory: true
+  commands:
+    - "tempban %zmenu_argument_target% 1d %zmenu_argument_reason%"
+  item:
+    material: CLOCK
+    name: "#db3214Ban &f&n%zmenu_argument_target%"
+    lore:
+      - " &f• %zmenu_argument_reason%"
+```
+
+See [Custom commands](./custom-commands) for all the argument options.
+
+### Commands bound to menus, and a command that opens a book
+
+`commands/commands.yml` binds `/basic_command`, `/advanced_command` (alias `/zai`) and `/pro_command` to the three sample inventories, each with its own permission, and defines `/openbook`, a command without inventory whose `actions` open a written book:
+
+```yaml
+commands:
+  basic_command:
+    command: basic_command
+    inventory: basic_inventory
+    permission: "zmenu.basic"
+
+  openbook:
+    command: openbook
+    permission: "zmenu.open.book"
+    actions:
+      - type: book
+        author: "Maxlego08"
+        title: "&cTest"
+        lines:
+          1:                       # page 1
+            - '     #34ebe8zMenu'
+            - ''
+            - '<hover:show_text:"#34eba8Open an url !"><click:open_url:"https://minecraft-inventory-builder.com/">#f0af24Open URL<reset>'
+```
+
+Any [action](./buttons/actions) can be used in a command's `actions`; MiniMessage tags (`<hover>`, `<click>`) work inside book lines.
+
+## Action Patterns
+
+`actions_patterns/default-actions.yml` defines actions that zMenu adds to buttons automatically:
+
+```yaml
+name: default-actions
+actions:                    # added after the `actions` of a button
+  - type: sound
+    sound: ENTITY_VILLAGER_YES
+deny-actions:               # added after the `deny` actions of its requirements
+  - type: sound
+    sound: ENTITY_VILLAGER_NO
+```
+
+Enable it in an inventory with `action-patterns: [default-actions]`, see [`action-patterns`](./inventories/inventory#action-patterns). Pattern actions are only added to buttons that already define at least one action, unless the button sets [`stop-on-empty: false`](./buttons/button#stop-on-empty), and an action whose `type` the button already uses is not duplicated.
+
+## Reusable Items
+
+`items/default-items.yml` declares a standalone custom item, a real item that zMenu can recognise and keep up to date:
+
+```yaml
+first-item:
+  name: "&aFirst Item"
+  lore:
+    - "&7This is the first item"
+    - "&7in the default items file."
+```
+
+See [Custom items](./items/custom-items) to learn how to give them and attach mechanics.

@@ -1,0 +1,162 @@
+---
+sidebar_position: 4.5
+title: Custom Requirements
+description: Creating custom requirement types for zMenu and using item rules from code
+---
+
+# Custom Requirements
+
+Learn how to add your own requirement `type` (the ones used in `view-requirement`, `click-requirement` and `open-requirement`, see [Requirements](../configurations/requirements)).
+
+## Overview
+
+A requirement type is made of two classes, like [buttons](./api-buttons) and [actions](./api-actions):
+
+1. A **`Permissible`** (abstract class): the condition itself, checked for a player.
+2. A **`PermissibleLoader`** (abstract class): reads the YAML map of one requirement and returns a `Permissible`.
+
+zMenu reads the `deny` and `success` action lists for you through the loader helpers, runs the `deny` actions when `hasPermission` returns `false` and the `success` actions when it returns `true`. Everything else about requirements (`minimum-requirement`, `else` chains, `clicks`, `refresh-requirements`) works with your type without extra code.
+
+## Creating a Permissible
+
+```java
+import fr.maxlego08.menu.api.button.Button;
+import fr.maxlego08.menu.api.engine.InventoryEngine;
+import fr.maxlego08.menu.api.requirement.Action;
+import fr.maxlego08.menu.api.requirement.Permissible;
+import fr.maxlego08.menu.api.utils.Placeholders;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.Map;
+
+public class MinHealthPermissible extends Permissible {
+
+    private final double minHealth;
+
+    public MinHealthPermissible(double minHealth, List<Action> denyActions, List<Action> successActions) {
+        super(denyActions, successActions);
+        this.minHealth = minHealth;
+    }
+
+    @Override
+    public boolean hasPermission(@NotNull Player player, @Nullable Button button,
+                                 @NotNull InventoryEngine inventoryEngine, @NotNull Placeholders placeholders) {
+        return player.getHealth() >= this.minHealth;
+    }
+
+    @Override
+    public boolean isValid() {
+        return this.minHealth >= 0;
+    }
+
+    // Optional: lets zMenu write the requirement back to YAML (exports, converters).
+    @Override
+    protected void serializeProperties(@NotNull Map<String, Object> map) {
+        map.put("type", "min-health");
+        map.put("health", this.minHealth);
+    }
+}
+```
+
+- `button` is `null` when the requirement is checked for an inventory (`open-requirement`).
+- `isValid()` is called right after loading: when it returns `false`, zMenu logs an error and **drops the requirement**. Use it to reject a bad configuration.
+- `placeholders.parse(string)` resolves zMenu placeholders (`%player%`, button placeholders...) and `inventoryEngine.getPlugin().parse(player, string)` resolves PlaceholderAPI. The built-in `permission` requirement does `plugin.parse(player, placeholders.parse(permission))`.
+- `serializeProperties` is optional. If you do not override it, serializing the requirement throws `UnsupportedOperationException`, but loading and checking still work.
+
+## Creating the Loader
+
+```java
+import fr.maxlego08.menu.api.ButtonManager;
+import fr.maxlego08.menu.api.loader.PermissibleLoader;
+import fr.maxlego08.menu.api.requirement.Action;
+import fr.maxlego08.menu.api.requirement.Permissible;
+import fr.maxlego08.menu.api.utils.TypedMapAccessor;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
+import java.util.List;
+
+public class MinHealthLoader extends PermissibleLoader {
+
+    private final ButtonManager buttonManager;
+
+    public MinHealthLoader(ButtonManager buttonManager) {
+        super("min-health"); // the `type:` written in YAML (matched case-insensitively)
+        this.buttonManager = buttonManager;
+    }
+
+    @Override
+    public Permissible load(@NotNull String path, @NotNull TypedMapAccessor accessor, @NotNull File file) {
+        List<Action> denyActions = this.loadAction(this.buttonManager, accessor, "deny", path, file);
+        List<Action> successActions = this.loadAction(this.buttonManager, accessor, "success", path, file);
+        return new MinHealthPermissible(accessor.getDouble("health", 10), denyActions, successActions);
+    }
+}
+```
+
+`PermissibleLoader` also provides `loadPermissible(...)` when your requirement contains nested requirements (the way `and` / `or` do).
+
+## Registering the Requirement
+
+```java
+@Override
+public void onEnable() {
+    MenuPlugin menuPlugin = (MenuPlugin) Bukkit.getPluginManager().getPlugin("zMenu");
+    ButtonManager buttonManager = menuPlugin.getButtonManager();
+
+    buttonManager.registerPermissible(new MinHealthLoader(buttonManager));
+}
+```
+
+Register it in `onEnable`. An inventory that already uses your `type` before it is registered is not lost: zMenu holds it back and loads it automatically as soon as `registerPermissible` is called (the same applies to buttons, actions and patterns).
+
+It can then be used in any inventory:
+
+```yaml
+items:
+  heal:
+    slot: 13
+    item:
+      material: GOLDEN_APPLE
+      name: "&aHeal"
+    click-requirement:
+      health-check:
+        clicks:
+          - ALL
+        requirements:
+          - type: min-health
+            health: 4
+            deny:
+              - type: message
+                messages:
+                  - "&cYou are too weak to use this."
+```
+
+## Item rules from code
+
+[Item rules](../configurations/item-rules) (`Rule`, `ItemRuleContext`, `RuleConfigHelper`, `AbstractPluginItemRule`) are public API types, and a rule can be tested against any item:
+
+```java
+Rule rule = ...;                         // see below
+boolean ok = rule.matches(context);      // context: ItemRuleContext of the item (material, name, lore, custom model data)
+```
+
+:::caution No public registration yet
+Rule loaders (`RuleLoader`, `AbstractPluginRuleLoader`) are discovered inside the zMenu jar with the `@AutoRuleLoader` annotation. A third-party plugin registers its own loader instead:
+
+```java
+ButtonManager buttonManager = menuPlugin.getButtonManager();
+buttonManager.registerRuleLoader(new MyRuleLoader());
+```
+
+The loader's `type` (and aliases) can then be used in `item_drag` buttons and `item-rule` requirements. For custom checks that are not about an item, use a [custom requirement](#creating-a-permissible).
+:::
+
+## Next Steps
+
+- [Custom Actions](./api-actions)
+- [Events](./api-events)
+- [Requirements reference](../configurations/requirements)

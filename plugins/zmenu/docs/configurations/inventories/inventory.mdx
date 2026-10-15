@@ -275,10 +275,11 @@ title-animation:
 |------------------------------|---------|---------|-----------------------------------------------------|
 | `titles`                     | List    | -       | List of title frames to cycle through               |
 | `cycles`                     | Integer | -1      | Number of animation cycles (-1 for infinite)        |
-| `initial-delay`              | Integer | 0       | Delay before animation starts                       |
-| `interval`                   | Integer | 1       | Time between each frame                             |
-| `time-unit`                  | String  | SECONDS | Time unit for delays (SECONDS, MILLISECONDS, TICKS) |
-| `show-items-after-animation` | Boolean | true    | Show items after animation completes                |
+| `initial-delay`              | Integer | 20      | Delay before animation starts                       |
+| `interval`                   | Integer | 20      | Time between each frame                             |
+| `time-unit`                  | String  | SECONDS | Time unit for delays (see list below)               |
+| `show-items-after-animation` | Boolean | false   | Show items after animation completes                |
+| `plugin`                     | String  | first available | Title animation provider id, case does not matter (the built-in one is `packet-events`). A wrong id logs a warning and no animation is played. |
 | `item-update-interval`       | Integer | 1       | How often to update items during animation          |
 
 **Time units:**
@@ -289,6 +290,14 @@ title-animation:
 - `MINUTES`
 - `HOURS`
 - `DAYS`
+
+:::caution Delays use the chosen time unit
+`initial-delay` and `interval` are expressed in `time-unit`. Their default value of `20` therefore means 20 **seconds** with the default `SECONDS` unit. For a fast animation, set `time-unit: MILLISECONDS` (for example `interval: 500`) or lower the values.
+:::
+
+:::note Infinite animations
+With `cycles: -1` (default) or `0`, the animation never ends. Combined with `show-items-after-animation: true`, the items would then **never** be displayed, because they are only sent once the last cycle is over: use a positive `cycles` with that option. `item-update-interval` is only used when `show-items-after-animation` is `false`: the items are resent every that many frames (`0` disables it). Titles accept placeholders.
+:::
 
 **Complete example:**
 ```yaml
@@ -406,7 +415,7 @@ Useful for profile menus or any inventory opened for a specific player.
 
 ### action-patterns
 
-Apply action patterns to all buttons in this inventory. Action patterns are reusable sets of actions defined in the `plugins/zMenu/action_patterns/` folder.
+Apply action patterns to all buttons in this inventory. Action patterns are reusable sets of actions defined in the `plugins/zMenu/actions_patterns/` folder.
 
 ```yaml
 action-patterns:
@@ -414,7 +423,7 @@ action-patterns:
   - "click-sound"
 ```
 
-**Action pattern file example** (`plugins/zMenu/action_patterns/default-actions.yml`):
+**Action pattern file example** (`plugins/zMenu/actions_patterns/default-actions.yml`):
 ```yaml
 name: default-actions
 actions:
@@ -425,7 +434,7 @@ deny-actions:
     sound: ENTITY_VILLAGER_NO
 ```
 
-When applied, all buttons in the inventory will inherit these actions. Button-specific actions are executed after pattern actions.
+When applied, the buttons of the inventory inherit these actions. The pattern actions are added **after** the button's own actions, only to buttons that define at least one action (set [`stop-on-empty: false`](../buttons/button#stop-on-empty) on a button to apply them to a button without actions), and an action whose `type` the button already uses is not added a second time.
 
 ---
 
@@ -524,28 +533,9 @@ See [Button Configuration](../buttons/button) for complete button documentation.
 
 ---
 
-### view-requirement
-
-Requirements that must be met to open this inventory.
-
-```yaml
-view-requirement:
-  requirements:
-    - type: permission
-      permission: "myserver.vip"
-      deny:
-        - type: message
-          messages:
-            - "&cYou need VIP to access this menu!"
-```
-
-If requirements aren't met, the inventory won't open and deny actions will execute.
-
----
-
 ### open-requirement
 
-Requirements that must be met to open this inventory. Similar to `view-requirement`, but checked before opening the inventory, allowing you to prevent the inventory from opening at all if conditions aren't met.
+Requirements that must be met to open this inventory. They are checked before opening the inventory, allowing you to prevent the inventory from opening at all (deny actions run) if conditions aren't met. Note that `view-requirement` is a button-level key and is not read at the inventory level.
 
 <Tabs>
     <TabItem value="open-requirement" label="open-requirement">
@@ -566,7 +556,7 @@ Requirements that must be met to open this inventory. Similar to `view-requireme
     </TabItem>
 </Tabs>
 
-**Aliases:** `open_requirement` and `open-requirement` are interchangeable.
+<Aliases keys={['open-requirement', 'open_requirement']} />
 
 ---
 
@@ -611,8 +601,9 @@ Define an item that opens this inventory when held and clicked.
             lore:
               - "&7Right-click to open"
           actions:
-            - RIGHT_CLICK
-          type: full # full, contains, or starts_with
+            - RIGHT_CLICK_AIR
+            - RIGHT_CLICK_BLOCK
+          type: full # full, material, name, lore, modelId, itemModel
         ```
     </TabItem>
     <TabItem value="openWithItem" label="openWithItem">
@@ -624,8 +615,9 @@ Define an item that opens this inventory when held and clicked.
             lore:
               - "&7Right-click to open"
           actions:
-            - RIGHT_CLICK
-          type: full # full, contains, or starts_with
+            - RIGHT_CLICK_AIR
+            - RIGHT_CLICK_BLOCK
+          type: full # full, material, name, lore, modelId, itemModel
         ```
     </TabItem>
 </Tabs>
@@ -633,18 +625,20 @@ Define an item that opens this inventory when held and clicked.
 
 **Aliases:** `open-with-item` and `openWithItem` are interchangeable.
 
-**Actions types:**
-- `RIGHT_CLICK` - Right click in air + on blocks
-- `LEFT_CLICK` - Left click in air + on blocks
-- `RIGHT_CLICK_AIR` - Right click in air only
-- `LEFT_CLICK_AIR` - Left click in air only
-- `RIGHT_CLICK_BLOCK` - Right click on a block only
-- `LEFT_CLICK_BLOCK` - Left click on a block only
+**Actions types** (Bukkit `Action` values; list every one you want to trigger the menu):
+- `RIGHT_CLICK_AIR` - Right click in air
+- `LEFT_CLICK_AIR` - Left click in air
+- `RIGHT_CLICK_BLOCK` - Right click on a block
+- `LEFT_CLICK_BLOCK` - Left click on a block
+- `PHYSICAL` - Physical interaction (pressure plate, etc.)
 
-**Type options:**
+**Type options** (how the held item is compared to `item`, default `full`):
 - `full` - Item must match exactly
-- `contains` - Item name must contain the specified name
-- `starts_with` - Item name must start with the specified name
+- `material` - Only the material is compared
+- `name` - Only the display name is compared
+- `lore` - Only the lore is compared
+- `modelId` - Only the custom model data is compared
+- `itemModel` - Only the item model is compared
 
 Give players the item with:
 ```
@@ -715,7 +709,7 @@ fill-item:
 patterns:
   - "navigation"
 
-view-requirement:
+open-requirement:
   requirements:
     - type: permission
       permission: "server.menu.use"

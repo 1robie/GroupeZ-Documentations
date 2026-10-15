@@ -1,0 +1,360 @@
+---
+sidebar_position: 2
+title: API Inventaire
+description: Ouvrir et gérer les inventaires par programmation
+---
+
+# API Inventaire
+
+Apprenez à ouvrir et gérer les inventaires zMenu par programmation en utilisant l'API.
+
+## InventoryManager
+
+Le `InventoryManager` est votre interface principale pour travailler avec les inventaires.
+
+```java
+InventoryManager manager = menuPlugin.getInventoryManager();
+```
+
+## Récupérer des Inventaires {#recuperer-des-inventaires}
+
+### Récupérer par Nom {#recuperer-par-nom}
+
+```java
+// Retourne Optional<Inventory>
+Optional<Inventory> inventory = manager.getInventory("shop");
+
+// Verifier si l'inventaire existe
+if (inventory.isPresent()) {
+    Inventory inv = inventory.get();
+    // Travailler avec l'inventaire
+}
+
+// Ou utiliser ifPresent
+manager.getInventory("shop").ifPresent(inv -> {
+    // Travailler avec l'inventaire
+});
+```
+
+### Récupérer Tous les Inventaires {#recuperer-tous-les-inventaires}
+
+```java
+// Obtenir tous les inventaires charges
+Collection<Inventory> allInventories = manager.getInventories();
+
+for (Inventory inventory : allInventories) {
+    String name = inventory.getName();          // Titre (peut contenir des placeholders)
+    String fileName = inventory.getFileName();  // Nom du fichier sans extension
+    // Traiter l'inventaire
+}
+
+// Uniquement les inventaires enregistres par un plugin
+Collection<Inventory> mine = manager.getInventories(myPlugin);
+
+// Noms de tous les inventaires charges
+Set<String> names = manager.getInventoryNames();
+```
+
+:::note Collisions de noms
+`getInventory(String name)` cherche dans tous les plugins. Si plusieurs plugins enregistrent le même nom de fichier, celui qui appartient à zMenu l'emporte, sinon le premier plugin par ordre alphabétique. Utilisez `getInventory(Plugin, String)` ou `getInventory(String pluginName, String name)` pour être explicite.
+:::
+
+### Vérifier Si un Inventaire Existe {#verifier-si-un-inventaire-existe}
+
+```java
+boolean exists = manager.getInventory("shop").isPresent();
+```
+
+## Ouvrir des Inventaires
+
+### Ouverture Basique
+
+```java
+manager.getInventory("shop").ifPresent(inv -> {
+    manager.openInventory(player, inv);
+});
+```
+
+### Ouvrir à une Page Spécifique {#ouvrir-a-une-page-specifique}
+
+```java
+manager.getInventory("catalog").ifPresent(inv -> {
+    manager.openInventory(player, inv, 3); // Ouvrir la page 3
+});
+```
+
+### Ouvrir par nom
+
+Des raccourcis qui retrouvent l'inventaire pour vous. S'il n'existe pas, zMenu envoie au joueur le message « inventaire introuvable » :
+
+```java
+manager.openInventory(player, "shop");                    // n'importe quel plugin
+manager.openInventory(player, "shop", 2);                 // page 2
+manager.openInventory(player, "MyPlugin", "shop");        // nom du plugin + nom du fichier
+manager.openInventory(player, "MyPlugin", "shop", 2);
+manager.openInventory(player, myPlugin, "shop");          // instance de Plugin + nom du fichier
+```
+
+### Ouvrir avec des Arguments
+
+Les arguments d'inventaire (les placeholders `%zmenu_argument_<nom>%` définis par les [commandes personnalisées](../configurations/custom-commands)) sont stockés par joueur dans le `CommandManager`. Definissez-les **avant** d'ouvrir l'inventaire :
+
+```java
+CommandManager commands = menuPlugin.getCommandManager();
+commands.setPlayerArgument(player, "category", "swords");
+commands.setPlayerArgument(player, "material", "diamond");
+
+manager.getInventory("category-shop").ifPresent(inv -> manager.openInventory(player, inv));
+
+// Relire un argument
+Optional<String> category = commands.getPlayerArgument(player, "category");
+```
+
+Dans le fichier d'inventaire, utilisez `%zmenu_argument_category%` et `%zmenu_argument_material%`.
+
+### Ouvrir avec un historique de navigation
+
+Le bouton `BACK` revient aux inventaires précédents de l'historique. Pour ouvrir un inventaire *depuis* celui que le joueur a actuellement ouvert, utilisez `openInventoryWithOldInventories` ; pour contrôler vous-même l'historique, passez la liste explicitement :
+
+```java
+// Conserve l'historique de l'inventaire actuellement ouvert (si c'est un inventaire zMenu)
+manager.openInventoryWithOldInventories(player, inv, 1);
+
+// Ou indiquez les inventaires vers lesquels le bouton BACK doit revenir
+manager.openInventory(player, inv, 1, previousInventory);              // varargs
+manager.openInventory(player, inv, 1, List.of(first, second));         // List<Inventory>
+```
+
+### Ouvrir pour un Autre Joueur
+
+```java
+Player target = Bukkit.getPlayer("Notch");
+
+manager.getInventory("admin-view").ifPresent(inv -> {
+    manager.openInventory(target, inv);
+});
+```
+
+## Interface Inventory
+
+L'interface `Inventory` fournit des informations sur les inventaires chargés :
+
+```java
+manager.getInventory("shop").ifPresent(inv -> {
+    // Obtenir les proprietes de l'inventaire
+    String name = inv.getName();           // Titre tel qu'ecrit dans le fichier
+    String fileName = inv.getFileName();   // Nom du fichier sans extension
+    Plugin plugin = inv.getPlugin();       // Plugin qui l'a enregistre
+    File file = inv.getFile();             // Fichier YAML sur le disque
+
+    // Obtenir les boutons
+    Collection<Button> buttons = inv.getButtons();
+    List<PaginateButton> paginated = inv.getButtons(PaginateButton.class);
+
+    // Patterns utilises par l'inventaire
+    Collection<Pattern> patterns = inv.getPatterns();
+
+    // Intervalle de rafraichissement en millisecondes
+    int updateInterval = inv.getUpdateInterval();
+});
+```
+
+`Inventory#size()`, `getType()` et quelques autres getters sont dépréciés depuis 1.1.1.5 ; ne les utilisez pas dans du nouveau code.
+
+## Charger vos propres inventaires
+
+Un plugin peut livrer ses propres fichiers d'inventaire et laisser zMenu les gérer. Ils sont alors listés sous le nom de votre plugin (voir [Inventaires spécifiques à un plugin](#travailler-avec-les-inventaires-specifiques-a-un-plugin)).
+
+```java
+@Override
+public void onEnable() {
+    MenuPlugin menuPlugin = (MenuPlugin) Bukkit.getPluginManager().getPlugin("zMenu");
+    InventoryManager manager = menuPlugin.getInventoryManager();
+
+    try {
+        // Copie inventories/shop.yml de votre jar vers votre dossier de donnees s'il est absent, puis le charge
+        manager.loadInventoryOrSaveResource(this, "inventories/shop.yml");
+
+        // Charger un fichier qui existe deja dans votre dossier de donnees
+        manager.loadInventory(this, new File(getDataFolder(), "inventories/other.yml"));
+    } catch (InventoryException exception) {
+        getLogger().severe("Impossible de charger un inventaire : " + exception.getMessage());
+    }
+}
+
+@Override
+public void onDisable() {
+    // Retirer vos inventaires de zMenu
+    // menuPlugin.getInventoryManager().deleteInventories(this);
+}
+```
+
+Les variantes qui prennent une `Class<? extends Inventory>` permettent de fournir votre propre implémentation de `Inventory`. `deleteInventory(String name)` / `deleteInventory(Inventory)` retirent un seul inventaire et `reloadInventory(Inventory)` le recharge depuis le disque.
+
+## Rafraîchir et mettre à jour {#rafraichir-et-mettre-a-jour}
+
+```java
+manager.updateInventory(player);              // Redessine l'inventaire zMenu ouvert
+manager.updateInventoryCurrentPage(player);   // Redessine uniquement la page courante
+manager.updateInventory(player, myPlugin);    // Seulement si l'inventaire ouvert appartient a myPlugin
+```
+
+## Fermer des Inventaires
+
+### Fermer pour un Joueur
+
+```java
+// Fermer l'inventaire actuel
+player.closeInventory();
+```
+
+### Vérifier Si un Joueur a un zMenu Ouvert {#verifier-si-un-joueur-a-un-zmenu-ouvert}
+
+```java
+// L'inventaire zMenu que le joueur a actuellement ouvert (vide s'il n'en a pas)
+Optional<Inventory> current = manager.getCurrentPlayerInventory(player);
+boolean hasMenuOpen = current.isPresent();
+```
+
+## Travailler avec les Inventaires Spécifiques à un Plugin {#travailler-avec-les-inventaires-specifiques-a-un-plugin}
+
+Si vous travaillez avec des inventaires de différents plugins :
+
+```java
+// Le nom du plugin vient en premier, le nom du fichier ensuite (sans tenir compte de la casse)
+Optional<Inventory> inventory = manager.getInventory("MyPlugin", "shop");
+
+// Avec une instance de Plugin
+Optional<Inventory> own = manager.getInventory(myPlugin, "shop");
+```
+
+## Exemple : Système de Boutique {#exemple--systeme-de-boutique}
+
+```java
+public class ShopManager {
+
+    private final MenuPlugin menuPlugin;
+
+    public ShopManager(MenuPlugin menuPlugin) {
+        this.menuPlugin = menuPlugin;
+    }
+
+    public void openShop(Player player) {
+        InventoryManager manager = menuPlugin.getInventoryManager();
+
+        manager.getInventory("shop-main").ifPresent(inv -> {
+            manager.openInventory(player, inv);
+        });
+    }
+
+    public void openCategory(Player player, String category) {
+        InventoryManager manager = menuPlugin.getInventoryManager();
+
+        // Lu dans l'inventaire avec %zmenu_argument_category%
+        menuPlugin.getCommandManager().setPlayerArgument(player, "category", category);
+
+        manager.getInventory("shop-category").ifPresent(inv -> {
+            manager.openInventory(player, inv);
+        });
+    }
+
+    public void openPlayerShop(Player viewer, Player shopOwner) {
+        InventoryManager manager = menuPlugin.getInventoryManager();
+
+        CommandManager commands = menuPlugin.getCommandManager();
+        commands.setPlayerArgument(viewer, "owner", shopOwner.getName());
+        commands.setPlayerArgument(viewer, "owner_uuid", shopOwner.getUniqueId().toString());
+
+        manager.getInventory("player-shop").ifPresent(inv -> {
+            manager.openInventory(viewer, inv);
+        });
+    }
+}
+```
+
+## Exemple : Commande pour Ouvrir un Menu
+
+```java
+public class MenuCommand implements CommandExecutor {
+
+    private final MenuPlugin menuPlugin;
+
+    public MenuCommand(MenuPlugin menuPlugin) {
+        this.menuPlugin = menuPlugin;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command,
+                            String label, String[] args) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage("Joueurs uniquement !");
+            return true;
+        }
+
+        Player player = (Player) sender;
+        InventoryManager manager = menuPlugin.getInventoryManager();
+
+        if (args.length == 0) {
+            // Ouvrir le menu par defaut
+            manager.getInventory("main-menu").ifPresent(inv -> {
+                manager.openInventory(player, inv);
+            });
+        } else {
+            // Ouvrir le menu specifie
+            String menuName = args[0];
+            Optional<Inventory> inventory = manager.getInventory(menuName);
+
+            if (inventory.isPresent()) {
+                manager.openInventory(player, inventory.get());
+            } else {
+                player.sendMessage("Menu non trouve : " + menuName);
+            }
+        }
+
+        return true;
+    }
+}
+```
+
+## Exemple : Ouvrir un Menu sur un Événement {#exemple--ouvrir-un-menu-sur-un-evenement}
+
+```java
+public class JoinListener implements Listener {
+
+    private final MenuPlugin menuPlugin;
+
+    public JoinListener(MenuPlugin menuPlugin) {
+        this.menuPlugin = menuPlugin;
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+
+        // Ouvrir le menu de bienvenue apres 1 seconde
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (player.isOnline()) {
+                InventoryManager manager = menuPlugin.getInventoryManager();
+
+                manager.getInventory("welcome-menu").ifPresent(inv -> {
+                    manager.openInventory(player, inv);
+                });
+            }
+        }, 20L); // 20 ticks = 1 seconde
+    }
+}
+```
+
+## Bonnes Pratiques
+
+1. **Toujours utiliser Optional** - `getInventory()` retourne Optional, gérez-le correctement
+2. **Vérifier que le joueur est en ligne** - Vérifiez que le joueur est toujours en ligne avant d'ouvrir
+3. **Utiliser des noms significatifs** - Les noms d'inventaire doivent correspondre à vos noms de fichiers
+4. **Gérer les inventaires manquants** - Fournissez un retour si l'inventaire n'existe pas
+5. **Ne pas mettre en cache les inventaires** - Récupérez des références fraîches quand nécessaire
+
+## Étapes Suivantes {#etapes-suivantes}
+
+- Créer des [Boutons Personnalisés](./api-buttons)
+- Créer des [Actions Personnalisées](./api-actions)
+- Travailler avec les [Données Joueur](./api-player-data)
